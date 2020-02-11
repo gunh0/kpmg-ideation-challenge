@@ -1,12 +1,10 @@
 # KPMG Ideation Challenge
 
-### Judging Criteria
+### PATENT ATTORNEY WITHOUT BORDERS
 
-- Innovation and Disruption
-- Realistic
-- Impact for the client
-- Impact for the customer
-- Presentation
+**Team : Jackpop**
 
----
+**Leader : Gun-ho Park**
+
+**Crew : Ji-hun Lim, Seung-jae Lee, Min-soo kim** 
 
