@@ -1,0 +1,28 @@
+[
+    {
+        "id": 1,
+        "patent_id": "US-7307391-B2",
+        "title": "LED lighting system",
+        "assignee": "Led Smart Inc.",
+        "inventor_author": "Xinxin Shan",
+        "priority_date": "2006-02-09",
+        "filing_creation_date": "2006-02-09",
+        "publication_date": "2007-12-11",
+        "grant_date": "2007-12-11",
+        "result_link": "https://patents.google.com/patent/US7307391B2/en",
+        "representative_figure_link": "https://patentimages.storage.googleapis.com/US7307391B2/US07307391-20071211-D00000.png"
+    },
+    {
+        "id": 2,
+        "patent_id": "KR-101510462-B1",
+        "title": "ＬＥＤ lamp bulb and ＬＥＤ lighting bar capable of emitting light over 4Π",
+        "assignee": "쩌지앙 레디슨 옵토일렉트로닉스 씨오., 엘티디.",
+        "inventor_author": "시차오 거, 후아빈 리우, 티에한 거",
+        "priority_date": "2010-09-08",
+        "filing_creation_date": "2011-09-01",
+        "publication_date": "2015-04-08",
+        "grant_date": "2015-04-08",
+        "result_link": "https://patents.google.com/patent/KR101510462B1/en",
+        "representative_figure_link": "https://patentimages.storage.googleapis.com/3c/f2/b9/38ea58d61cb8f6/112013029366611-pct00001.png"
+    }
+]
