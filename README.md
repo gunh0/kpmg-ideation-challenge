@@ -31,9 +31,11 @@
 
 
 
-### designrevision | Shards Dashboard Lite React
-
-https://designrevision.com/downloads/shards-dashboard-lite-react/
+<h3 align="left" style="border-bottom: none !important; margin-bottom: 5px !important;"><a href="https://designrevision.com/downloads/shards-dashboard-lite-react/">Shards Dashboard React</a>
+<a href="#">
+    <img src="https://img.shields.io/badge/License-MIT-brightgreen.svg" />
+  </a>
+</h3>
 
 ```
 REACT UI KIT | FREE
@@ -41,10 +43,3 @@ REACT UI KIT | FREE
 A free React admin dashboard template pack featuring a modern design system 
 and lots of custom templates and components.
 ```
-
-
-
-
-
-
-
