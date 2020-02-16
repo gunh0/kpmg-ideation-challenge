@@ -39,7 +39,6 @@ https://designrevision.com/downloads/shards-dashboard-lite-react/
 REACT UI KIT | FREE
 
 A free React admin dashboard template pack featuring a modern design system 
-
 and lots of custom templates and components.
 ```
 
