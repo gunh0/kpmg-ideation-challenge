@@ -18,7 +18,7 @@
 
 
 
-| stack                                                        | __________________________________________________________________________________________________________________________________________________________________________________________________________ |
+| stack                                                        | ___________________________________________________________________________ |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | <img src="https://user-images.githubusercontent.com/41619898/74603749-2a4da880-50fa-11ea-8a89-c8cb45765054.png"/> | Selenium is a testing framework for web applications. <br>It supports several features for automated testing. |
 | ![image](https://user-images.githubusercontent.com/41619898/74603764-47827700-50fa-11ea-8f18-f607732853ce.png) | Django is a high-level Python Web framework that encourages rapid development and clean, pragmatic design. Built by experienced developers, it takes care of much of the hassle of Web development, so you can focus on writing your app without needing to reinvent the wheel. It’s free and open source. |
