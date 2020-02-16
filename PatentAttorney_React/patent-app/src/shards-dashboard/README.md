@@ -26,8 +26,6 @@ A modern & free Bootstrap 4 admin dashboard template pack.
   </a>
 </p>
 
-<br />
-
 <p align="center">
 <a href="https://designrevision.com/downloads/shards-dashboard-lite/">
 <img src="assets/demo-preview.gif" width="650" />
