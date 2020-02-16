@@ -5,66 +5,40 @@ import {
   CardHeader,
   CardBody,
   CardFooter,
-  ButtonGroup,
   Button,
   Row,
   Col
 } from "shards-react";
 
-const Discussions = ({ title, discussions }) => (
+const Discussions = ({ title, discussions, patents}) => (
   <Card small className="blog-comments">
     <CardHeader className="border-bottom">
       <h6 className="m-0">{title}</h6>
     </CardHeader>
-
+    
     <CardBody className="p-0">
-      {discussions.map((discussion, idx) => (
+      {patents.map((patent, idx) => (
         <div key={idx} className="blog-comments__item d-flex p-3">
-          {/* Avatar */}
           <div className="blog-comments__avatar mr-3">
-            <img src={discussion.author.image} alt={discussion.author.name} />
+            <img src={patent.representative_figure_link} alt={patent.representative_figure_link} />
           </div>
-
+        
           {/* Content */}
           <div className="blog-comments__content">
             {/* Content :: Title */}
             <div className="blog-comments__meta text-mutes">
-              <a className="text-secondary" href={discussion.author.url}>
-                {discussion.author.name}
+              <a className="text-secondary" href={patent.result_link}>
+                {patent.inventor}
               </a>{" "}
-              on{" "}
-              <a className="text-secondary" href={discussion.post.url}>
-                {discussion.post.title}
+              |{" "}
+              <a className="text-secondary" href={patent.result_link}>
+                {patent.assignee}
               </a>
-              <span className="text-mutes">- {discussion.date}</span>
+              <span className="text-mutes"> / {patent.publication_date}</span>
             </div>
 
             {/* Content :: Body */}
-            <p className="m-0 my-1 mb-2 text-muted">{discussion.body}</p>
-
-            {/* Content :: Actions */}
-            <div className="blog-comments__actions">
-              <ButtonGroup size="sm">
-                <Button theme="white">
-                  <span className="text-success">
-                    <i className="material-icons">check</i>
-                  </span>{" "}
-                  Approve
-                </Button>
-                <Button theme="white">
-                  <span className="text-danger">
-                    <i className="material-icons">clear</i>
-                  </span>{" "}
-                  Reject
-                </Button>
-                <Button theme="white">
-                  <span className="text-light">
-                    <i className="material-icons">more_vert</i>
-                  </span>{" "}
-                  Edit
-                </Button>
-              </ButtonGroup>
-            </div>
+            <p className="m-0 my-1 mb-2 text-muted">{patent.title}</p>
           </div>
         </div>
       ))}
@@ -83,18 +57,29 @@ const Discussions = ({ title, discussions }) => (
 );
 
 Discussions.propTypes = {
-  /**
-   * The component's title.
-   */
   title: PropTypes.string,
-  /**
-   * The discussions dataset.
-   */
-  discussions: PropTypes.array
+  discussions: PropTypes.array,
+  patents: PropTypes.array
 };
 
+const listData = [];
+for (let i = 0; i < 10; i++) {
+  listData.push({
+    id: "US-7524089-B2",
+    title: "LED illuminating device for providing a uniform light spot",
+    assignee: "Daejin Dmp Co., Ltd.",
+    inventor: "Hitora Shozo, Tokio Kawashima",
+    priority_date: "2004-02-06",
+    creation_date: "2004-02-06",
+    publication_date: "2004-02-06",
+    grant_date: "2004-02-06",
+    result_link: "https://patents.google.com/patent/US6033087A/en",
+    representative_figure_link: "https://patentimages.storage.googleapis.com/pages/US6033087-1.png",
+  });
+}
+
 Discussions.defaultProps = {
-  title: "Discussions",
+  title: "Patents",
   discussions: [
     {
       id: 1,
@@ -137,8 +122,23 @@ Discussions.defaultProps = {
         url: "#"
       },
       body: "My money's in that office, right? If she start giving me..."
+    },
+    {
+      id: 3,
+      date: "5 days ago",
+      author: {
+        image: require("../../images/avatars/3.jpg"),
+        name: "John Doe",
+        url: "#"
+      },
+      post: {
+        title: "Hello World!",
+        url: "#"
+      },
+      body: "My money's in that office, right? If she start giving me..."
     }
-  ]
+  ],
+  patents: listData
 };
 
 export default Discussions;
