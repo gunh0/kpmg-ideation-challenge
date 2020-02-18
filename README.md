@@ -44,16 +44,3 @@ REACT UI KIT | FREE
 A free React admin dashboard template pack featuring a modern design system 
 and lots of custom templates and components.
 ```
-
-
-
-| Ant Design                                                   |                                                              |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![image](https://user-images.githubusercontent.com/41619898/74706806-4583f980-525b-11ea-8660-751da4e9d733.png) | A design system with values of Nature and Determinacy for better user experience of enterprise applications |
-
-
-
-
-
-
-
