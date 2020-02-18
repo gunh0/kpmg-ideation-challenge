@@ -10,7 +10,7 @@ import UsersByDevice from "./../components/blog/UsersByDevice";
 import TopReferrals from "./../components/common/TopReferrals";
 
 const BlogOverview = ({ smallStats }) => (
-  
+
   <Container fluid className="main-content-container px-4">
     {/* Page Header */}
     <Row noGutters className="page-header py-4">
@@ -32,7 +32,7 @@ const BlogOverview = ({ smallStats }) => (
             increase={stats.increase}
             decrease={stats.decrease}
           />
-        </Col>        
+        </Col>
       ))}
     </Row>
 
@@ -50,25 +50,13 @@ const BlogOverview = ({ smallStats }) => (
       {/* Users by Device */}
       <Col lg="3" md="6" sm="12" className="mb-4">
         <UsersByDevice />
-      </Col>      
+      </Col>
     </Row>
 
     <Row>
-      {smallStats.map((stats, idx) => (
-        <Col className="col-lg mb-4" key={idx} {...stats.attrs}>
-          <SmallStats
-            id={`small-stats-${idx}`}
-            variation="1"
-            chartData={stats.datasets}
-            chartLabels={stats.chartLabels}
-            label={stats.label}
-            value={stats.value}
-            percentage={stats.percentage}
-            increase={stats.increase}
-            decrease={stats.decrease}
-          />
-        </Col>        
-      ))}
+      <Col lg="12" md="6" sm="12" className="mb-4">
+        <SmallStats />
+      </Col>
     </Row>
   </Container>
 );
