@@ -10,7 +10,7 @@ import {
   Col
 } from "shards-react";
 
-const Discussions = ({ title, discussions, patents}) => (
+const Discussions = ({ title, patents}) => (
   <Card small className="blog-comments">
     <CardHeader className="border-bottom">
       <h6 className="m-0">{title}</h6>
@@ -58,12 +58,11 @@ const Discussions = ({ title, discussions, patents}) => (
 
 Discussions.propTypes = {
   title: PropTypes.string,
-  discussions: PropTypes.array,
   patents: PropTypes.array
 };
 
 const listData = [];
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 15; i++) {
   listData.push({
     id: "US-7524089-B2",
     title: "LED illuminating device for providing a uniform light spot",
@@ -80,64 +79,6 @@ for (let i = 0; i < 10; i++) {
 
 Discussions.defaultProps = {
   title: "Patents",
-  discussions: [
-    {
-      id: 1,
-      date: "3 days ago",
-      author: {
-        image: require("../../images/avatars/1.jpg"),
-        name: "John Doe",
-        url: "#"
-      },
-      post: {
-        title: "Hello World!",
-        url: "#"
-      },
-      body: "Well, the way they make shows is, they make one show ..."
-    },
-    {
-      id: 2,
-      date: "4 days ago",
-      author: {
-        image: require("../../images/avatars/2.jpg"),
-        name: "John Doe",
-        url: "#"
-      },
-      post: {
-        title: "Hello World!",
-        url: "#"
-      },
-      body: "After the avalanche, it took us a week to climb out. Now..."
-    },
-    {
-      id: 3,
-      date: "5 days ago",
-      author: {
-        image: require("../../images/avatars/3.jpg"),
-        name: "John Doe",
-        url: "#"
-      },
-      post: {
-        title: "Hello World!",
-        url: "#"
-      },
-      body: "My money's in that office, right? If she start giving me..."
-    },
-    {
-      id: 3,
-      date: "5 days ago",
-      author: {
-        image: require("../../images/avatars/3.jpg"),
-        name: "John Doe",
-        url: "#"
-      },
-      post: {
-        title: "Hello World!",
-        url: "#"
-      },
-      body: "My money's in that office, right? If she start giving me..."
-    }
-  ],
   patents: listData
 };
 

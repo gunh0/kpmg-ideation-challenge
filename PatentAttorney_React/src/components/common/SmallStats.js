@@ -1,10 +1,12 @@
 import React from "react";
+import axios from "axios";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import shortid from "shortid";
 import { Card, CardBody } from "shards-react";
 
 import Chart from "../../utils/chart";
+//import PatentData from "../blog/PatentData"
 
 class SmallStats extends React.Component {
   constructor(props) {
@@ -13,7 +15,20 @@ class SmallStats extends React.Component {
     this.canvasRef = React.createRef();
   }
 
+  state = {
+    articles: []
+  };
+
+  fetchArticles = () => {
+    axios.get("http://127.0.0.1:8000/api/").then(res => {
+      this.setState({
+        articles: res.data
+      });
+    });
+  }
+
   componentDidMount() {
+    this.fetchArticles();
     const chartOptions = {
       ...{
         maintainAspectRatio: true,
@@ -79,6 +94,12 @@ class SmallStats extends React.Component {
     new Chart(this.canvasRef.current, chartConfig);
   }
 
+  componentWillReceiveProps(newProps) {
+    if (newProps.token) {
+      this.fetchArticles();      
+    }
+  }
+
   render() {
     const { variation, label, value, percentage, increase } = this.props;
 
@@ -142,7 +163,7 @@ class SmallStats extends React.Component {
             ref={this.canvasRef}
             className={`stats-small-${shortid()}`}
           />
-        </CardBody>
+        </CardBody> <br/>
       </Card>
     );
   }
@@ -184,7 +205,8 @@ SmallStats.propTypes = {
   /**
    * The chart labels.
    */
-  chartLabels: PropTypes.array
+  chartLabels: PropTypes.array,
+  articles: PropTypes.array
 };
 
 SmallStats.defaultProps = {
@@ -195,7 +217,8 @@ SmallStats.defaultProps = {
   chartOptions: Object.create(null),
   chartConfig: Object.create(null),
   chartData: [],
-  chartLabels: []
+  chartLabels: [],
+  articles: []
 };
 
 export default SmallStats;
