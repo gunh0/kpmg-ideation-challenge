@@ -4,29 +4,10 @@ import { Container, Row, Col } from "shards-react";
 
 import PageTitle from "./../components/common/PageTitle";
 import SmallStats from "./../components/common/SmallStats";
+import SmallStatsOrigin from "./../components/common/SmallStatsOrigin";
 import UsersOverview from "./../components/blog/UsersOverview";
 import UsersByDevice from "./../components/blog/UsersByDevice";
-import PatentData from "./../components/blog/PatentData";
-import Discussions from "./../components/blog/Discussions";
 import TopReferrals from "./../components/common/TopReferrals";
-
-const listData = [];
-for (let i = 0; i < 15; i++) {
-  listData.push({
-    id: "US-7524089-B2",
-    title: "LED illuminating device for providing a uniform light spot",
-    assignee: "Daejin Dmp Co., Ltd.",
-    inventor: "Hitora Shozo, Tokio Kawashima",
-    priority_date: "2004-02-06",
-    creation_date: "2004-02-06",
-    publication_date: "2004-02-06",
-    grant_date: "2004-02-06",
-    result_link: "https://patents.google.com/patent/US6033087A/en",
-    representative_figure_link: "https://patentimages.storage.googleapis.com/pages/US6033087-1.png",
-  });
-}
-
-
 
 const BlogOverview = ({ smallStats }) => (
   
@@ -37,6 +18,41 @@ const BlogOverview = ({ smallStats }) => (
     </Row>
 
     {/* Small Stats Blocks */}
+    <Row>
+      {smallStats.map((stats, idx) => (
+        <Col className="col-lg mb-4" key={idx} {...stats.attrs}>
+          <SmallStatsOrigin
+            id={`small-stats-${idx}`}
+            variation="1"
+            chartData={stats.datasets}
+            chartLabels={stats.chartLabels}
+            label={stats.label}
+            value={stats.value}
+            percentage={stats.percentage}
+            increase={stats.increase}
+            decrease={stats.decrease}
+          />
+        </Col>        
+      ))}
+    </Row>
+
+    <Row>
+      {/* Users Overview */}
+      <Col lg="6" md="12" sm="12" className="mb-4">
+        <UsersOverview />
+      </Col>
+
+      {/* Top Referrals */}
+      <Col lg="3" md="12" sm="12" className="mb-4">
+        <TopReferrals />
+      </Col>
+
+      {/* Users by Device */}
+      <Col lg="3" md="6" sm="12" className="mb-4">
+        <UsersByDevice />
+      </Col>      
+    </Row>
+
     <Row>
       {smallStats.map((stats, idx) => (
         <Col className="col-lg mb-4" key={idx} {...stats.attrs}>
@@ -51,33 +67,8 @@ const BlogOverview = ({ smallStats }) => (
             increase={stats.increase}
             decrease={stats.decrease}
           />
-        </Col>
+        </Col>        
       ))}
-    </Row>
-
-    <Row>
-      {/* Users Overview */}
-      <Col lg="9" md="12" sm="12" className="mb-4">
-        <UsersOverview />
-      </Col>
-
-      {/* Users by Device */}
-      <Col lg="3" md="6" sm="12" className="mb-4">
-        <UsersByDevice />
-      </Col>
-
-      <Col lg="9" md="12" sm="12" className="mb-4">
-        <PatentData data={smallStats}/>
-      </Col>
-
-      <Col lg="9" md="12" sm="12" className="mb-4">
-        <Discussions />
-      </Col>
-
-      {/* Top Referrals */}
-      <Col lg="3" md="12" sm="12" className="mb-4">
-        <TopReferrals />
-      </Col>
     </Row>
   </Container>
 );
