@@ -1,34 +1,20 @@
 import React from "react";
-import axios from "axios";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import shortid from "shortid";
 import { Card, CardBody } from "shards-react";
 
 import Chart from "../../utils/chart";
-import PatentData from "../blog/PatentData"
+//import PatentData from "../blog/PatentData"
 
-class SmallStats extends React.Component {
+class SmallStatsOrigin extends React.Component {
   constructor(props) {
     super(props);
 
     this.canvasRef = React.createRef();
   }
 
-  state = {
-    articles: []
-  };
-
-  fetchArticles = () => {
-    axios.get("http://127.0.0.1:8000/api/").then(res => {
-      this.setState({
-        articles: res.data
-      });
-    });
-  }
-
   componentDidMount() {
-    this.fetchArticles();
     const chartOptions = {
       ...{
         maintainAspectRatio: true,
@@ -164,13 +150,12 @@ class SmallStats extends React.Component {
             className={`stats-small-${shortid()}`}
           />
         </CardBody> <br/>
-        <PatentData data={this.state.articles}/>
       </Card>
     );
   }
 }
 
-SmallStats.propTypes = {
+SmallStatsOrigin.propTypes = {
   /**
    * The Small Stats variation.
    */
@@ -210,7 +195,7 @@ SmallStats.propTypes = {
   articles: PropTypes.array
 };
 
-SmallStats.defaultProps = {
+SmallStatsOrigin.defaultProps = {
   increase: true,
   percentage: 0,
   value: 0,
@@ -222,4 +207,4 @@ SmallStats.defaultProps = {
   articles: []
 };
 
-export default SmallStats;
+export default SmallStatsOrigin;
