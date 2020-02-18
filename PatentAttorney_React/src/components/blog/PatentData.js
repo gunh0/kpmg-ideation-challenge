@@ -1,5 +1,4 @@
 import React from "react";
-import { List, Avatar, Icon } from "antd";
 import 'antd/dist/antd.css';
 
 import {
@@ -12,18 +11,6 @@ import {
     Col
 } from "shards-react";
 
-const IconText = ({ type, text }) => (
-    <span>
-        <Icon
-            type={type}
-            style={{
-                marginRight: 8
-            }}
-        />
-        {text}
-    </span>
-);
-
 const PatentData = props => {
     return (
         <Card small className="blog-comments">
@@ -31,41 +18,32 @@ const PatentData = props => {
                 <h6 className="m-0">Patents</h6>
             </CardHeader>
             <CardBody className="p-0">
-                <List
-                    itemLayout="vertical"
-                    size="large"
-                    pagination={{
-                        onChange: page => {
-                            console.log(page);
-                        },
-                        pageSize: 5
-                    }}
-                    dataSource={props.data}
-                    renderItem={item => (
-                        <List.Item
-                            key={item.title}
-                            actions={[
-                                <IconText type="star-o" text="156" />,
-                                <IconText type="like-o" text="156" />,
-                                <IconText type="message" text="2" />
-                            ]}
-                            extra={
-                                <img
-                                    width={200}
-                                    alt="logo"
-                                    src={item.representative_figure_link}
-                                />
-                            }
-                        >
-                            <List.Item.Meta
-                                avatar={<Avatar src={item.result_link} />}
-                                title={<a href={item.result_link}> {item.title} </a>}
-                                description={item.title}
-                            />
-                            {item.content}
-                        </List.Item>
-                    )}
-                />
+                {props.data.map((patent, idx) => (
+                    <div key={idx} className="blog-comments__item d-flex p-3">
+                        <div className="blog-comments__avatar mr-3">
+                            <img src={patent.representative_figure_link} alt={patent.representative_figure_link} />
+                        </div>
+
+                        {/* Content */}
+                        <div className="blog-comments__content">
+                            {/* Content :: Title */}
+                            <div className="blog-comments__meta text-mutes">
+                                <a className="text-secondary" href={patent.result_link}>
+                                    {patent.inventor_author}
+                                </a>{" "}
+                                |{" "}
+                                <a className="text-secondary" href={patent.result_link}>
+                                    {patent.assignee}
+                                </a>
+                                <span className="text-mutes"> / Priority : {patent.priority_date}</span>
+                            </div>
+
+                            {/* Content :: Body */}
+                            <p className="m-0 my-1 mb-2 text-muted">{patent.title}</p>
+                            <p className="m-0 my-1 mb-2 text-muted">[Filing/Creation : {patent.filing_creation_date}] [Publication : {patent.publication_date}] [Grant : {patent.grant_date}]</p>
+                        </div>
+                    </div>
+                ))}
             </CardBody>
             <CardFooter className="border-top">
                 <Row>
