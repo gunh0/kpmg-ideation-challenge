@@ -71,7 +71,7 @@ BlogOverview.propTypes = {
 BlogOverview.defaultProps = {
   smallStats: [
     {
-      label: "PAPPLICATION",
+      label: "APPLICATION",
       value: "2,390",
       percentage: "4.7%",
       increase: true,
@@ -126,7 +126,7 @@ BlogOverview.defaultProps = {
       ]
     },
     {
-      label: "ASSIGNESS",
+      label: "ASSIGNEES",
       value: "29",
       percentage: "2.71%",
       increase: false,

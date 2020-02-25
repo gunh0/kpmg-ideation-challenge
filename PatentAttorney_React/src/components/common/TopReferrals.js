@@ -15,7 +15,7 @@ import {
 const TopReferrals = ({ title, referralData }) => (
   <Card small>
     <CardHeader className="border-bottom">
-      <h6 className="m-0">{title}</h6>
+      <h6 className="m-0">Related Tech.</h6>
       <div className="block-handle" />
     </CardHeader>
 

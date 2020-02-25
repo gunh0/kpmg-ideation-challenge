@@ -62,3 +62,6 @@ and lots of custom templates and components.
 ![image](https://user-images.githubusercontent.com/41619898/75181937-ab541200-5782-11ea-81ed-ec48db7e5417.png)
 
 ![image](https://user-images.githubusercontent.com/41619898/75181804-6203c280-5782-11ea-8f71-6c66c6f14dee.png)
+
+![image](https://user-images.githubusercontent.com/41619898/75223211-4f70a400-57e9-11ea-8147-6e865d20126d.png)
+
