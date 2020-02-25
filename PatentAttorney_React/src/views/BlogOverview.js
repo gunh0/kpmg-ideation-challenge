@@ -71,7 +71,7 @@ BlogOverview.propTypes = {
 BlogOverview.defaultProps = {
   smallStats: [
     {
-      label: "Posts",
+      label: "PAPPLICATION",
       value: "2,390",
       percentage: "4.7%",
       increase: true,
@@ -89,7 +89,7 @@ BlogOverview.defaultProps = {
       ]
     },
     {
-      label: "Pages",
+      label: "REGISTER",
       value: "182",
       percentage: "12.4",
       increase: true,
@@ -107,7 +107,7 @@ BlogOverview.defaultProps = {
       ]
     },
     {
-      label: "Comments",
+      label: "REJECT",
       value: "8,147",
       percentage: "3.8%",
       increase: false,
@@ -126,7 +126,7 @@ BlogOverview.defaultProps = {
       ]
     },
     {
-      label: "New Customers",
+      label: "ASSIGNESS",
       value: "29",
       percentage: "2.71%",
       increase: false,
@@ -145,7 +145,7 @@ BlogOverview.defaultProps = {
       ]
     },
     {
-      label: "Subscribers",
+      label: "INVENTORS",
       value: "17,281",
       percentage: "2.4%",
       increase: false,

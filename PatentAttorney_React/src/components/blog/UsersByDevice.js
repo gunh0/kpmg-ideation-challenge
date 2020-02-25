@@ -106,7 +106,7 @@ UsersByDevice.propTypes = {
 };
 
 UsersByDevice.defaultProps = {
-  title: "Users by device",
+  title: "Application Country",
   chartData: {
     datasets: [
       {
