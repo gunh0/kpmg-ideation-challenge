@@ -1,0 +1,33 @@
+version: "3"
+services:
+    django:
+        build:
+            context: ./PatentAttorney_Django
+            dockerfile: Dockerfile
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./PatentAttorney_Django:/code
+        depends_on:
+            - db
+    react:
+        build:
+            context: ./PatentAttorney_React
+            dockerfile: Dockerfile
+        ports:
+            - "80:80"
+        volumes:
+            - ./PatentAttorney_React:/app
+        depends_on:
+            - django
+    db:
+        image: postgres
+        environment:
+            - POSTGRES_USER=your_postgres_user
+            - POSTGRES_PASSWORD=your_postgres_password
+            - POSTGRES_DB=your_database_name
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+
+volumes:
+    pgdata:
