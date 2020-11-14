@@ -1,0 +1,9 @@
+asgiref==3.7.2
+Django==3.0.2
+django-cors-headers==3.0.2
+django-utils-six==2.0
+djangorestframework==3.14.0
+pytz==2023.3
+six==1.16.0
+sqlparse==0.4.4
+typing_extensions==4.6.3
