@@ -158,7 +158,7 @@ CountryReports.propTypes = {
 };
 
 CountryReports.defaultProps = {
-  title: "Application Country",
+  title: "Users by Country",
   countries: [
     {
       flag: require("../../images/flags/flag-us.png"),

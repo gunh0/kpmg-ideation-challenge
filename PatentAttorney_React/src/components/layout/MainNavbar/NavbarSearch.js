@@ -17,7 +17,7 @@ export default () => (
       </InputGroupAddon>
       <FormInput
         className="navbar-search"
-        placeholder="Input Patent Keywords"
+        placeholder="Search for something..."
       />
     </InputGroup>
   </Form>
