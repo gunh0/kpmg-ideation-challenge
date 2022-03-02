@@ -1,0 +1,6 @@
+search URL:,https://patents.google.com/?q=(drone+delivery)&before=priority:20200101
+id,title,assignee,inventor/author,priority date,filing/creation date,publication date,grant date,result link,representative figure link
+ZZ-0000001-B2,Parcel release mechanism for an unmanned aerial vehicle,Example Robotics Inc.,"Jane Doe, John Roe",2016-03-14,2017-03-10,2019-08-20,2019-08-20,https://patents.google.com/patent/ZZ0000001B2/en,https://patentimages.storage.googleapis.com/example/ZZ0000001B2.png
+ZZ-0000002-A1,Landing pad with charging contacts for delivery drones,Example Logistics Corp.,Mary Major,2018-11-02,2019-10-30,2020-05-07,,https://patents.google.com/patent/ZZ0000002A1/en,
+ZZ-0000003-B1,Route planning for aerial parcel delivery,Example Robotics Inc.,"John Roe, Richard Miles",2017-06-01,2018-05-29,2020-01-14,2020-01-14,https://patents.google.com/patent/ZZ0000003B1/en,
+,Row without an identifier is skipped,,,,,,,,
