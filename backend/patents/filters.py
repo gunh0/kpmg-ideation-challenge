@@ -1,0 +1,14 @@
+import django_filters
+
+from .models import Patent
+
+
+class PatentFilter(django_filters.FilterSet):
+    assignee = django_filters.CharFilter(field_name="assignee", lookup_expr="iexact")
+    granted = django_filters.BooleanFilter(field_name="grant_date", lookup_expr="isnull", exclude=True)
+    year_from = django_filters.NumberFilter(field_name="publication_date", lookup_expr="year__gte")
+    year_to = django_filters.NumberFilter(field_name="publication_date", lookup_expr="year__lte")
+
+    class Meta:
+        model = Patent
+        fields = ["dataset", "assignee", "granted", "year_from", "year_to"]
