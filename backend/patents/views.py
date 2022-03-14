@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .csv_import import CSVFormatError
 from .filters import NullsLastOrderingFilter, PatentFilter
@@ -10,6 +11,7 @@ from .importer import import_export
 from .models import Dataset, Patent
 from .pagination import PatentPagination
 from .serializers import DatasetSerializer, DatasetUploadSerializer, PatentSerializer
+from .stats import summary
 
 
 class DatasetViewSet(
@@ -47,3 +49,17 @@ class PatentViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["patent_id", "title", "assignee", "inventors"]
     ordering_fields = ["publication_date", "priority_date", "filing_date", "grant_date", "patent_id", "title"]
     ordering = ["-publication_date", "patent_id"]
+
+
+class StatsView(APIView):
+    """Dashboard aggregates. Accepts the same filters and search as /api/patents/."""
+
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_class = PatentFilter
+    search_fields = PatentViewSet.search_fields
+
+    def get(self, request):
+        queryset = Patent.objects.all()
+        for backend in self.filter_backends:
+            queryset = backend().filter_queryset(request, queryset, self)
+        return Response(summary(queryset))
