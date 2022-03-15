@@ -52,7 +52,8 @@ class PatentViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class StatsView(APIView):
-    """Dashboard aggregates. Accepts the same filters and search as /api/patents/."""
+    """Dashboard aggregates. Accepts the same filters and search as /api/patents/,
+    plus ?top=N (1-50, default 10) for the length of the ranking lists."""
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = PatentFilter
@@ -62,4 +63,8 @@ class StatsView(APIView):
         queryset = Patent.objects.all()
         for backend in self.filter_backends:
             queryset = backend().filter_queryset(request, queryset, self)
-        return Response(summary(queryset))
+        try:
+            limit = min(max(int(request.query_params.get("top", 10)), 1), 50)
+        except ValueError:
+            limit = 10
+        return Response(summary(queryset, limit=limit))

@@ -1,5 +1,5 @@
 """Aggregates for the dashboard, computed over an already filtered queryset."""
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 from django.db.models import Count
 from django.db.models.functions import ExtractYear
@@ -23,9 +23,30 @@ def patents_by_year(queryset):
     return [{"year": year, **counts} for year, counts in sorted(years.items())]
 
 
-def summary(queryset):
+def top_assignees(queryset, limit):
+    rows = (
+        queryset.exclude(assignee="")
+        .values("assignee")
+        .annotate(count=Count("id"))
+        .order_by("-count", "assignee")[:limit]
+    )
+    return [{"name": row["assignee"], "count": row["count"]} for row in rows]
+
+
+def top_inventors(queryset, limit):
+    """Inventors are stored comma-separated, so they are counted in Python."""
+    counts = Counter()
+    for inventors in queryset.exclude(inventors="").values_list("inventors", flat=True):
+        counts.update({name.strip() for name in inventors.split(",") if name.strip()})
+    ranked = sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:limit]
+    return [{"name": name, "count": count} for name, count in ranked]
+
+
+def summary(queryset, limit=10):
     return {
         "total": queryset.count(),
         "granted": queryset.filter(grant_date__isnull=False).count(),
         "by_year": patents_by_year(queryset),
+        "top_assignees": top_assignees(queryset, limit),
+        "top_inventors": top_inventors(queryset, limit),
     }
