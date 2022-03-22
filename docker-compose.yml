@@ -1,18 +1,24 @@
-version: "3"
+version: "3.8"
+
 services:
-    django:
-        container_name: kpmg_django
-        build:
-            context: ./PatentAttorney_Django
-            dockerfile: Dockerfile
-        ports:
-            - "8000:8000"
-    react:
-        container_name: kpmg_react
-        build:
-            context: ./PatentAttorney_React
-            dockerfile: Dockerfile
-        ports:
-            - "3000:3000"
-        depends_on:
-            - django
+  backend:
+    build: ./backend
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-in-production}
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+    volumes:
+      - backend-data:/data
+    ports:
+      - "8000:8000"
+  react:
+    container_name: kpmg_react
+    build:
+      context: ./PatentAttorney_React
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  backend-data:
