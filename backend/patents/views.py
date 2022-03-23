@@ -1,11 +1,14 @@
 from django.db.models import Count
+from django.http import StreamingHttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .csv_import import CSVFormatError
+from .export import export_rows
 from .filters import NullsLastOrderingFilter, PatentFilter
 from .importer import import_export
 from .models import Dataset, Patent
@@ -49,6 +52,14 @@ class PatentViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["patent_id", "title", "assignee", "inventors"]
     ordering_fields = ["publication_date", "priority_date", "filing_date", "grant_date", "patent_id", "title"]
     ordering = ["-publication_date", "patent_id"]
+
+    @action(detail=False, url_path="export")
+    def export(self, request):
+        """The filtered, ordered list as CSV (Google Patents columns, no pagination)."""
+        queryset = self.filter_queryset(self.get_queryset())
+        response = StreamingHttpResponse(export_rows(queryset), content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="patents.csv"'
+        return response
 
 
 class StatsView(APIView):
