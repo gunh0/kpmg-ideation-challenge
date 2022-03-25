@@ -25,6 +25,9 @@ COLUMNS = {
 }
 DATE_FIELDS = ("priority_date", "filing_date", "publication_date", "grant_date")
 REQUIRED = ("id", "title")
+# Characters that make a spreadsheet treat a cell as a formula. Our own exports
+# prefix such values with an apostrophe, which is removed again on import.
+FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
 
 
 class CSVFormatError(ValueError):
@@ -36,6 +39,12 @@ class ParsedExport:
     search_url: str = ""
     rows: list = field(default_factory=list)
     skipped: int = 0
+
+
+def unescape(value):
+    if value.startswith("'") and value[1:].startswith(FORMULA_PREFIXES):
+        return value[1:]
+    return value
 
 
 def parse_date(value):
@@ -68,7 +77,7 @@ def parse_export(text):
 
     for record in reader:
         row = {
-            model_field: (record.get(column) or "").strip()
+            model_field: unescape((record.get(column) or "").strip())
             for column, model_field in COLUMNS.items()
         }
         if not row["patent_id"] or not row["title"]:

@@ -38,3 +38,13 @@ class ExportTests(APITestCase):
         again = parse_export(self.export("ordering=patent_id")).rows
 
         self.assertEqual(sorted(original, key=lambda row: row["patent_id"]), again)
+
+    def test_formula_like_values_are_neutralised_and_restored_on_import(self):
+        import_export('id,title,assignee\nZZ-7-A1,"=HYPERLINK(""http://x"")",@Evil Corp\n', name="Hostile")
+
+        text = self.export("search=ZZ-7")
+        row = list(csv.reader(io.StringIO(text)))[1]
+
+        self.assertEqual(row[1], "'=HYPERLINK(\"http://x\")")
+        self.assertEqual(row[2], "'@Evil Corp")
+        self.assertEqual(parse_export(text).rows[0]["title"], '=HYPERLINK("http://x")')
