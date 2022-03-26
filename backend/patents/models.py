@@ -35,6 +35,11 @@ class Patent(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["dataset", "patent_id"], name="unique_patent_per_dataset"),
         ]
+        indexes = [
+            # default ordering and the year filters
+            models.Index(fields=["-publication_date", "patent_id"], name="patent_publication_idx"),
+            models.Index(fields=["assignee"], name="patent_assignee_idx"),
+        ]
 
     def __str__(self):
         return f"{self.patent_id} {self.title}"
