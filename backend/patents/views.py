@@ -79,3 +79,21 @@ class StatsView(APIView):
         except ValueError:
             limit = 10
         return Response(summary(queryset, limit=limit))
+
+
+class AssigneeView(APIView):
+    """Assignee names with their patent counts, for filter suggestions.
+
+    ?dataset=<id> limits to one dataset, ?search= matches part of the name.
+    """
+
+    def get(self, request):
+        queryset = Patent.objects.exclude(assignee="")
+        dataset = request.query_params.get("dataset")
+        if dataset and dataset.isdigit():
+            queryset = queryset.filter(dataset_id=dataset)
+        search = request.query_params.get("search", "").strip()
+        if search:
+            queryset = queryset.filter(assignee__icontains=search)
+        rows = queryset.values("assignee").annotate(count=Count("id")).order_by("-count", "assignee")[:20]
+        return Response([{"name": row["assignee"], "count": row["count"]} for row in rows])
