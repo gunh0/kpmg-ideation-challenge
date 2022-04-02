@@ -1,0 +1,32 @@
+import { NavLink, Outlet } from "react-router-dom";
+
+const links = [
+  { to: "/", label: "Dashboard", end: true },
+  { to: "/patents", label: "Patents" },
+  { to: "/datasets", label: "Datasets" },
+];
+
+export default function Layout() {
+  return (
+    <div className="shell">
+      <header className="topbar">
+        <div className="topbar-inner">
+          <NavLink to="/" className="brand">
+            <span className="brand-mark" aria-hidden="true">⚖</span>
+            Patent Attorney <span className="brand-dim">Without Borders</span>
+          </NavLink>
+          <nav className="nav" aria-label="Main">
+            {links.map((link) => (
+              <NavLink key={link.to} to={link.to} end={link.end} className="nav-link">
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      </header>
+      <main className="content">
+        <Outlet />
+      </main>
+    </div>
+  );
+}

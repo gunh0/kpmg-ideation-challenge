@@ -1,8 +1,22 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
+import Datasets from "./pages/Datasets";
+import NotFound from "./pages/NotFound";
+import Patents from "./pages/Patents";
+
 export default function App() {
   return (
-    <main className="app">
-      <h1>Patent Attorney Without Borders</h1>
-      <p>Explore Google Patents search results by assignee, inventor and year.</p>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="patents" element={<Patents />} />
+          <Route path="datasets" element={<Datasets />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
