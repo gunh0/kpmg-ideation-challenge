@@ -1,14 +1,26 @@
 import { useState } from "react";
 
 import { api } from "../api";
+import Pagination from "../components/Pagination";
 import PatentTable from "../components/PatentTable";
 import useApi from "../hooks/useApi";
 import useDebounce from "../hooks/useDebounce";
 
+const PAGE_SIZE = 25;
+
 export default function Patents() {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const query = useDebounce(search.trim());
-  const { data, error, loading } = useApi(() => api.patents({ search: query }), [query]);
+  const { data, error, loading } = useApi(
+    () => api.patents({ search: query, page, page_size: PAGE_SIZE }),
+    [query, page]
+  );
+
+  function changeSearch(value) {
+    setSearch(value);
+    setPage(1);
+  }
 
   return (
     <section>
@@ -22,7 +34,7 @@ export default function Patents() {
           placeholder="Search id, title, assignee or inventor"
           aria-label="Search patents"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) => changeSearch(event.target.value)}
         />
       </div>
 
@@ -34,6 +46,7 @@ export default function Patents() {
             {data.count} patents{query && <> matching “{query}”</>}
           </p>
           <PatentTable patents={data.results} />
+          <Pagination page={page} pageSize={PAGE_SIZE} count={data.count} onChange={setPage} />
         </>
       )}
     </section>
