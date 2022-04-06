@@ -229,3 +229,26 @@ a {
   margin-top: 14px;
   font-size: 0.9rem;
 }
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.sort-arrow {
+  color: #9aa4b2;
+}
+
+th[aria-sort="ascending"] .sort-arrow,
+th[aria-sort="descending"] .sort-arrow {
+  color: var(--accent);
+}

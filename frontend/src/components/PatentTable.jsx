@@ -2,17 +2,52 @@ export function formatDate(value) {
   return value || "—";
 }
 
-export default function PatentTable({ patents }) {
+const COLUMNS = [
+  { key: "patent_id", label: "Patent", sortable: true },
+  { key: "title", label: "Title", sortable: true },
+  { key: "assignee", label: "Assignee" },
+  { key: "publication_date", label: "Published", sortable: true },
+  { key: "grant_date", label: "Status", sortable: true },
+];
+
+// "-publication_date" -> {field: "publication_date", descending: true}
+export function parseOrdering(ordering) {
+  const descending = ordering.startsWith("-");
+  return { field: descending ? ordering.slice(1) : ordering, descending };
+}
+
+export function nextOrdering(ordering, field) {
+  const current = parseOrdering(ordering);
+  if (current.field !== field) return field;
+  return current.descending ? field : `-${field}`;
+}
+
+function SortHeader({ column, ordering, onSort }) {
+  if (!column.sortable || !onSort) return <th>{column.label}</th>;
+  const current = parseOrdering(ordering);
+  const active = current.field === column.key;
+  const direction = active ? (current.descending ? "descending" : "ascending") : "none";
+  return (
+    <th aria-sort={direction}>
+      <button type="button" className="sort" onClick={() => onSort(nextOrdering(ordering, column.key))}>
+        {column.label}
+        <span className="sort-arrow" aria-hidden="true">
+          {active ? (current.descending ? "↓" : "↑") : "↕"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
+export default function PatentTable({ patents, ordering = "", onSort }) {
   return (
     <div className="table-wrap">
       <table className="table">
         <thead>
           <tr>
-            <th>Patent</th>
-            <th>Title</th>
-            <th>Assignee</th>
-            <th>Published</th>
-            <th>Status</th>
+            {COLUMNS.map((column) => (
+              <SortHeader key={column.key} column={column} ordering={ordering} onSort={onSort} />
+            ))}
           </tr>
         </thead>
         <tbody>

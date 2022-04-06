@@ -11,11 +11,17 @@ const PAGE_SIZE = 25;
 export default function Patents() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [ordering, setOrdering] = useState("-publication_date");
   const query = useDebounce(search.trim());
   const { data, error, loading } = useApi(
-    () => api.patents({ search: query, page, page_size: PAGE_SIZE }),
-    [query, page]
+    () => api.patents({ search: query, ordering, page, page_size: PAGE_SIZE }),
+    [query, ordering, page]
   );
+
+  function changeOrdering(value) {
+    setOrdering(value);
+    setPage(1);
+  }
 
   function changeSearch(value) {
     setSearch(value);
@@ -45,7 +51,7 @@ export default function Patents() {
           <p className="muted">
             {data.count} patents{query && <> matching “{query}”</>}
           </p>
-          <PatentTable patents={data.results} />
+          <PatentTable patents={data.results} ordering={ordering} onSort={changeOrdering} />
           <Pagination page={page} pageSize={PAGE_SIZE} count={data.count} onChange={setPage} />
         </>
       )}
