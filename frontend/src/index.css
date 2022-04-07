@@ -252,3 +252,13 @@ th[aria-sort="ascending"] .sort-arrow,
 th[aria-sort="descending"] .sort-arrow {
   color: var(--accent);
 }
+
+.year-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.year {
+  width: 90px;
+}
