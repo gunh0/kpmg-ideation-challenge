@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { api } from "../api";
+import AssigneeFilter from "../components/AssigneeFilter";
 import Pagination from "../components/Pagination";
 import PatentTable from "../components/PatentTable";
 import useApi from "../hooks/useApi";
@@ -13,6 +14,7 @@ export default function Patents() {
   const [page, setPage] = useState(1);
   const [ordering, setOrdering] = useState("-publication_date");
   const [granted, setGranted] = useState("");
+  const [assignee, setAssignee] = useState("");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
   const query = useDebounce(search.trim());
@@ -22,6 +24,7 @@ export default function Patents() {
     () =>
       api.patents({
         search: query,
+        assignee,
         granted,
         year_from: debouncedYearFrom,
         year_to: debouncedYearTo,
@@ -29,7 +32,7 @@ export default function Patents() {
         page,
         page_size: PAGE_SIZE,
       }),
-    [query, granted, debouncedYearFrom, debouncedYearTo, ordering, page]
+    [query, assignee, granted, debouncedYearFrom, debouncedYearTo, ordering, page]
   );
 
   function withFirstPage(setter) {
@@ -63,6 +66,7 @@ export default function Patents() {
           value={search}
           onChange={(event) => changeSearch(event.target.value)}
         />
+        <AssigneeFilter value={assignee} onChange={withFirstPage(setAssignee)} />
         <select
           className="select"
           aria-label="Grant status"

@@ -262,3 +262,7 @@ th[aria-sort="descending"] .sort-arrow {
 .year {
   width: 90px;
 }
+
+.assignee {
+  width: 220px;
+}
