@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { api } from "../api";
 import AssigneeFilter from "../components/AssigneeFilter";
@@ -6,51 +6,42 @@ import Pagination from "../components/Pagination";
 import PatentTable from "../components/PatentTable";
 import useApi from "../hooks/useApi";
 import useDebounce from "../hooks/useDebounce";
+import useQueryParams from "../hooks/useQueryParams";
 
 const PAGE_SIZE = 25;
+const DEFAULTS = {
+  search: "",
+  assignee: "",
+  granted: "",
+  year_from: "",
+  year_to: "",
+  ordering: "-publication_date",
+  page: "1",
+};
+
+// Text inputs keep their own state while typing and write to the URL debounced.
+function useDebouncedParam(value, onChange) {
+  const [text, setText] = useState(value);
+  const debounced = useDebounce(text);
+  useEffect(() => setText(value), [value]);
+  useEffect(() => {
+    if (debounced !== value) onChange(debounced);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debounced]);
+  return [text, setText];
+}
 
 export default function Patents() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [ordering, setOrdering] = useState("-publication_date");
-  const [granted, setGranted] = useState("");
-  const [assignee, setAssignee] = useState("");
-  const [yearFrom, setYearFrom] = useState("");
-  const [yearTo, setYearTo] = useState("");
-  const query = useDebounce(search.trim());
-  const debouncedYearFrom = useDebounce(yearFrom);
-  const debouncedYearTo = useDebounce(yearTo);
+  const [params, update] = useQueryParams(DEFAULTS);
+  const page = Number(params.page) || 1;
+  const [search, setSearch] = useDebouncedParam(params.search, (value) => update({ search: value.trim() }));
+  const [yearFrom, setYearFrom] = useDebouncedParam(params.year_from, (value) => update({ year_from: value }));
+  const [yearTo, setYearTo] = useDebouncedParam(params.year_to, (value) => update({ year_to: value }));
+
   const { data, error, loading } = useApi(
-    () =>
-      api.patents({
-        search: query,
-        assignee,
-        granted,
-        year_from: debouncedYearFrom,
-        year_to: debouncedYearTo,
-        ordering,
-        page,
-        page_size: PAGE_SIZE,
-      }),
-    [query, assignee, granted, debouncedYearFrom, debouncedYearTo, ordering, page]
+    () => api.patents({ ...params, page, page_size: PAGE_SIZE }),
+    [params]
   );
-
-  function withFirstPage(setter) {
-    return (value) => {
-      setter(value);
-      setPage(1);
-    };
-  }
-
-  function changeOrdering(value) {
-    setOrdering(value);
-    setPage(1);
-  }
-
-  function changeSearch(value) {
-    setSearch(value);
-    setPage(1);
-  }
 
   return (
     <section>
@@ -64,14 +55,14 @@ export default function Patents() {
           placeholder="Search id, title, assignee or inventor"
           aria-label="Search patents"
           value={search}
-          onChange={(event) => changeSearch(event.target.value)}
+          onChange={(event) => setSearch(event.target.value)}
         />
-        <AssigneeFilter value={assignee} onChange={withFirstPage(setAssignee)} />
+        <AssigneeFilter value={params.assignee} onChange={(value) => update({ assignee: value })} />
         <select
           className="select"
           aria-label="Grant status"
-          value={granted}
-          onChange={(event) => withFirstPage(setGranted)(event.target.value)}
+          value={params.granted}
+          onChange={(event) => update({ granted: event.target.value })}
         >
           <option value="">All statuses</option>
           <option value="true">Granted</option>
@@ -86,7 +77,7 @@ export default function Patents() {
             min="1900"
             max="2100"
             value={yearFrom}
-            onChange={(event) => withFirstPage(setYearFrom)(event.target.value)}
+            onChange={(event) => setYearFrom(event.target.value)}
           />
           <span className="muted">–</span>
           <input
@@ -97,7 +88,7 @@ export default function Patents() {
             min="1900"
             max="2100"
             value={yearTo}
-            onChange={(event) => withFirstPage(setYearTo)(event.target.value)}
+            onChange={(event) => setYearTo(event.target.value)}
           />
         </div>
       </div>
@@ -107,10 +98,19 @@ export default function Patents() {
       {data && (
         <>
           <p className="muted">
-            {data.count} patents{query && <> matching “{query}”</>}
+            {data.count} patents{params.search && <> matching “{params.search}”</>}
           </p>
-          <PatentTable patents={data.results} ordering={ordering} onSort={changeOrdering} />
-          <Pagination page={page} pageSize={PAGE_SIZE} count={data.count} onChange={setPage} />
+          <PatentTable
+            patents={data.results}
+            ordering={params.ordering}
+            onSort={(ordering) => update({ ordering })}
+          />
+          <Pagination
+            page={page}
+            pageSize={PAGE_SIZE}
+            count={data.count}
+            onChange={(next) => update({ page: String(next) })}
+          />
         </>
       )}
     </section>
