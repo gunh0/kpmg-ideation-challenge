@@ -266,3 +266,79 @@ th[aria-sort="descending"] .sort-arrow {
 .assignee {
   width: 220px;
 }
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover,
+.clickable:focus {
+  background: #f8fafc;
+  outline: none;
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(480px, 100%);
+  padding: 20px 24px;
+  overflow-y: auto;
+  background: var(--surface);
+  box-shadow: -8px 0 24px rgba(15, 23, 42, 0.15);
+}
+
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-title {
+  margin: 8px 0 10px;
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.icon-button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: #f1f5f9;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px 12px;
+  margin: 20px 0;
+  font-size: 0.92rem;
+}
+
+.facts dt {
+  color: var(--muted);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.fact-row {
+  display: contents;
+}

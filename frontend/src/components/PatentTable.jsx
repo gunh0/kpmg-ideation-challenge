@@ -39,7 +39,7 @@ function SortHeader({ column, ordering, onSort }) {
   );
 }
 
-export default function PatentTable({ patents, ordering = "", onSort }) {
+export default function PatentTable({ patents, ordering = "", onSort, onSelect }) {
   return (
     <div className="table-wrap">
       <table className="table">
@@ -52,7 +52,13 @@ export default function PatentTable({ patents, ordering = "", onSort }) {
         </thead>
         <tbody>
           {patents.map((patent) => (
-            <tr key={patent.id}>
+            <tr
+              key={patent.id}
+              className={onSelect ? "clickable" : undefined}
+              tabIndex={onSelect ? 0 : undefined}
+              onClick={onSelect && (() => onSelect(patent))}
+              onKeyDown={onSelect && ((event) => event.key === "Enter" && onSelect(patent))}
+            >
               <td className="mono nowrap">{patent.patent_id}</td>
               <td>{patent.title}</td>
               <td>{patent.assignee || "—"}</td>

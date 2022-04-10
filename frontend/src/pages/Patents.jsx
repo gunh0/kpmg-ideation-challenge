@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import AssigneeFilter from "../components/AssigneeFilter";
 import Pagination from "../components/Pagination";
+import PatentDetail from "../components/PatentDetail";
 import PatentTable from "../components/PatentTable";
 import useApi from "../hooks/useApi";
 import useDebounce from "../hooks/useDebounce";
@@ -38,6 +39,7 @@ export default function Patents() {
   const [yearFrom, setYearFrom] = useDebouncedParam(params.year_from, (value) => update({ year_from: value }));
   const [yearTo, setYearTo] = useDebouncedParam(params.year_to, (value) => update({ year_to: value }));
 
+  const [selected, setSelected] = useState(null);
   const { data, error, loading } = useApi(
     () => api.patents({ ...params, page, page_size: PAGE_SIZE }),
     [params]
@@ -104,6 +106,7 @@ export default function Patents() {
             patents={data.results}
             ordering={params.ordering}
             onSort={(ordering) => update({ ordering })}
+            onSelect={setSelected}
           />
           <Pagination
             page={page}
@@ -113,6 +116,7 @@ export default function Patents() {
           />
         </>
       )}
+      {selected && <PatentDetail patent={selected} onClose={() => setSelected(null)} />}
     </section>
   );
 }
