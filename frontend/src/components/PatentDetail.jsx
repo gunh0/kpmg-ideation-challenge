@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { safeUrl } from "../links";
 import { formatDate } from "./PatentTable";
 
 const DATES = [
@@ -10,6 +11,9 @@ const DATES = [
 ];
 
 export default function PatentDetail({ patent, onClose }) {
+  const link = safeUrl(patent.result_link);
+  const figure = safeUrl(patent.figure_link);
+
   useEffect(() => {
     const onKey = (event) => event.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -50,6 +54,17 @@ export default function PatentDetail({ patent, onClose }) {
             </div>
           ))}
         </dl>
+
+        {figure && (
+          <figure className="figure">
+            <img src={figure} alt={`Representative figure of ${patent.patent_id}`} loading="lazy" referrerPolicy="no-referrer" />
+          </figure>
+        )}
+        {link && (
+          <a className="button button-primary" href={link} target="_blank" rel="noopener noreferrer">
+            Open in Google Patents ↗
+          </a>
+        )}
       </aside>
     </div>
   );
