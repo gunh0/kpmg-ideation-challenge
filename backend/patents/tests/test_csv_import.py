@@ -48,3 +48,11 @@ class ParseExportTests(SimpleTestCase):
         self.assertEqual(parse_date("2021-12-31"), date(2021, 12, 31))
         self.assertIsNone(parse_date(""))
         self.assertIsNone(parse_date("31/12/2021"))
+
+    def test_links_must_be_http(self):
+        text = "id,title,result link,representative figure link\nZZ-1-A1,T,javascript:alert(1),HTTPS://example.org/f.png\n"
+
+        row = parse_export(text).rows[0]
+
+        self.assertEqual(row["result_link"], "")
+        self.assertEqual(row["figure_link"], "HTTPS://example.org/f.png")

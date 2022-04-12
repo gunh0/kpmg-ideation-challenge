@@ -24,6 +24,7 @@ COLUMNS = {
     "representative figure link": "figure_link",
 }
 DATE_FIELDS = ("priority_date", "filing_date", "publication_date", "grant_date")
+LINK_FIELDS = ("result_link", "figure_link")
 REQUIRED = ("id", "title")
 # Characters that make a spreadsheet treat a cell as a formula. Our own exports
 # prefix such values with an apostrophe, which is removed again on import.
@@ -45,6 +46,11 @@ def unescape(value):
     if value.startswith("'") and value[1:].startswith(FORMULA_PREFIXES):
         return value[1:]
     return value
+
+
+def parse_link(value):
+    """Keep only http(s) URLs; the dashboard renders links from uploaded files."""
+    return value if value.lower().startswith(("https://", "http://")) else ""
 
 
 def parse_date(value):
@@ -85,5 +91,7 @@ def parse_export(text):
             continue
         for name in DATE_FIELDS:
             row[name] = parse_date(row[name])
+        for name in LINK_FIELDS:
+            row[name] = parse_link(row[name])
         result.rows.append(row)
     return result
