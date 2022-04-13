@@ -369,3 +369,18 @@ th[aria-sort="descending"] .sort-arrow {
   max-width: 100%;
   max-height: 320px;
 }
+
+.small {
+  font-size: 0.8rem;
+}
+
+.ellipsis {
+  max-width: 520px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.refresh {
+  margin-top: 14px;
+}
