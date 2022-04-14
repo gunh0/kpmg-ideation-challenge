@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { api } from "../api";
+import UploadDataset from "../components/UploadDataset";
 import useApi from "../hooks/useApi";
 
 function formatDateTime(value) {
@@ -14,7 +15,12 @@ export default function Datasets() {
   return (
     <section>
       <h1 className="page-title">Datasets</h1>
-      <p className="page-lead">Google Patents exports imported so far.</p>
+      <p className="page-lead">
+        On <a href="https://patents.google.com" target="_blank" rel="noopener noreferrer">patents.google.com</a>, run a
+        search and choose <em>Download (CSV)</em>, then import the file here.
+      </p>
+
+      <UploadDataset onUploaded={() => setVersion((v) => v + 1)} />
 
       {error && <p className="error">{error.message}</p>}
       {loading && !data && <p className="muted">Loading…</p>}
