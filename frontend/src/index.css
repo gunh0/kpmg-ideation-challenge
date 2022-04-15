@@ -426,3 +426,19 @@ th[aria-sort="descending"] .sort-arrow {
 .upload-actions .input {
   flex: 1;
 }
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -10px 0 20px;
+  padding: 10px 14px;
+  border: 1px solid #b7e1c4;
+  border-radius: var(--radius);
+  background: #e7f6ec;
+  font-size: 0.92rem;
+}
+
+.notice .icon-button {
+  margin-left: auto;
+}

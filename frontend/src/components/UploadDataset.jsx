@@ -2,6 +2,14 @@ import { useRef, useState } from "react";
 
 import { api } from "../api";
 
+const MAX_SIZE = 10 * 1024 * 1024;
+
+export function checkFile(file) {
+  if (!file.name.toLowerCase().endsWith(".csv")) return "Choose the .csv file downloaded from Google Patents.";
+  if (file.size > MAX_SIZE) return "The file is larger than 10 MB.";
+  return "";
+}
+
 export default function UploadDataset({ onUploaded }) {
   const input = useRef(null);
   const [file, setFile] = useState(null);
@@ -11,8 +19,10 @@ export default function UploadDataset({ onUploaded }) {
   const [error, setError] = useState("");
 
   function choose(files) {
-    setError("");
-    setFile(files && files[0] ? files[0] : null);
+    const next = files && files[0] ? files[0] : null;
+    const problem = next ? checkFile(next) : "";
+    setError(problem);
+    setFile(problem ? null : next);
   }
 
   async function submit(event) {

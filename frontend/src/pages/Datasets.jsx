@@ -10,6 +10,7 @@ function formatDateTime(value) {
 
 export default function Datasets() {
   const [version, setVersion] = useState(0);
+  const [notice, setNotice] = useState(null);
   const { data, error, loading } = useApi(() => api.datasets(), [version]);
 
   return (
@@ -20,7 +21,22 @@ export default function Datasets() {
         search and choose <em>Download (CSV)</em>, then import the file here.
       </p>
 
-      <UploadDataset onUploaded={() => setVersion((v) => v + 1)} />
+      <UploadDataset
+        onUploaded={(dataset) => {
+          setNotice(dataset);
+          setVersion((v) => v + 1);
+        }}
+      />
+      {notice && (
+        <div className="notice" role="status">
+          Imported <strong>{notice.import.imported}</strong> patents into “{notice.name}”
+          {notice.import.duplicates > 0 && <> · {notice.import.duplicates} duplicate rows merged</>}
+          {notice.import.skipped > 0 && <> · {notice.import.skipped} rows without id or title skipped</>}
+          <button type="button" className="icon-button" aria-label="Dismiss" onClick={() => setNotice(null)}>
+            ×
+          </button>
+        </div>
+      )}
 
       {error && <p className="error">{error.message}</p>}
       {loading && !data && <p className="muted">Loading…</p>}
