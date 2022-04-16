@@ -4,6 +4,13 @@ import { api } from "../api";
 import UploadDataset from "../components/UploadDataset";
 import useApi from "../hooks/useApi";
 
+async function remove(dataset, onDone) {
+  const ok = window.confirm(`Delete “${dataset.name}” and its ${dataset.patent_count} patents?`);
+  if (!ok) return;
+  await api.deleteDataset(dataset.id);
+  onDone();
+}
+
 function formatDateTime(value) {
   return new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
@@ -11,6 +18,7 @@ function formatDateTime(value) {
 export default function Datasets() {
   const [version, setVersion] = useState(0);
   const [notice, setNotice] = useState(null);
+  const [actionError, setActionError] = useState("");
   const { data, error, loading } = useApi(() => api.datasets(), [version]);
 
   return (
@@ -39,6 +47,7 @@ export default function Datasets() {
       )}
 
       {error && <p className="error">{error.message}</p>}
+      {actionError && <p className="error">{actionError}</p>}
       {loading && !data && <p className="muted">Loading…</p>}
       {data && (
         <div className="table-wrap">
@@ -48,6 +57,7 @@ export default function Datasets() {
                 <th>Name</th>
                 <th>Patents</th>
                 <th>Imported</th>
+                <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
@@ -63,6 +73,18 @@ export default function Datasets() {
                   </td>
                   <td>{dataset.patent_count}</td>
                   <td className="nowrap">{formatDateTime(dataset.imported_at)}</td>
+                  <td className="actions">
+                    <button
+                      type="button"
+                      className="button button-danger"
+                      onClick={() => {
+                        setActionError("");
+                        remove(dataset, () => setVersion((v) => v + 1)).catch((err) => setActionError(err.message));
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

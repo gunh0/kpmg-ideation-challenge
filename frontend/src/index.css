@@ -442,3 +442,16 @@ th[aria-sort="descending"] .sort-arrow {
 .notice .icon-button {
   margin-left: auto;
 }
+
+.actions {
+  text-align: right;
+}
+
+.button-danger {
+  color: #b42318;
+}
+
+.button-danger:hover:not(:disabled) {
+  border-color: #b42318;
+  background: #fef3f2;
+}
