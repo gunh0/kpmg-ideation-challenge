@@ -1,0 +1,49 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+
+import { api } from "./api";
+
+const DatasetContext = createContext(null);
+const STORAGE_KEY = "selected-dataset";
+
+function stored() {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+// The dataset chosen in the header applies to the dashboard and the patent
+// list. "" means all datasets.
+export function DatasetProvider({ children }) {
+  const [datasets, setDatasets] = useState([]);
+  const [selected, setSelected] = useState(stored);
+
+  const reload = useCallback(() => api.datasets().then(setDatasets).catch(() => setDatasets([])), []);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  // Forget a selection whose dataset was deleted.
+  useEffect(() => {
+    if (selected && datasets.length && !datasets.some((dataset) => String(dataset.id) === selected)) {
+      setSelected("");
+    }
+  }, [datasets, selected]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, selected);
+    } catch {
+      // storage may be unavailable (private mode); the selection just won't persist
+    }
+  }, [selected]);
+
+  const value = useMemo(() => ({ datasets, selected, setSelected, reload }), [datasets, selected, reload]);
+  return <DatasetContext.Provider value={value}>{children}</DatasetContext.Provider>;
+}
+
+export function useDatasets() {
+  return useContext(DatasetContext);
+}

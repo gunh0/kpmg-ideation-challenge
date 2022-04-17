@@ -68,6 +68,8 @@ a {
 .nav {
   display: flex;
   gap: 4px;
+  margin-left: auto;
+  margin-right: 16px;
 }
 
 .nav-link {
@@ -454,4 +456,15 @@ th[aria-sort="descending"] .sort-arrow {
 .button-danger:hover:not(:disabled) {
   border-color: #b42318;
   background: #fef3f2;
+}
+
+.picker {
+  max-width: 240px;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+}
+
+.picker option {
+  color: var(--text);
 }

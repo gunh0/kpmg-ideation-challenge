@@ -1,5 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 
+import DatasetPicker from "./DatasetPicker";
+
 const links = [
   { to: "/", label: "Dashboard", end: true },
   { to: "/patents", label: "Patents" },
@@ -22,6 +24,7 @@ export default function Layout() {
               </NavLink>
             ))}
           </nav>
+          <DatasetPicker />
         </div>
       </header>
       <main className="content">

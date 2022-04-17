@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { api } from "../api";
+import { useDatasets } from "../DatasetContext";
 import UploadDataset from "../components/UploadDataset";
 import useApi from "../hooks/useApi";
 
@@ -17,9 +18,14 @@ function formatDateTime(value) {
 
 export default function Datasets() {
   const [version, setVersion] = useState(0);
+  const { reload } = useDatasets();
   const [notice, setNotice] = useState(null);
   const [actionError, setActionError] = useState("");
   const { data, error, loading } = useApi(() => api.datasets(), [version]);
+  const changed = () => {
+    setVersion((v) => v + 1);
+    reload();
+  };
 
   return (
     <section>
@@ -32,7 +38,7 @@ export default function Datasets() {
       <UploadDataset
         onUploaded={(dataset) => {
           setNotice(dataset);
-          setVersion((v) => v + 1);
+          changed();
         }}
       />
       {notice && (
@@ -79,7 +85,7 @@ export default function Datasets() {
                       className="button button-danger"
                       onClick={() => {
                         setActionError("");
-                        remove(dataset, () => setVersion((v) => v + 1)).catch((err) => setActionError(err.message));
+                        remove(dataset, changed).catch((err) => setActionError(err.message));
                       }}
                     >
                       Delete

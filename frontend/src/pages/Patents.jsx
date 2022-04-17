@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { api } from "../api";
+import { useDatasets } from "../DatasetContext";
 import AssigneeFilter from "../components/AssigneeFilter";
 import Pagination from "../components/Pagination";
 import PatentDetail from "../components/PatentDetail";
@@ -34,6 +35,7 @@ function useDebouncedParam(value, onChange) {
 
 export default function Patents() {
   const [params, update] = useQueryParams(DEFAULTS);
+  const { selected: dataset } = useDatasets();
   const page = Number(params.page) || 1;
   const [search, setSearch] = useDebouncedParam(params.search, (value) => update({ search: value.trim() }));
   const [yearFrom, setYearFrom] = useDebouncedParam(params.year_from, (value) => update({ year_from: value }));
@@ -41,8 +43,8 @@ export default function Patents() {
 
   const [selected, setSelected] = useState(null);
   const { data, error, loading } = useApi(
-    () => api.patents({ ...params, page, page_size: PAGE_SIZE }),
-    [params]
+    () => api.patents({ ...params, dataset, page, page_size: PAGE_SIZE }),
+    [params, dataset]
   );
 
   return (
@@ -59,7 +61,7 @@ export default function Patents() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
-        <AssigneeFilter value={params.assignee} onChange={(value) => update({ assignee: value })} />
+        <AssigneeFilter value={params.assignee} dataset={dataset} onChange={(value) => update({ assignee: value })} />
         <select
           className="select"
           aria-label="Grant status"
