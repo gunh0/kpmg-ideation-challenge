@@ -468,3 +468,41 @@ th[aria-sort="descending"] .sort-arrow {
 .picker option {
   color: var(--text);
 }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.card {
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.card-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.card-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.card-note {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.card-value-text {
+  font-size: 1.05rem;
+  line-height: 1.35;
+  padding: 6px 0 2px;
+}
