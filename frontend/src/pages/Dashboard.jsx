@@ -1,4 +1,5 @@
 import { api } from "../api";
+import YearChart from "../components/YearChart";
 import { useDatasets } from "../DatasetContext";
 import useApi from "../hooks/useApi";
 
@@ -38,6 +39,12 @@ export default function Dashboard() {
             <div className="card-value card-value-text">{data.top_assignees[0]?.name || "—"}</div>
             {data.top_assignees[0] && <div className="card-note">{data.top_assignees[0].count} patents</div>}
           </div>
+        </div>
+      )}
+      {data && (
+        <div className="panel">
+          <h2 className="panel-title">Patents per year</h2>
+          <YearChart data={data.by_year} />
         </div>
       )}
     </section>
