@@ -581,3 +581,54 @@ th[aria-sort="descending"] .sort-arrow {
   font-size: 0.85rem;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.grid-2 .panel {
+  margin-bottom: 0;
+}
+
+.ranking {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranking li {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.2fr) 1fr 36px;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 0.9rem;
+}
+
+.ranking-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranking-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #eef1f5;
+}
+
+.ranking-bar span {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  border-radius: 999px;
+  background: #2a78d6;
+}
+
+.ranking-count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
