@@ -54,6 +54,10 @@ export default function Dashboard() {
             <h2 className="panel-title">Top assignees</h2>
             <Ranking rows={data.top_assignees} emptyText="No assignees in this selection." />
           </div>
+          <div className="panel">
+            <h2 className="panel-title">Top inventors</h2>
+            <Ranking rows={data.top_inventors} emptyText="No inventors in this selection." />
+          </div>
         </div>
       )}
     </section>
