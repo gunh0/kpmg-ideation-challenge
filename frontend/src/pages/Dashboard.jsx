@@ -52,11 +52,17 @@ export default function Dashboard() {
         <div className="grid-2">
           <div className="panel">
             <h2 className="panel-title">Top assignees</h2>
-            <Ranking rows={data.top_assignees} emptyText="No assignees in this selection." />
+            <Ranking
+              rows={data.top_assignees}
+              linkTo={(row) => `/patents?assignee=${encodeURIComponent(row.name)}`}
+              emptyText="No assignees in this selection." />
           </div>
           <div className="panel">
             <h2 className="panel-title">Top inventors</h2>
-            <Ranking rows={data.top_inventors} emptyText="No inventors in this selection." />
+            <Ranking
+              rows={data.top_inventors}
+              linkTo={(row) => `/patents?search=${encodeURIComponent(row.name)}`}
+              emptyText="No inventors in this selection." />
           </div>
         </div>
       )}
