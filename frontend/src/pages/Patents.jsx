@@ -101,9 +101,16 @@ export default function Patents() {
       {loading && !data && <p className="muted">Loading…</p>}
       {data && (
         <>
-          <p className="muted">
-            {data.count} patents{params.search && <> matching “{params.search}”</>}
-          </p>
+          <div className="result-bar">
+            <p className="muted">
+              {data.count} patents{params.search && <> matching “{params.search}”</>}
+            </p>
+            {data.count > 0 && (
+              <a className="button" href={api.exportUrl({ ...params, page: undefined, dataset })} download>
+                Download CSV
+              </a>
+            )}
+          </div>
           <PatentTable
             patents={data.results}
             ordering={params.ordering}

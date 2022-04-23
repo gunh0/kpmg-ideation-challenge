@@ -632,3 +632,21 @@ th[aria-sort="descending"] .sort-arrow {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
+
+.result-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.result-bar p {
+  margin: 0;
+}
+
+a.button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
