@@ -650,3 +650,29 @@ a.button {
   align-items: center;
   text-decoration: none;
 }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 56px 24px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: center;
+}
+
+.empty h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.empty p {
+  max-width: 440px;
+  margin: 0 0 12px;
+}
+
+.empty-mark {
+  font-size: 2rem;
+}

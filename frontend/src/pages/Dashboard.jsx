@@ -2,6 +2,7 @@ import { api } from "../api";
 import Ranking from "../components/Ranking";
 import YearChart from "../components/YearChart";
 import { useDatasets } from "../DatasetContext";
+import EmptyState from "../components/EmptyState";
 import useApi from "../hooks/useApi";
 
 function percent(part, whole) {
@@ -9,9 +10,18 @@ function percent(part, whole) {
 }
 
 export default function Dashboard() {
-  const { selected: dataset, datasets } = useDatasets();
+  const { selected: dataset, datasets, loaded } = useDatasets();
   const { data, error, loading } = useApi(() => api.stats({ dataset }), [dataset]);
   const name = datasets.find((item) => String(item.id) === dataset)?.name;
+
+  if (loaded && datasets.length === 0) {
+    return (
+      <section>
+        <h1 className="page-title">Dashboard</h1>
+        <EmptyState />
+      </section>
+    );
+  }
 
   return (
     <section>

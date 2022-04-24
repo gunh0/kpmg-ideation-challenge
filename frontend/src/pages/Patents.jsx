@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { api } from "../api";
 import { useDatasets } from "../DatasetContext";
+import EmptyState from "../components/EmptyState";
 import AssigneeFilter from "../components/AssigneeFilter";
 import Pagination from "../components/Pagination";
 import PatentDetail from "../components/PatentDetail";
@@ -35,7 +36,7 @@ function useDebouncedParam(value, onChange) {
 
 export default function Patents() {
   const [params, update] = useQueryParams(DEFAULTS);
-  const { selected: dataset } = useDatasets();
+  const { selected: dataset, datasets, loaded } = useDatasets();
   const page = Number(params.page) || 1;
   const [search, setSearch] = useDebouncedParam(params.search, (value) => update({ search: value.trim() }));
   const [yearFrom, setYearFrom] = useDebouncedParam(params.year_from, (value) => update({ year_from: value }));
@@ -46,6 +47,15 @@ export default function Patents() {
     () => api.patents({ ...params, dataset, page, page_size: PAGE_SIZE }),
     [params, dataset]
   );
+
+  if (loaded && datasets.length === 0) {
+    return (
+      <section>
+        <h1 className="page-title">Patents</h1>
+        <EmptyState />
+      </section>
+    );
+  }
 
   return (
     <section>

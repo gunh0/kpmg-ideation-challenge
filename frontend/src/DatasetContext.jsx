@@ -17,9 +17,18 @@ function stored() {
 // list. "" means all datasets.
 export function DatasetProvider({ children }) {
   const [datasets, setDatasets] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const [selected, setSelected] = useState(stored);
 
-  const reload = useCallback(() => api.datasets().then(setDatasets).catch(() => setDatasets([])), []);
+  const reload = useCallback(
+    () =>
+      api
+        .datasets()
+        .then(setDatasets)
+        .catch(() => setDatasets([]))
+        .finally(() => setLoaded(true)),
+    []
+  );
 
   useEffect(() => {
     reload();
@@ -40,7 +49,10 @@ export function DatasetProvider({ children }) {
     }
   }, [selected]);
 
-  const value = useMemo(() => ({ datasets, selected, setSelected, reload }), [datasets, selected, reload]);
+  const value = useMemo(
+    () => ({ datasets, loaded, selected, setSelected, reload }),
+    [datasets, loaded, selected, reload]
+  );
   return <DatasetContext.Provider value={value}>{children}</DatasetContext.Provider>;
 }
 
