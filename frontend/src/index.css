@@ -676,3 +676,16 @@ a.button {
 .empty-mark {
   font-size: 2rem;
 }
+
+.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border: 1px solid #f5c2c0;
+  border-radius: var(--radius);
+  background: #fef3f2;
+  color: #b42318;
+}

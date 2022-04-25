@@ -7,6 +7,7 @@ import AssigneeFilter from "../components/AssigneeFilter";
 import Pagination from "../components/Pagination";
 import PatentDetail from "../components/PatentDetail";
 import PatentTable from "../components/PatentTable";
+import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
 import useDebounce from "../hooks/useDebounce";
 import useQueryParams from "../hooks/useQueryParams";
@@ -43,7 +44,7 @@ export default function Patents() {
   const [yearTo, setYearTo] = useDebouncedParam(params.year_to, (value) => update({ year_to: value }));
 
   const [selected, setSelected] = useState(null);
-  const { data, error, loading } = useApi(
+  const { data, error, loading, retry } = useApi(
     () => api.patents({ ...params, dataset, page, page_size: PAGE_SIZE }),
     [params, dataset]
   );
@@ -107,7 +108,7 @@ export default function Patents() {
         </div>
       </div>
 
-      {error && <p className="error">{error.message}</p>}
+      <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
       {data && (
         <>

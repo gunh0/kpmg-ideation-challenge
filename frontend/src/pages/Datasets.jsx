@@ -3,6 +3,7 @@ import { useState } from "react";
 import { api } from "../api";
 import { useDatasets } from "../DatasetContext";
 import UploadDataset from "../components/UploadDataset";
+import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
 
 async function remove(dataset, onDone) {
@@ -21,7 +22,7 @@ export default function Datasets() {
   const { reload } = useDatasets();
   const [notice, setNotice] = useState(null);
   const [actionError, setActionError] = useState("");
-  const { data, error, loading } = useApi(() => api.datasets(), [version]);
+  const { data, error, loading, retry } = useApi(() => api.datasets(), [version]);
   const changed = () => {
     setVersion((v) => v + 1);
     reload();
@@ -52,7 +53,7 @@ export default function Datasets() {
         </div>
       )}
 
-      {error && <p className="error">{error.message}</p>}
+      <ErrorMessage error={error} onRetry={retry} />
       {actionError && <p className="error">{actionError}</p>}
       {loading && !data && <p className="muted">Loading…</p>}
       {data && (

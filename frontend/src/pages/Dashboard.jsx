@@ -3,6 +3,7 @@ import Ranking from "../components/Ranking";
 import YearChart from "../components/YearChart";
 import { useDatasets } from "../DatasetContext";
 import EmptyState from "../components/EmptyState";
+import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
 
 function percent(part, whole) {
@@ -11,7 +12,7 @@ function percent(part, whole) {
 
 export default function Dashboard() {
   const { selected: dataset, datasets, loaded } = useDatasets();
-  const { data, error, loading } = useApi(() => api.stats({ dataset }), [dataset]);
+  const { data, error, loading, retry } = useApi(() => api.stats({ dataset }), [dataset]);
   const name = datasets.find((item) => String(item.id) === dataset)?.name;
 
   if (loaded && datasets.length === 0) {
@@ -28,7 +29,7 @@ export default function Dashboard() {
       <h1 className="page-title">Dashboard</h1>
       <p className="page-lead">{name ? `Dataset “${name}”` : "All datasets"}</p>
 
-      {error && <p className="error">{error.message}</p>}
+      <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
       {data && (
         <div className="cards">
