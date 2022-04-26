@@ -689,3 +689,51 @@ a.button {
   background: #fef3f2;
   color: #b42318;
 }
+
+@media (max-width: 760px) {
+  .topbar-inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    gap: 8px;
+  }
+
+  .nav {
+    order: 3;
+    width: 100%;
+    margin: 0;
+    overflow-x: auto;
+  }
+
+  .picker {
+    max-width: 50%;
+  }
+
+  .topbar-inner,
+  .content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .search,
+  .assignee,
+  .toolbar .select {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .upload-actions {
+    flex-direction: column;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+  }
+
+  .tooltip {
+    position: static;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+}
