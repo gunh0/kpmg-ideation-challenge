@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-// Categorical slots 1-3 of the validated palette: filed, published, granted.
+// Categorical slots 1-3 of the validated palette (light/dark steps in index.css).
 export const SERIES = [
-  { key: "filed", label: "Filed", color: "#2a78d6" },
-  { key: "published", label: "Published", color: "#eb6834" },
-  { key: "granted", label: "Granted", color: "#1baf7a" },
+  { key: "filed", label: "Filed", color: "var(--series-1)" },
+  { key: "published", label: "Published", color: "var(--series-2)" },
+  { key: "granted", label: "Granted", color: "var(--series-3)" },
 ];
 
 // Close to the rendered width, so text keeps its size when the SVG scales.
@@ -65,12 +65,12 @@ export default function YearChart({ data }) {
           <g key={series.key}>
             <polyline
               fill="none"
-              stroke={series.color}
+              style={{ stroke: series.color }}
               strokeWidth="2"
               points={data.map((point, i) => `${x(i)},${y(point[series.key])}`).join(" ")}
             />
             {data.map((point, i) => (
-              <circle key={point.year} cx={x(i)} cy={y(point[series.key])} r={hover === i ? 4.5 : 3} fill={series.color} />
+              <circle key={point.year} cx={x(i)} cy={y(point[series.key])} r={hover === i ? 4.5 : 3} style={{ fill: series.color }} />
             ))}
           </g>
         ))}
