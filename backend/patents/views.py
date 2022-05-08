@@ -1,7 +1,8 @@
+from django.conf import settings
 from django.db.models import Count
 from django.http import StreamingHttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
@@ -17,6 +18,13 @@ from .serializers import DatasetSerializer, DatasetUploadSerializer, PatentSeria
 from .stats import summary
 
 
+class ReadOnlyInstance(permissions.BasePermission):
+    message = "This instance is read-only: uploads and deletions are disabled."
+
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS or not settings.PATENTS_READ_ONLY
+
+
 class DatasetViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -28,6 +36,7 @@ class DatasetViewSet(
     queryset = Dataset.objects.annotate(patent_count=Count("patents"))
     serializer_class = DatasetSerializer
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [ReadOnlyInstance]
 
     def create(self, request):
         upload = DatasetUploadSerializer(data=request.data)
@@ -97,3 +106,10 @@ class AssigneeView(APIView):
             queryset = queryset.filter(assignee__icontains=search)
         rows = queryset.values("assignee").annotate(count=Count("id")).order_by("-count", "assignee")[:20]
         return Response([{"name": row["assignee"], "count": row["count"]} for row in rows])
+
+
+class ConfigView(APIView):
+    """Instance settings the dashboard adapts to."""
+
+    def get(self, request):
+        return Response({"read_only": settings.PATENTS_READ_ONLY})
