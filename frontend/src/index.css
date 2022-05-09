@@ -786,3 +786,12 @@ a.button {
     margin-top: 6px;
   }
 }
+
+.read-only-note {
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+}

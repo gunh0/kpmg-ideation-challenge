@@ -52,4 +52,5 @@ export const api = {
   stats: (params) => request(`stats/${toQuery(params)}`),
   assignees: (params) => request(`assignees/${toQuery(params)}`),
   exportUrl: (params) => `/api/patents/export/${toQuery(params)}`,
+  config: () => request("config/"),
 };

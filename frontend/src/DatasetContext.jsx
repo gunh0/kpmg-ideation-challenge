@@ -19,6 +19,14 @@ export function DatasetProvider({ children }) {
   const [datasets, setDatasets] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [selected, setSelected] = useState(stored);
+  const [readOnly, setReadOnly] = useState(false);
+
+  useEffect(() => {
+    api
+      .config()
+      .then((config) => setReadOnly(Boolean(config.read_only)))
+      .catch(() => setReadOnly(false));
+  }, []);
 
   const reload = useCallback(
     () =>
@@ -50,8 +58,8 @@ export function DatasetProvider({ children }) {
   }, [selected]);
 
   const value = useMemo(
-    () => ({ datasets, loaded, selected, setSelected, reload }),
-    [datasets, loaded, selected, reload]
+    () => ({ datasets, loaded, readOnly, selected, setSelected, reload }),
+    [datasets, loaded, readOnly, selected, reload]
   );
   return <DatasetContext.Provider value={value}>{children}</DatasetContext.Provider>;
 }

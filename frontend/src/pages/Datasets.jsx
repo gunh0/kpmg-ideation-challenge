@@ -19,7 +19,7 @@ function formatDateTime(value) {
 
 export default function Datasets() {
   const [version, setVersion] = useState(0);
-  const { reload } = useDatasets();
+  const { reload, readOnly } = useDatasets();
   const [notice, setNotice] = useState(null);
   const [actionError, setActionError] = useState("");
   const { data, error, loading, retry } = useApi(() => api.datasets(), [version]);
@@ -36,12 +36,16 @@ export default function Datasets() {
         search and choose <em>Download (CSV)</em>, then import the file here.
       </p>
 
-      <UploadDataset
-        onUploaded={(dataset) => {
-          setNotice(dataset);
-          changed();
-        }}
-      />
+      {readOnly ? (
+        <p className="read-only-note">This is a read-only demo: importing and deleting datasets is disabled.</p>
+      ) : (
+        <UploadDataset
+          onUploaded={(dataset) => {
+            setNotice(dataset);
+            changed();
+          }}
+        />
+      )}
       {notice && (
         <div className="notice" role="status">
           Imported <strong>{notice.import.imported}</strong> patents into “{notice.name}”
@@ -64,7 +68,7 @@ export default function Datasets() {
                 <th>Name</th>
                 <th>Patents</th>
                 <th>Imported</th>
-                <th aria-label="Actions" />
+                {!readOnly && <th aria-label="Actions" />}
               </tr>
             </thead>
             <tbody>
@@ -80,18 +84,20 @@ export default function Datasets() {
                   </td>
                   <td>{dataset.patent_count}</td>
                   <td className="nowrap">{formatDateTime(dataset.imported_at)}</td>
-                  <td className="actions">
-                    <button
-                      type="button"
-                      className="button button-danger"
-                      onClick={() => {
-                        setActionError("");
-                        remove(dataset, changed).catch((err) => setActionError(err.message));
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {!readOnly && (
+                    <td className="actions">
+                      <button
+                        type="button"
+                        className="button button-danger"
+                        onClick={() => {
+                          setActionError("");
+                          remove(dataset, changed).catch((err) => setActionError(err.message));
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
