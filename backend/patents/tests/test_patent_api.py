@@ -61,3 +61,8 @@ class PatentApiTests(APITestCase):
 
     def test_api_is_read_only(self):
         self.assertEqual(self.client.post("/api/patents/", {"title": "x"}).status_code, 405)
+
+    def test_filter_by_inventor_matches_whole_names(self):
+        self.assertEqual(self.ids("inventor=john roe&ordering=patent_id"), ["ZZ-0000001-B2", "ZZ-0000003-B1"])
+        self.assertEqual(self.ids("inventor=Roe"), [])
+        self.assertEqual(self.ids("inventor=Mary Major"), ["ZZ-0000002-A1"])

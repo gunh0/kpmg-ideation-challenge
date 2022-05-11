@@ -58,6 +58,7 @@ Each upload becomes a **dataset** named after the search query. A patent listed 
 | `dataset` | dataset id |
 | `search` | id, title, assignee or inventor contains |
 | `assignee` | exact name, case-insensitive |
+| `inventor` | one of the inventors, whole name, case-insensitive |
 | `granted` | `true` / `false` |
 | `year_from`, `year_to` | publication year |
 | `ordering` | `publication_date`, `priority_date`, `filing_date`, `grant_date`, `patent_id`, `title`, `-` for descending; patents without the date come last |

@@ -7,13 +7,28 @@ from .models import Patent
 
 class PatentFilter(django_filters.FilterSet):
     assignee = django_filters.CharFilter(field_name="assignee", lookup_expr="iexact")
+    inventor = django_filters.CharFilter(method="filter_inventor")
     granted = django_filters.BooleanFilter(field_name="grant_date", lookup_expr="isnull", exclude=True)
     year_from = django_filters.NumberFilter(field_name="publication_date", lookup_expr="year__gte")
     year_to = django_filters.NumberFilter(field_name="publication_date", lookup_expr="year__lte")
 
     class Meta:
         model = Patent
-        fields = ["dataset", "assignee", "granted", "year_from", "year_to"]
+        fields = ["dataset", "assignee", "inventor", "granted", "year_from", "year_to"]
+
+    def filter_inventor(self, queryset, name, value):
+        """Whole names within the comma-separated inventor list, case-insensitive."""
+        value = value.strip()
+        if not value:
+            return queryset
+        target = value.casefold()
+        candidates = queryset.filter(inventors__icontains=value).values_list("pk", "inventors")
+        ids = [
+            pk
+            for pk, inventors in candidates
+            if target in (name.strip().casefold() for name in inventors.split(","))
+        ]
+        return queryset.filter(pk__in=ids)
 
 
 class NullsLastOrderingFilter(OrderingFilter):
