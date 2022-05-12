@@ -72,7 +72,7 @@ export default function Dashboard() {
             <h2 className="panel-title">Top inventors</h2>
             <Ranking
               rows={data.top_inventors}
-              linkTo={(row) => `/patents?search=${encodeURIComponent(row.name)}`}
+              linkTo={(row) => `/patents?inventor=${encodeURIComponent(row.name)}`}
               emptyText="No inventors in this selection." />
           </div>
         </div>

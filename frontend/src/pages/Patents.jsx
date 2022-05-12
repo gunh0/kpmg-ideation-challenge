@@ -16,6 +16,7 @@ const PAGE_SIZE = 25;
 const DEFAULTS = {
   search: "",
   assignee: "",
+  inventor: "",
   granted: "",
   year_from: "",
   year_to: "",
@@ -107,6 +108,17 @@ export default function Patents() {
           />
         </div>
       </div>
+
+      {params.inventor && (
+        <p className="chips">
+          <span className="chip">
+            Inventor: {params.inventor}
+            <button type="button" aria-label="Remove inventor filter" onClick={() => update({ inventor: "" })}>
+              ×
+            </button>
+          </span>
+        </p>
+      )}
 
       <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
