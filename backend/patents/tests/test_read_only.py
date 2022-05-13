@@ -24,10 +24,12 @@ class ReadOnlyTests(APITestCase):
 
         created = self.client.post("/api/datasets/", {"file": upload}, format="multipart")
         deleted = self.client.delete(f"/api/datasets/{self.dataset.pk}/")
+        renamed = self.client.patch(f"/api/datasets/{self.dataset.pk}/", {"name": "x"}, format="json")
 
         self.assertEqual(created.status_code, 403)
         self.assertIn("read-only", created.json()["detail"])
         self.assertEqual(deleted.status_code, 403)
+        self.assertEqual(renamed.status_code, 403)
 
     @override_settings(PATENTS_READ_ONLY=True)
     def test_reading_still_works(self):

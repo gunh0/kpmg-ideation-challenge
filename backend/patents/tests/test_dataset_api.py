@@ -65,7 +65,28 @@ class DatasetApiTests(APITestCase):
         self.assertEqual(self.client.delete(f"/api/datasets/{dataset.pk}/").status_code, 204)
         self.assertFalse(Patent.objects.exists())
 
-    def test_datasets_cannot_be_edited(self):
+    def test_rename(self):
         dataset = import_export(FIXTURE.read_text()).dataset
 
-        self.assertEqual(self.client.patch(f"/api/datasets/{dataset.pk}/", {"name": "x"}).status_code, 405)
+        response = self.client.patch(f"/api/datasets/{dataset.pk}/", {"name": "  Drones 2020  "}, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["name"], "Drones 2020")
+        dataset.refresh_from_db()
+        self.assertEqual(dataset.name, "Drones 2020")
+
+    def test_rename_rejects_empty_names_and_ignores_other_fields(self):
+        dataset = import_export(FIXTURE.read_text()).dataset
+
+        empty = self.client.patch(f"/api/datasets/{dataset.pk}/", {"name": "  "}, format="json")
+        other = self.client.patch(f"/api/datasets/{dataset.pk}/", {"search_url": "https://x.example"}, format="json")
+
+        self.assertEqual(empty.status_code, 400)
+        dataset.refresh_from_db()
+        self.assertTrue(dataset.search_url.startswith("https://patents.google.com/"))
+        self.assertEqual(other.status_code, 200)
+
+    def test_full_updates_are_not_allowed(self):
+        dataset = import_export(FIXTURE.read_text()).dataset
+
+        self.assertEqual(self.client.put(f"/api/datasets/{dataset.pk}/", {"name": "x"}, format="json").status_code, 405)

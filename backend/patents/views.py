@@ -4,7 +4,7 @@ from django.http import StreamingHttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -28,15 +28,18 @@ class ReadOnlyInstance(permissions.BasePermission):
 class DatasetViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Imported Google Patents exports. POST a CSV file to import a new one."""
+    """Imported Google Patents exports. POST a CSV file to import a new one,
+    PATCH {"name": ...} to rename one."""
 
     queryset = Dataset.objects.annotate(patent_count=Count("patents"))
     serializer_class = DatasetSerializer
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
     permission_classes = [ReadOnlyInstance]
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     def create(self, request):
         upload = DatasetUploadSerializer(data=request.data)

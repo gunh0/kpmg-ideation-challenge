@@ -44,6 +44,7 @@ Each upload becomes a **dataset** named after the search query. A patent listed 
 | `GET` | `/api/datasets/` | datasets with `patent_count` |
 | `POST` | `/api/datasets/` | multipart `file` (+ optional `name`): import an export, returns the dataset and an `import` summary |
 | `GET`, `DELETE` | `/api/datasets/{id}/` | |
+| `PATCH` | `/api/datasets/{id}/` | `{"name": "..."}` renames a dataset |
 | `GET` | `/api/patents/` | paginated (`page`, `page_size` ≤ 200) |
 | `GET` | `/api/patents/{id}/` | |
 | `GET` | `/api/patents/export/` | CSV in the Google Patents layout; can be imported again |

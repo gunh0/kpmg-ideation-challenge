@@ -34,6 +34,12 @@ class DatasetSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "search_url", "imported_at", "patent_count")
         read_only_fields = ("search_url", "imported_at")
 
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("The name cannot be empty.")
+        return value
+
 
 class DatasetUploadSerializer(serializers.Serializer):
     MAX_SIZE = 10 * 1024 * 1024
