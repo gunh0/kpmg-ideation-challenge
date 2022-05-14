@@ -47,6 +47,12 @@ export const api = {
     return request("datasets/", { method: "POST", body: form });
   },
   deleteDataset: (id) => request(`datasets/${id}/`, { method: "DELETE" }),
+  renameDataset: (id, name) =>
+    request(`datasets/${id}/`, {
+      method: "PATCH",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    }),
   patents: (params) => request(`patents/${toQuery(params)}`),
   patent: (id) => request(`patents/${id}/`),
   stats: (params) => request(`stats/${toQuery(params)}`),

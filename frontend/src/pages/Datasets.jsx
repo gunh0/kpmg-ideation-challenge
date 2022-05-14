@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { api } from "../api";
 import { useDatasets } from "../DatasetContext";
+import DatasetName from "../components/DatasetName";
 import UploadDataset from "../components/UploadDataset";
 import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
@@ -75,7 +76,7 @@ export default function Datasets() {
               {data.map((dataset) => (
                 <tr key={dataset.id}>
                   <td>
-                    <strong>{dataset.name}</strong>
+                    <DatasetName dataset={dataset} editable={!readOnly} onRenamed={changed} />
                     {dataset.search_url && (
                       <div className="muted small ellipsis" title={dataset.search_url}>
                         {dataset.search_url}
