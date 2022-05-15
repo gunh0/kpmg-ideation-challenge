@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { api } from "../api";
 import { useDatasets } from "../DatasetContext";
@@ -45,6 +45,20 @@ export default function Patents() {
   const [yearTo, setYearTo] = useDebouncedParam(params.year_to, (value) => update({ year_to: value }));
 
   const [selected, setSelected] = useState(null);
+  const searchInput = useRef(null);
+
+  // "/" focuses the search, as on GitHub and Google Patents.
+  useEffect(() => {
+    function onKey(event) {
+      const typing = ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName);
+      if (event.key === "/" && !typing) {
+        event.preventDefault();
+        searchInput.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const { data, error, loading, retry } = useApi(
     () => api.patents({ ...params, dataset, page, page_size: PAGE_SIZE }),
     [params, dataset]
@@ -66,9 +80,10 @@ export default function Patents() {
 
       <div className="toolbar">
         <input
+          ref={searchInput}
           type="search"
           className="input search"
-          placeholder="Search id, title, assignee or inventor"
+          placeholder="Search id, title, assignee or inventor  ( / )"
           aria-label="Search patents"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
