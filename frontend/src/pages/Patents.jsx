@@ -11,6 +11,7 @@ import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
 import useDebounce from "../hooks/useDebounce";
 import useQueryParams from "../hooks/useQueryParams";
+import useTitle from "../hooks/useTitle";
 
 const PAGE_SIZE = 25;
 const DEFAULTS = {
@@ -37,6 +38,7 @@ function useDebouncedParam(value, onChange) {
 }
 
 export default function Patents() {
+  useTitle("Patents");
   const [params, update] = useQueryParams(DEFAULTS);
   const { selected: dataset, datasets, loaded } = useDatasets();
   const page = Number(params.page) || 1;

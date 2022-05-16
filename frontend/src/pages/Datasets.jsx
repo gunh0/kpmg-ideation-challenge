@@ -6,6 +6,7 @@ import DatasetName from "../components/DatasetName";
 import UploadDataset from "../components/UploadDataset";
 import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
+import useTitle from "../hooks/useTitle";
 
 async function remove(dataset, onDone) {
   const ok = window.confirm(`Delete “${dataset.name}” and its ${dataset.patent_count} patents?`);
@@ -19,6 +20,7 @@ function formatDateTime(value) {
 }
 
 export default function Datasets() {
+  useTitle("Datasets");
   const [version, setVersion] = useState(0);
   const { reload, readOnly } = useDatasets();
   const [notice, setNotice] = useState(null);

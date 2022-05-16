@@ -5,12 +5,14 @@ import { useDatasets } from "../DatasetContext";
 import EmptyState from "../components/EmptyState";
 import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
+import useTitle from "../hooks/useTitle";
 
 function percent(part, whole) {
   return whole ? `${Math.round((100 * part) / whole)}%` : "—";
 }
 
 export default function Dashboard() {
+  useTitle("Dashboard");
   const { selected: dataset, datasets, loaded } = useDatasets();
   const { data, error, loading, retry } = useApi(() => api.stats({ dataset }), [dataset]);
   const name = datasets.find((item) => String(item.id) === dataset)?.name;
