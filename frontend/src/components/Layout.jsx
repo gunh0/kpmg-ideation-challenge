@@ -11,6 +11,9 @@ const links = [
 export default function Layout() {
   return (
     <div className="shell">
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
       <header className="topbar">
         <div className="topbar-inner">
           <NavLink to="/" className="brand">
@@ -27,7 +30,7 @@ export default function Layout() {
           <DatasetPicker />
         </div>
       </header>
-      <main className="content">
+      <main id="main" className="content" tabIndex={-1}>
         <Outlet />
       </main>
     </div>
