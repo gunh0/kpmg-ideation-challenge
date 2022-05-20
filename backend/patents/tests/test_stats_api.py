@@ -38,12 +38,13 @@ class StatsApiTests(APITestCase):
     def test_rankings(self):
         body = self.stats()
 
-        self.assertEqual(body["top_assignees"][0], {"name": "Example Robotics Inc.", "count": 2})
+        self.assertEqual(body["top_assignees"][0], {"name": "Example Robotics Inc.", "count": 2, "granted": 2})
+        self.assertEqual(body["top_assignees"][1], {"name": "Example Logistics Corp.", "count": 1, "granted": 0})
         self.assertEqual(body["top_inventors"][0], {"name": "John Roe", "count": 3})
 
     def test_stats_follow_the_patent_filters_and_search(self):
         self.assertEqual(self.stats("granted=false")["total"], 2)
-        self.assertEqual(self.stats("search=antenna")["top_assignees"], [{"name": "Other Corp.", "count": 1}])
+        self.assertEqual(self.stats("search=antenna")["top_assignees"], [{"name": "Other Corp.", "count": 1, "granted": 0}])
         self.assertEqual(self.stats("year_from=2020")["total"], 2)
 
     def test_top_limits_the_rankings(self):

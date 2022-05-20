@@ -1,7 +1,7 @@
 """Aggregates for the dashboard, computed over an already filtered queryset."""
 from collections import Counter, defaultdict
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import ExtractYear
 
 YEAR_FIELDS = {"filed": "filing_date", "published": "publication_date", "granted": "grant_date"}
@@ -27,10 +27,10 @@ def top_assignees(queryset, limit):
     rows = (
         queryset.exclude(assignee="")
         .values("assignee")
-        .annotate(count=Count("id"))
+        .annotate(count=Count("id"), granted=Count("id", filter=Q(grant_date__isnull=False)))
         .order_by("-count", "assignee")[:limit]
     )
-    return [{"name": row["assignee"], "count": row["count"]} for row in rows]
+    return [{"name": row["assignee"], "count": row["count"], "granted": row["granted"]} for row in rows]
 
 
 def top_inventors(queryset, limit):

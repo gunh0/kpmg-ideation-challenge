@@ -48,7 +48,7 @@ Each upload becomes a **dataset** named after the search query. A patent listed 
 | `GET` | `/api/patents/` | paginated (`page`, `page_size` ≤ 200) |
 | `GET` | `/api/patents/{id}/` | |
 | `GET` | `/api/patents/export/` | CSV in the Google Patents layout; can be imported again |
-| `GET` | `/api/stats/` | `total`, `granted`, `by_year` (filed / published / granted), `top_assignees`, `top_inventors` (`top` = 1–50) |
+| `GET` | `/api/stats/` | `total`, `granted`, `by_year` (filed / published / granted), `top_assignees` (with their `granted` count), `top_inventors` (`top` = 1–50) |
 | `GET` | `/api/assignees/` | assignee names and counts for suggestions (`dataset`, `search`) |
 | `GET` | `/api/health/` | `{"status": "ok"}` when the database answers |
 
