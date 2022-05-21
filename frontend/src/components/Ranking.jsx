@@ -22,7 +22,14 @@ export default function Ranking({ rows, linkTo, emptyText = "Nothing to rank." }
           <span className="ranking-bar">
             <span style={{ width: `${(100 * row.count) / max}%` }} />
           </span>
-          <span className="ranking-count">{row.count}</span>
+          <span className="ranking-count">
+            {row.count}
+            {row.granted !== undefined && (
+              <span className="ranking-rate" title={`${row.granted} of ${row.count} granted`}>
+                {Math.round((100 * row.granted) / row.count)}% granted
+              </span>
+            )}
+          </span>
         </li>
       ))}
     </ol>
