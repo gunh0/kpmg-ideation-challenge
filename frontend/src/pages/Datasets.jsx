@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import { api } from "../api";
 import { useDatasets } from "../DatasetContext";
@@ -22,7 +23,7 @@ function formatDateTime(value) {
 export default function Datasets() {
   useTitle("Datasets");
   const [version, setVersion] = useState(0);
-  const { reload, readOnly } = useDatasets();
+  const { reload, readOnly, setSelected } = useDatasets();
   const [notice, setNotice] = useState(null);
   const [actionError, setActionError] = useState("");
   const { data, error, loading, retry } = useApi(() => api.datasets(), [version]);
@@ -45,13 +46,18 @@ export default function Datasets() {
         <UploadDataset
           onUploaded={(dataset) => {
             setNotice(dataset);
-            changed();
+            setVersion((v) => v + 1);
+            // Select once the header knows the new dataset, or it would drop
+            // the selection as unknown.
+            reload().then(() => setSelected(String(dataset.id)));
           }}
         />
       )}
       {notice && (
         <div className="notice" role="status">
           Imported <strong>{notice.import.imported}</strong> patents into “{notice.name}”
+          {" · "}
+          <Link to="/">Open the dashboard</Link>
           {notice.import.duplicates > 0 && <> · {notice.import.duplicates} duplicate rows merged</>}
           {notice.import.skipped > 0 && <> · {notice.import.skipped} rows without id or title skipped</>}
           <button type="button" className="icon-button" aria-label="Dismiss" onClick={() => setNotice(null)}>
