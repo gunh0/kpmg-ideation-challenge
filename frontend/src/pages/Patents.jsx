@@ -156,6 +156,11 @@ export default function Patents() {
             ordering={params.ordering}
             onSort={(ordering) => update({ ordering })}
             onSelect={setSelected}
+            datasetNames={
+              !dataset && datasets.length > 1
+                ? Object.fromEntries(datasets.map((item) => [item.id, item.name]))
+                : undefined
+            }
           />
           <Pagination
             page={page}

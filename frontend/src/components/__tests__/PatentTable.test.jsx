@@ -31,6 +31,13 @@ describe("PatentTable", () => {
     expect(within(rows[1]).getByText("—")).toBeInTheDocument();
   });
 
+  it("names the dataset of each patent when asked to", () => {
+    render(<PatentTable patents={[{ ...patent, dataset: 7 }]} datasetNames={{ 7: "Drones" }} />);
+
+    expect(screen.getByRole("columnheader", { name: "Dataset" })).toBeInTheDocument();
+    expect(screen.getByText("Drones")).toBeInTheDocument();
+  });
+
   it("sorts through the column headers", () => {
     const onSort = vi.fn();
     render(<PatentTable patents={[patent]} ordering="-publication_date" onSort={onSort} />);
