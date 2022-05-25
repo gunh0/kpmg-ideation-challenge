@@ -1,6 +1,7 @@
 import django_filters
-from django.db.models import F
-from rest_framework.filters import OrderingFilter
+from django.db.models import F, Value
+from django.db.models.functions import Replace
+from rest_framework.filters import OrderingFilter, SearchFilter
 
 from .models import Patent
 
@@ -46,3 +47,19 @@ class NullsLastOrderingFilter(OrderingFilter):
             else:
                 expressions.append(F(field).asc(nulls_last=True))
         return queryset.order_by(*expressions)
+
+
+class PatentSearchFilter(SearchFilter):
+    """Search that also finds patent numbers written without dashes, as they
+    appear in Google Patents URLs (US10000000B2 for US-10000000-B2)."""
+
+    def filter_queryset(self, request, queryset, view):
+        matches = super().filter_queryset(request, queryset, view)
+        terms = self.get_search_terms(request)
+        if len(terms) != 1:
+            return matches
+        compact = terms[0].replace("-", "")
+        by_number = queryset.annotate(compact_id=Replace(F("patent_id"), Value("-"), Value(""))).filter(
+            compact_id__iexact=compact
+        )
+        return matches | queryset.filter(pk__in=by_number.values("pk"))

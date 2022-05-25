@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db.models import Count
 from django.http import StreamingHttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from .csv_import import CSVFormatError
 from .export import export_rows
-from .filters import NullsLastOrderingFilter, PatentFilter
+from .filters import NullsLastOrderingFilter, PatentFilter, PatentSearchFilter
 from .importer import import_export
 from .models import Dataset, Patent
 from .pagination import PatentPagination
@@ -59,7 +59,7 @@ class PatentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Patent.objects.select_related("dataset")
     serializer_class = PatentSerializer
     pagination_class = PatentPagination
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, NullsLastOrderingFilter]
+    filter_backends = [DjangoFilterBackend, PatentSearchFilter, NullsLastOrderingFilter]
     filterset_class = PatentFilter
     search_fields = ["patent_id", "title", "assignee", "inventors"]
     ordering_fields = ["publication_date", "priority_date", "filing_date", "grant_date", "patent_id", "title"]
@@ -78,7 +78,7 @@ class StatsView(APIView):
     """Dashboard aggregates. Accepts the same filters and search as /api/patents/,
     plus ?top=N (1-50, default 10) for the length of the ranking lists."""
 
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend, PatentSearchFilter]
     filterset_class = PatentFilter
     search_fields = PatentViewSet.search_fields
 

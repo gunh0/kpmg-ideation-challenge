@@ -66,3 +66,11 @@ class PatentApiTests(APITestCase):
         self.assertEqual(self.ids("inventor=john roe&ordering=patent_id"), ["ZZ-0000001-B2", "ZZ-0000003-B1"])
         self.assertEqual(self.ids("inventor=Roe"), [])
         self.assertEqual(self.ids("inventor=Mary Major"), ["ZZ-0000002-A1"])
+
+    def test_search_finds_numbers_written_without_dashes(self):
+        self.assertEqual(self.ids("search=ZZ0000001B2"), ["ZZ-0000001-B2"])
+        self.assertEqual(self.ids("search=zz0000003b1"), ["ZZ-0000003-B1"])
+        self.assertEqual(self.ids(f"search=ZZ0000001B2&dataset={self.other.pk}"), [])
+
+    def test_stats_use_the_same_search(self):
+        self.assertEqual(self.client.get("/api/stats/?search=ZZ0000002A1").json()["total"], 1)
