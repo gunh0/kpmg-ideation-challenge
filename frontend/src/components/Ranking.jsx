@@ -11,7 +11,7 @@ export default function Ranking({ rows, linkTo, emptyText = "Nothing to rank." }
       {rows.map((row) => (
         <li key={row.name}>
           {linkTo ? (
-            <Link className="ranking-name" title={`Show patents of ${row.name}`} to={linkTo(row)}>
+            <Link className="ranking-name" title={row.name} to={linkTo(row)}>
               {row.name}
             </Link>
           ) : (
