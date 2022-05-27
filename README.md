@@ -1,55 +1,74 @@
-# KPMG Ideation Challenge 2020
+# Patent Attorney Without Borders
 
-### PATENT ATTORNEY WITHOUT BORDERS
+Explore [Google Patents](https://patents.google.com) search results by assignee, inventor and year: import the CSV export of any search and get a searchable patent list and a dashboard of filings, grants and the most active players.
 
-**Team : Jackpop**
+> Originally built for the **KPMG Ideation Challenge 2020** by team **Jackpop** — leader [gunh0](https://github.com/gunh0), crew Ji-hun Lim, Seung-jae Lee and Min-soo Kim. The idea: a "borderless patent attorney" that helps inventors and companies see who already holds patents around their idea before they file. Rebuilt in 2022 as a maintainable web app (see [History](#history)).
 
-**Leader : [Gunho Park](https://github.com/gunh0)**
+## Features
 
-**Crew : Ji-hun Lim, Seung-jae Lee, Min-soo kim**
+- **Import** the CSV that Google Patents' *Download (CSV)* button produces — drag and drop in the browser, or `make import` on the command line. Each file becomes a dataset named after its search query.
+- **Patent list** with full-text search, filters for assignee (with suggestions), inventor, grant status and publication years, sortable columns and pagination. Filters live in the URL, so every view can be bookmarked or shared.
+- **Details panel** with inventors, priority / filing / publication / grant dates, the representative figure and a link to the patent on Google Patents.
+- **Dashboard**: filings, publications and grants per year, top assignees with their grant rate, top inventors — each ranking opens the matching patents.
+- **CSV export** of any filtered list, in the Google Patents layout so it can be imported again.
+- Dark mode, small screens and keyboard use (`/` jumps to the search).
+- **Read-only mode** for public demos (`PATENTS_READ_ONLY=1`).
 
-> Individuals and businesses with promising ideas should ensure they have valid patent registrations. To facilitate this process, we are working towards the development of a prototype service called "Patent Attorney Without Borders", inspired by the concept of a borderless board of directors. By utilizing relevant keywords and Google's patent search platform, this service aims to assist inventors and companies around the world in securing their patents. With "Patent Attorney Without Borders", we strive to provide a seamless, global patent registration experience for all.
+## Quick start
 
-<br/>
+```bash
+docker compose up -d --build     # or: make up
+open http://localhost:8080
+```
 
-### Tech Stack Utilized for Development
+Then go to **Datasets** and import a file:
 
-| stack                                                                                                                                 |                                                                                                                                                                                                                                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://user-images.githubusercontent.com/41619898/74603749-2a4da880-50fa-11ea-8a89-c8cb45765054.png" style="width:200px"/> | Selenium is a testing framework for web applications. <br>It supports several features for automated testing.                                                                                                                                                                                              |
-| <img src="https://user-images.githubusercontent.com/41619898/74603764-47827700-50fa-11ea-8f18-f607732853ce.png" style="width:200px"/> | Django is a high-level Python Web framework that encourages rapid development and clean, pragmatic design. Built by experienced developers, it takes care of much of the hassle of Web development, so you can focus on writing your app without needing to reinvent the wheel. It’s free and open source. |
-| <img src="https://user-images.githubusercontent.com/41619898/74603827-03dc3d00-50fb-11ea-9029-da4ab7141581.png" style="width:200px"/> | _version: v1.12.1_ <br/> Yarn is a new package manager that replaces the existing workflow for the npm client or other package managers while remaining compatible with the npm registry. It has the same feature set as existing workflows while operating faster, more securely, and more reliably.      |
-| <img src="https://user-images.githubusercontent.com/41619898/74603770-5537fc80-50fa-11ea-8991-4a57ad22d5a4.png" style="width:200px"/> | React (also known as React.js or ReactJS) is a JavaScript library for building user interfaces. It is maintained by Facebook and a community of individual developers and companies. React can be used as a base in the development of single-page or mobile applications.                                 |
-| <img src="https://user-images.githubusercontent.com/41619898/74702866-bcff5c00-524e-11ea-93b6-54928b0e7d95.png" style="width:200px"/> | Promise based HTTP client for the browser and node.js                                                                                                                                                                                                                                                      |
+1. Search on [patents.google.com](https://patents.google.com), e.g. `(drone delivery)`.
+2. Click **Download (CSV)** above the results.
+3. Drop the file on the import area.
 
----
+## Development
 
-### Raw Data Sample
+Requirements: Python 3.10, Node.js 16.
 
-![image](https://user-images.githubusercontent.com/41619898/75181937-ab541200-5782-11ea-81ed-ec48db7e5417.png)
+```bash
+make install        # backend requirements + frontend packages
+make backend        # Django API        http://localhost:8000/api/
+make frontend       # React dev server  http://localhost:3000  (proxies /api)
+make test           # backend and frontend tests
+make lint           # Django checks, pending migrations, ESLint
+```
 
-<br/>
+## Architecture
 
-### API Call Sample
+```
+browser ──► nginx (frontend container, :8080)
+              ├── /            React 18 app (Vite build)
+              └── /api, /admin ─► gunicorn + Django 4.0 REST API (backend container)
+                                      └── SQLite in the backend-data volume
+```
 
-![image](https://user-images.githubusercontent.com/41619898/75181804-6203c280-5782-11ea-8f71-6c66c6f14dee.png)
+| Path | |
+|---|---|
+| [`backend/`](backend) | Django REST Framework API: CSV import, patents, datasets, stats, export. [API reference](backend/README.md) |
+| [`frontend/`](frontend) | React 18 + Vite: dashboard, patent list, datasets. Charts are plain SVG. |
+| [`docker-compose.yml`](docker-compose.yml) | backend + frontend with health checks |
+| [`.github/workflows/`](.github/workflows) | CI for both apps |
 
-<Br/>
+### Security notes
 
-### Demo Page View
+- There are no user accounts: run it locally or behind your own authentication, or enable `PATENTS_READ_ONLY=1` for a public read-only instance. The Django admin keeps its own login.
+- Uploaded files are data from a third party: links are only rendered when they are `http(s)`, and exported cells that a spreadsheet would run as a formula are escaped.
+- Set `DJANGO_SECRET_KEY` and, behind TLS, `DJANGO_HTTPS=1` for any deployment. All settings are listed in the [backend README](backend/README.md#configuration).
 
-![image](https://user-images.githubusercontent.com/41619898/75223211-4f70a400-57e9-11ea-8147-6e865d20126d.png)
+## History
 
-<br/>
+**2020 — challenge prototype.** A Selenium script opened Google Patents for a keyword and clicked the CSV download; a Django app stored the rows and a React admin template (Shards Dashboard) displayed them.
 
-### Reference
+![2020 prototype](https://user-images.githubusercontent.com/41619898/75223211-4f70a400-57e9-11ea-8147-6e865d20126d.png)
 
-<h3 align="left" style="border-bottom: none !important; margin-bottom: 5px !important;"><a href="https://designrevision.com/downloads/shards-dashboard-lite-react/">Shards Dashboard React</a>
-<a href="#">
-    <img src="https://img.shields.io/badge/License-MIT-brightgreen.svg" />
-  </a>
-</h3>
+**2022 — rewrite.** Automating the Google Patents UI broke whenever the page changed and is not how the site is meant to be used, so the app now imports the CSV that users download themselves. Backend and frontend were rewritten from scratch with tests, CI and Docker; the Selenium script, the bundled chromedriver binaries and both React templates were removed.
 
-REACT UI KIT | FREE
+## License
 
-A free React admin dashboard template pack featuring a modern design system and lots of custom templates and components.
+[Apache License 2.0](LICENSE)
