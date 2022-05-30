@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — 2022-05-30
 
 First release of the rebuilt app.
 
