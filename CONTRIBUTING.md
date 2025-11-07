@@ -3,7 +3,7 @@
 ## Setup
 
 ```bash
-python3.10 -m venv backend/.venv && . backend/.venv/bin/activate
+python3.13 -m venv backend/.venv && . backend/.venv/bin/activate
 make install
 make backend      # terminal 1
 make frontend     # terminal 2 -> http://localhost:3000

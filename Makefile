@@ -1,7 +1,7 @@
 # Patent Attorney Without Borders
 #
 #   make up         build and start everything in Docker   -> http://localhost:8080
-#   make backend    API dev server (Python 3.10)           -> http://localhost:8000/api/
+#   make backend    API dev server (Python 3.13)           -> http://localhost:8000/api/
 #   make frontend   React dev server, proxies /api          -> http://localhost:3000
 
 .PHONY: up down logs backend frontend install test lint
