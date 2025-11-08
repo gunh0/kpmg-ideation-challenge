@@ -107,6 +107,13 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    # collectstatic writes compressed copies with content hashes in their
+    # names, so WhiteNoise can serve the admin's files with long cache headers.
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # PATENTS_READ_ONLY=1 serves the imported data but refuses uploads and deletions,
