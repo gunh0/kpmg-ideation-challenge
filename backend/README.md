@@ -25,6 +25,7 @@ With Docker: `docker build -t patent-backend . && docker run -p 8000:8000 -e DJA
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | – | e.g. `https://patents.example.com` for the admin |
 | `DJANGO_HTTPS` | `0` | `1` behind a TLS proxy: secure cookies, HSTS, HTTPS redirect |
 | `DJANGO_DB_PATH` | `db.sqlite3` | `/data/db.sqlite3` in the Docker image |
+| `GUNICORN_WORKERS`, `GUNICORN_THREADS` | `3`, `4` | Docker image only, see `gunicorn.conf.py` |
 
 ## Getting data
 
