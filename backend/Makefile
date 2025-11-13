@@ -12,7 +12,7 @@ migrate:
 	$(PYTHON) manage.py migrate
 
 test:
-	$(PYTHON) manage.py test
+	$(PYTHON) manage.py test --parallel auto --shuffle
 
 # Fails when a model change has no migration yet.
 check:
