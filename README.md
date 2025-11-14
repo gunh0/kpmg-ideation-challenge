@@ -29,7 +29,7 @@ Then go to **Datasets** and import a file:
 
 ## Development
 
-Requirements: Python 3.13, Node.js 16.
+Requirements: Python 3.13, Node.js 22.
 
 ```bash
 make install        # backend requirements + frontend packages
