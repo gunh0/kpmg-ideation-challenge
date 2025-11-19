@@ -18,7 +18,7 @@ function stored() {
 export function DatasetProvider({ children }) {
   const [datasets, setDatasets] = useState([]);
   const [loaded, setLoaded] = useState(false);
-  const [selected, setSelected] = useState(stored);
+  const [choice, setSelected] = useState(stored);
   const [readOnly, setReadOnly] = useState(false);
 
   useEffect(() => {
@@ -42,12 +42,9 @@ export function DatasetProvider({ children }) {
     reload();
   }, [reload]);
 
-  // Forget a selection whose dataset was deleted.
-  useEffect(() => {
-    if (selected && datasets.length && !datasets.some((dataset) => String(dataset.id) === selected)) {
-      setSelected("");
-    }
-  }, [datasets, selected]);
+  // A stored selection whose dataset was deleted falls back to all datasets.
+  const selected =
+    choice && datasets.length && !datasets.some((dataset) => String(dataset.id) === choice) ? "" : choice;
 
   useEffect(() => {
     try {
