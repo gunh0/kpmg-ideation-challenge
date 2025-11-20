@@ -8,10 +8,15 @@ import useDebounce from "../hooks/useDebounce";
 // or the user presses Enter.
 export default function AssigneeFilter({ value, dataset, onChange }) {
   const [text, setText] = useState(value);
+  const [shown, setShown] = useState(value);
   const [suggestions, setSuggestions] = useState([]);
   const query = useDebounce(text.trim(), 250);
 
-  useEffect(() => setText(value), [value]);
+  // Take over a value set from outside (a ranking link, "Clear filters").
+  if (value !== shown) {
+    setShown(value);
+    setText(value);
+  }
 
   useEffect(() => {
     let current = true;
