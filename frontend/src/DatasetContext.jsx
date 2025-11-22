@@ -58,7 +58,7 @@ export function DatasetProvider({ children }) {
     () => ({ datasets, loaded, readOnly, selected, setSelected, reload }),
     [datasets, loaded, readOnly, selected, reload]
   );
-  return <DatasetContext.Provider value={value}>{children}</DatasetContext.Provider>;
+  return <DatasetContext value={value}>{children}</DatasetContext>;
 }
 
 export function useDatasets() {
