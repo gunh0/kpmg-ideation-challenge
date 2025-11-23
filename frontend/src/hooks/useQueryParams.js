@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 
 // Filter state kept in the URL so views can be bookmarked, shared and reached
 // from other pages. Changing any filter other than "page" returns to page 1.

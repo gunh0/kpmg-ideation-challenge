@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import useTitle from "../hooks/useTitle";
 
 export default function NotFound() {

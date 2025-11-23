@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 // Horizontal bars for a ranked list. One hue: the bars compare magnitude,
 // the names carry identity. linkTo(row) turns names into links.
