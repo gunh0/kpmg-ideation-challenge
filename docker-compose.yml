@@ -1,5 +1,3 @@
-version: "3.8"
-
 # docker compose up --build   ->  http://localhost:8080
 services:
   backend:
