@@ -9,6 +9,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Datasets = lazy(() => import("./pages/Datasets"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Patents = lazy(() => import("./pages/Patents"));
+const Profile = lazy(() => import("./pages/Profile"));
 
 function page(Component) {
   return (
@@ -27,6 +28,7 @@ export default function App() {
             <Route index element={page(Dashboard)} />
             <Route path="patents" element={page(Patents)} />
             <Route path="datasets" element={page(Datasets)} />
+            <Route path="assignees/:name" element={page(Profile)} />
             <Route path="*" element={page(NotFound)} />
           </Route>
         </Routes>

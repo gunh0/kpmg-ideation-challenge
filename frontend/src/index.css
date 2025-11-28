@@ -148,6 +148,12 @@ a {
   font-size: 1.6rem;
 }
 
+.breadcrumb {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .page-lead {
   margin: 0 0 24px;
   color: var(--muted);
