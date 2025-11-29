@@ -570,6 +570,11 @@ th[aria-sort="descending"] .sort-arrow {
   background: var(--surface);
 }
 
+.panel-more {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+
 .panel-title {
   margin: 0 0 12px;
   font-size: 1rem;

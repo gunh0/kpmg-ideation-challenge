@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { api } from "../api";
 import { useDatasets } from "../DatasetContext";
 import ErrorMessage from "../components/ErrorMessage";
+import PatentDetail from "../components/PatentDetail";
+import PatentTable from "../components/PatentTable";
 import Ranking from "../components/Ranking";
 import YearChart from "../components/YearChart";
 import useApi from "../hooks/useApi";
 import useTitle from "../hooks/useTitle";
+
+const LATEST = 5;
 
 function percent(part, whole) {
   return whole ? `${Math.round((100 * part) / whole)}%` : "—";
@@ -28,6 +33,11 @@ export default function Profile() {
   const { selected: dataset } = useDatasets();
   const filter = { assignee: name };
   const { data, error, loading, retry } = useApi(() => api.stats({ ...filter, dataset }), [name, dataset]);
+  const latest = useApi(
+    () => api.patents({ ...filter, dataset, ordering: "-publication_date", page_size: LATEST }),
+    [name, dataset]
+  );
+  const [open, setOpen] = useState(null);
   const listUrl = `/patents?assignee=${encodeURIComponent(name)}`;
 
   return (
@@ -67,6 +77,17 @@ export default function Profile() {
             <h2 className="panel-title">Patents per year</h2>
             <YearChart data={data.by_year} />
           </div>
+          {latest.data && (
+            <div className="panel">
+              <h2 className="panel-title">Latest publications</h2>
+              <PatentTable patents={latest.data.results} onSelect={setOpen} />
+              {data.total > LATEST && (
+                <p className="panel-more">
+                  <Link to={listUrl}>All {data.total} patents →</Link>
+                </p>
+              )}
+            </div>
+          )}
           <div className="panel">
             <h2 className="panel-title">Top inventors</h2>
             <Ranking
@@ -77,6 +98,7 @@ export default function Profile() {
           </div>
         </>
       )}
+      {open && <PatentDetail patent={open} onClose={() => setOpen(null)} />}
     </section>
   );
 }
