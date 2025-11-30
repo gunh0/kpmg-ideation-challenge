@@ -25,32 +25,50 @@ function activeYears(byYear) {
   return first === last ? String(first) : `${first}–${last}`;
 }
 
-// One assignee across the selected dataset: how much it files, since when,
-// and who invents for it. The filters are those of the patent list.
-export default function Profile() {
+const path = (kind, name) => `/${kind}s/${encodeURIComponent(name)}`;
+
+// What each kind of profile ranks next to the yearly chart.
+const KINDS = {
+  assignee: {
+    label: "Assignee",
+    rankings: [{ title: "Top inventors", key: "top_inventors", kind: "inventor" }],
+  },
+  inventor: {
+    label: "Inventor",
+    rankings: [
+      { title: "Assignees", key: "top_assignees", kind: "assignee" },
+      { title: "Co-inventors", key: "top_inventors", kind: "inventor" },
+    ],
+  },
+};
+
+// One assignee or inventor across the selected dataset: how much they file,
+// since when, and with whom. The filters are those of the patent list.
+export default function Profile({ kind }) {
   const { name } = useParams();
   useTitle(name);
   const { selected: dataset } = useDatasets();
-  const filter = { assignee: name };
-  const { data, error, loading, retry } = useApi(() => api.stats({ ...filter, dataset }), [name, dataset]);
+  const filter = { [kind]: name };
+  const { data, error, loading, retry } = useApi(() => api.stats({ ...filter, dataset }), [kind, name, dataset]);
   const latest = useApi(
     () => api.patents({ ...filter, dataset, ordering: "-publication_date", page_size: LATEST }),
-    [name, dataset]
+    [kind, name, dataset]
   );
   const [open, setOpen] = useState(null);
-  const listUrl = `/patents?assignee=${encodeURIComponent(name)}`;
+  const listUrl = `/patents?${kind}=${encodeURIComponent(name)}`;
+  const { label, rankings } = KINDS[kind];
 
   return (
     <section>
       <p className="breadcrumb">
-        <Link to="/">Dashboard</Link> / Assignee
+        <Link to="/">Dashboard</Link> / {label}
       </p>
       <h1 className="page-title">{name}</h1>
 
       <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
       {data && data.total === 0 && (
-        <p className="page-lead">No patents of this assignee in the selected dataset.</p>
+        <p className="page-lead">No patents of this {kind} in the selected dataset.</p>
       )}
       {data && data.total > 0 && (
         <>
@@ -88,13 +106,18 @@ export default function Profile() {
               )}
             </div>
           )}
-          <div className="panel">
-            <h2 className="panel-title">Top inventors</h2>
-            <Ranking
-              rows={data.top_inventors}
-              linkTo={(row) => `/patents?assignee=${encodeURIComponent(name)}&inventor=${encodeURIComponent(row.name)}`}
-              emptyText="No inventors listed."
-            />
+          <div className="grid-2">
+            {rankings.map((ranking) => (
+              <div className="panel" key={ranking.key}>
+                <h2 className="panel-title">{ranking.title}</h2>
+                <Ranking
+                  // An inventor is always among the top inventors of their own patents.
+                  rows={data[ranking.key].filter((row) => ranking.kind !== kind || row.name !== name)}
+                  linkTo={(row) => path(ranking.kind, row.name)}
+                  emptyText="Nobody else is listed."
+                />
+              </div>
+            ))}
           </div>
         </>
       )}

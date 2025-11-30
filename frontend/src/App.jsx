@@ -11,12 +11,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Patents = lazy(() => import("./pages/Patents"));
 const Profile = lazy(() => import("./pages/Profile"));
 
-function page(Component) {
-  return (
-    <Suspense fallback={<p className="muted">Loading…</p>}>
-      <Component />
-    </Suspense>
-  );
+function page(element) {
+  return <Suspense fallback={<p className="muted">Loading…</p>}>{element}</Suspense>;
 }
 
 export default function App() {
@@ -25,11 +21,12 @@ export default function App() {
       <DatasetProvider>
         <Routes>
           <Route element={<Layout />}>
-            <Route index element={page(Dashboard)} />
-            <Route path="patents" element={page(Patents)} />
-            <Route path="datasets" element={page(Datasets)} />
-            <Route path="assignees/:name" element={page(Profile)} />
-            <Route path="*" element={page(NotFound)} />
+            <Route index element={page(<Dashboard />)} />
+            <Route path="patents" element={page(<Patents />)} />
+            <Route path="datasets" element={page(<Datasets />)} />
+            <Route path="assignees/:name" element={page(<Profile kind="assignee" />)} />
+            <Route path="inventors/:name" element={page(<Profile kind="inventor" />)} />
+            <Route path="*" element={page(<NotFound />)} />
           </Route>
         </Routes>
       </DatasetProvider>
