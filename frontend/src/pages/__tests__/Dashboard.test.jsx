@@ -37,7 +37,7 @@ afterEach(() => {
 });
 
 describe("Dashboard", () => {
-  it("summarises the selection and links rankings to the patent list", async () => {
+  it("summarises the selection and links rankings to their pages", async () => {
     vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", search_url: "", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockResolvedValue(stats);
 
@@ -47,9 +47,9 @@ describe("Dashboard", () => {
     expect(screen.getByRole("img", { name: /per year/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Example Robotics Inc." })).toHaveAttribute(
       "href",
-      "/patents?assignee=Example%20Robotics%20Inc."
+      "/assignees/Example%20Robotics%20Inc."
     );
-    expect(screen.getByRole("link", { name: "John Roe" })).toHaveAttribute("href", "/patents?inventor=John%20Roe");
+    expect(screen.getByRole("link", { name: "John Roe" })).toHaveAttribute("href", "/inventors/John%20Roe");
     expect(screen.getByText("100% granted")).toBeInTheDocument();
   });
 

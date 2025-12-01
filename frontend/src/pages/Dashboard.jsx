@@ -80,14 +80,14 @@ export default function Dashboard() {
             <h2 className="panel-title">Top assignees</h2>
             <Ranking
               rows={data.top_assignees}
-              linkTo={(row) => `/patents?assignee=${encodeURIComponent(row.name)}`}
+              linkTo={(row) => `/assignees/${encodeURIComponent(row.name)}`}
               emptyText="No assignees in this selection." />
           </div>
           <div className="panel">
             <h2 className="panel-title">Top inventors</h2>
             <Ranking
               rows={data.top_inventors}
-              linkTo={(row) => `/patents?inventor=${encodeURIComponent(row.name)}`}
+              linkTo={(row) => `/inventors/${encodeURIComponent(row.name)}`}
               emptyText="No inventors in this selection." />
           </div>
         </div>
