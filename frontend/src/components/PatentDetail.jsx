@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
+import { Link } from "react-router";
 
 import { safeUrl } from "../links";
 import { formatDate } from "./PatentTable";
@@ -44,9 +45,28 @@ export default function PatentDetail({ patent, onClose }) {
 
         <dl className="facts">
           <dt>Assignee</dt>
-          <dd>{patent.assignee || "—"}</dd>
+          <dd>
+            {patent.assignee ? (
+              <Link to={`/assignees/${encodeURIComponent(patent.assignee)}`} onClick={onClose}>
+                {patent.assignee}
+              </Link>
+            ) : (
+              "—"
+            )}
+          </dd>
           <dt>Inventors</dt>
-          <dd>{patent.inventors.length ? patent.inventors.join(", ") : "—"}</dd>
+          <dd>
+            {patent.inventors.length
+              ? patent.inventors.map((name, i) => (
+                  <Fragment key={name}>
+                    {i > 0 && ", "}
+                    <Link to={`/inventors/${encodeURIComponent(name)}`} onClick={onClose}>
+                      {name}
+                    </Link>
+                  </Fragment>
+                ))
+              : "—"}
+          </dd>
           {DATES.map(([field, label]) => (
             <div key={field} className="fact-row">
               <dt>{label}</dt>

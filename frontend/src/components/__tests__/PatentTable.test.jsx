@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render as renderPlain, screen, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 
 import PatentDetail from "../PatentDetail";
@@ -18,6 +19,11 @@ const patent = {
   result_link: "https://patents.google.com/patent/ZZ0000001B2/en",
   figure_link: "javascript:alert(1)",
 };
+// Names link to their pages, so the components need a router.
+function render(ui) {
+  return renderPlain(<MemoryRouter>{ui}</MemoryRouter>);
+}
+
 const application = { ...patent, id: 2, patent_id: "ZZ-2-A1", assignee: "", is_granted: false, grant_date: null };
 
 describe("PatentTable", () => {
@@ -59,6 +65,17 @@ describe("PatentTable", () => {
 
     expect(onSelect).toHaveBeenCalledTimes(2);
   });
+
+  it("links the assignee to its page without opening the details", () => {
+    const onSelect = vi.fn();
+    render(<PatentTable patents={[patent]} onSelect={onSelect} />);
+
+    const link = screen.getByRole("link", { name: "Example Robotics Inc." });
+    expect(link).toHaveAttribute("href", "/assignees/Example%20Robotics%20Inc.");
+    fireEvent.click(link);
+
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });
 
 describe("PatentDetail", () => {
@@ -66,7 +83,8 @@ describe("PatentDetail", () => {
     render(<PatentDetail patent={patent} onClose={() => {}} />);
 
     expect(screen.getByRole("dialog", { name: "Parcel release mechanism" })).toBeInTheDocument();
-    expect(screen.getByText("Jane Doe, John Roe")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Jane Doe" })).toHaveAttribute("href", "/inventors/Jane%20Doe");
+    expect(screen.getByRole("link", { name: "John Roe" })).toHaveAttribute("href", "/inventors/John%20Roe");
     expect(screen.getByText("2016-03-14")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /open in google patents/i })).toHaveAttribute("href", patent.result_link);
   });

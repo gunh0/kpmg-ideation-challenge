@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 export function formatDate(value) {
   return value || "—";
 }
@@ -63,7 +65,20 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
             >
               <td className="mono nowrap">{patent.patent_id}</td>
               <td>{patent.title}</td>
-              <td>{patent.assignee || "—"}</td>
+              <td>
+                {patent.assignee ? (
+                  <Link
+                    to={`/assignees/${encodeURIComponent(patent.assignee)}`}
+                    // The row itself opens the details.
+                    onClick={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                  >
+                    {patent.assignee}
+                  </Link>
+                ) : (
+                  "—"
+                )}
+              </td>
               <td className="nowrap">{formatDate(patent.publication_date)}</td>
               <td>
                 <span className={`badge ${patent.is_granted ? "badge-granted" : "badge-pending"}`}>
