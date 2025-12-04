@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 
 import { api } from "../api";
 import { useDatasets } from "../DatasetContext";
@@ -46,7 +47,6 @@ export default function Patents() {
   const [yearFrom, setYearFrom] = useDebouncedParam(params.year_from, (value) => update({ year_from: value }));
   const [yearTo, setYearTo] = useDebouncedParam(params.year_to, (value) => update({ year_to: value }));
 
-  const [selected, setSelected] = useState(null);
   const searchInput = useRef(null);
 
   // "/" focuses the search, as on GitHub and Google Patents.
@@ -65,6 +65,23 @@ export default function Patents() {
     () => api.patents({ ...params, dataset, page, page_size: PAGE_SIZE }),
     [params, dataset]
   );
+
+  // The open patent is part of the URL (?patent=<id>), so it can be shared and
+  // Back closes it. A patent that is not on the current page is fetched.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const openId = searchParams.get("patent");
+  const listed = data?.results.find((patent) => String(patent.id) === openId);
+  const fetched = useApi(
+    () => (openId && data && !listed ? api.patent(openId) : Promise.resolve(null)),
+    [openId, Boolean(data), Boolean(listed)]
+  );
+  const openPatent = openId ? listed || fetched.data : null;
+  function setOpen(patent) {
+    const next = new URLSearchParams(searchParams);
+    if (patent) next.set("patent", patent.id);
+    else next.delete("patent");
+    setSearchParams(next);
+  }
 
   if (loaded && datasets.length === 0) {
     return (
@@ -155,7 +172,7 @@ export default function Patents() {
             patents={data.results}
             ordering={params.ordering}
             onSort={(ordering) => update({ ordering })}
-            onSelect={setSelected}
+            onSelect={setOpen}
             datasetNames={
               !dataset && datasets.length > 1
                 ? Object.fromEntries(datasets.map((item) => [item.id, item.name]))
@@ -170,7 +187,7 @@ export default function Patents() {
           />
         </>
       )}
-      {selected && <PatentDetail patent={selected} onClose={() => setSelected(null)} />}
+      {openPatent && <PatentDetail patent={openPatent} onClose={() => setOpen(null)} />}
     </section>
   );
 }
