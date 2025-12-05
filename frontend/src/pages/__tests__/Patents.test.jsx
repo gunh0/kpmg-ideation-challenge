@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -60,6 +60,16 @@ describe("Patents", () => {
     expect(screen.getByTestId("location")).toHaveTextContent("?patent=1");
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("keeps a trailing space while typing a search", async () => {
+    renderAt("/patents");
+    const box = await screen.findByRole("searchbox", { name: "Search patents" });
+
+    fireEvent.change(box, { target: { value: "parcel " } });
+
+    await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent("?search=parcel"));
+    expect(box).toHaveValue("parcel ");
   });
 
   it("opens a shared link to a patent that is not on the page", async () => {

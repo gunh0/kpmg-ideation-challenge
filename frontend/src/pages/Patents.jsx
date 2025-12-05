@@ -29,8 +29,14 @@ const DEFAULTS = {
 // Text inputs keep their own state while typing and write to the URL debounced.
 function useDebouncedParam(value, onChange) {
   const [text, setText] = useState(value);
+  const [shown, setShown] = useState(value);
   const debounced = useDebounce(text);
-  useEffect(() => setText(value), [value]);
+  // Take over values set from outside, but not the trimmed echo of what is
+  // being typed: "drone " would lose its space before the next word.
+  if (value !== shown) {
+    setShown(value);
+    if (value !== text.trim()) setText(value);
+  }
   useEffect(() => {
     if (debounced !== value) onChange(debounced);
     // eslint-disable-next-line react-hooks/exhaustive-deps
