@@ -95,6 +95,23 @@ describe("PatentDetail", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
+  it("takes the focus and gives it back when closed", () => {
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+
+    const { unmount } = render(<PatentDetail patent={patent} onClose={() => {}} />);
+    const close = screen.getByRole("button", { name: "Close" });
+    expect(close).toHaveFocus();
+
+    fireEvent.keyDown(close, { key: "Tab", shiftKey: true });
+    expect(screen.getByRole("link", { name: /open in google patents/i })).toHaveFocus();
+
+    unmount();
+    expect(opener).toHaveFocus();
+    opener.remove();
+  });
+
   it("closes with Escape and the close button", () => {
     const onClose = vi.fn();
     render(<PatentDetail patent={patent} onClose={onClose} />);

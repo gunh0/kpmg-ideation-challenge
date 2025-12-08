@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { Link } from "react-router";
 
 import { safeUrl } from "../links";
@@ -15,11 +15,35 @@ export default function PatentDetail({ patent, onClose }) {
   const link = safeUrl(patent.result_link);
   const figure = safeUrl(patent.figure_link);
 
+  const drawer = useRef(null);
+
   useEffect(() => {
     const onKey = (event) => event.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  // Move focus into the dialog and give it back to the row that opened it.
+  useEffect(() => {
+    const opener = document.activeElement;
+    drawer.current?.querySelector("button")?.focus();
+    return () => opener?.focus?.();
+  }, []);
+
+  // Tab and Shift+Tab cycle within the dialog while it is open.
+  function trapFocus(event) {
+    if (event.key !== "Tab") return;
+    const items = drawer.current.querySelectorAll("a[href], button");
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
 
   return (
     <div className="drawer-backdrop" onClick={onClose}>
@@ -28,6 +52,8 @@ export default function PatentDetail({ patent, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="patent-title"
+        ref={drawer}
+        onKeyDown={trapFocus}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="drawer-head">
