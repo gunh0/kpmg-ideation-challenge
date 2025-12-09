@@ -15,6 +15,7 @@ import useQueryParams from "../hooks/useQueryParams";
 import useTitle from "../hooks/useTitle";
 
 const PAGE_SIZE = 25;
+const FILTERS = ["search", "assignee", "inventor", "granted", "year_from", "year_to"];
 const DEFAULTS = {
   search: "",
   assignee: "",
@@ -54,6 +55,7 @@ export default function Patents() {
   const [yearTo, setYearTo] = useDebouncedParam(params.year_to, (value) => update({ year_to: value }));
 
   const searchInput = useRef(null);
+  const filtered = FILTERS.some((key) => params[key]);
 
   // "/" focuses the search, as on GitHub and Google Patents.
   useEffect(() => {
@@ -147,6 +149,15 @@ export default function Patents() {
             onChange={(event) => setYearTo(event.target.value)}
           />
         </div>
+        {filtered && (
+          <button
+            type="button"
+            className="button"
+            onClick={() => update(Object.fromEntries(FILTERS.map((key) => [key, ""])))}
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       {params.inventor && (

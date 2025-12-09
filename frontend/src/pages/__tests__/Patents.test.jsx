@@ -72,6 +72,16 @@ describe("Patents", () => {
     expect(box).toHaveValue("parcel ");
   });
 
+  it("clears all filters at once", async () => {
+    renderAt("/patents?search=parcel&granted=true&year_from=2019&ordering=title");
+
+    fireEvent.click(await screen.findByRole("button", { name: "Clear filters" }));
+
+    expect(screen.getByTestId("location")).toHaveTextContent(/^\?ordering=title$/);
+    expect(screen.getByRole("searchbox", { name: "Search patents" })).toHaveValue("");
+    expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
+  });
+
   it("opens a shared link to a patent that is not on the page", async () => {
     const other = { ...patent, id: 9, title: "Landing pad for parcel drones" };
     vi.spyOn(api, "patent").mockResolvedValue(other);
