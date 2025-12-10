@@ -82,6 +82,15 @@ describe("Patents", () => {
     expect(screen.queryByRole("button", { name: "Clear filters" })).not.toBeInTheDocument();
   });
 
+  it("asks for the chosen number of rows and starts again at page 1", async () => {
+    renderAt("/patents?page=3");
+
+    fireEvent.change(await screen.findByRole("combobox", { name: "Rows" }), { target: { value: "100" } });
+
+    expect(screen.getByTestId("location")).toHaveTextContent(/^\?page_size=100$/);
+    await waitFor(() => expect(api.patents).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, page_size: 100 })));
+  });
+
   it("opens a shared link to a patent that is not on the page", async () => {
     const other = { ...patent, id: 9, title: "Landing pad for parcel drones" };
     vi.spyOn(api, "patent").mockResolvedValue(other);

@@ -701,6 +701,12 @@ th[aria-sort="descending"] .sort-arrow {
   margin-bottom: 10px;
 }
 
+.result-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .result-bar p {
   margin: 0;
 }

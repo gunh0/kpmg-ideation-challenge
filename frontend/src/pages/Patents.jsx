@@ -14,7 +14,7 @@ import useDebounce from "../hooks/useDebounce";
 import useQueryParams from "../hooks/useQueryParams";
 import useTitle from "../hooks/useTitle";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZES = ["25", "50", "100"];
 const FILTERS = ["search", "assignee", "inventor", "granted", "year_from", "year_to"];
 const DEFAULTS = {
   search: "",
@@ -25,6 +25,7 @@ const DEFAULTS = {
   year_to: "",
   ordering: "-publication_date",
   page: "1",
+  page_size: "25",
 };
 
 // Text inputs keep their own state while typing and write to the URL debounced.
@@ -50,6 +51,7 @@ export default function Patents() {
   const [params, update] = useQueryParams(DEFAULTS);
   const { selected: dataset, datasets, loaded } = useDatasets();
   const page = Number(params.page) || 1;
+  const pageSize = PAGE_SIZES.includes(params.page_size) ? Number(params.page_size) : 25;
   const [search, setSearch] = useDebouncedParam(params.search, (value) => update({ search: value.trim() }));
   const [yearFrom, setYearFrom] = useDebouncedParam(params.year_from, (value) => update({ year_from: value }));
   const [yearTo, setYearTo] = useDebouncedParam(params.year_to, (value) => update({ year_to: value }));
@@ -70,7 +72,7 @@ export default function Patents() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   const { data, error, loading, retry } = useApi(
-    () => api.patents({ ...params, dataset, page, page_size: PAGE_SIZE }),
+    () => api.patents({ ...params, dataset, page, page_size: pageSize }),
     [params, dataset]
   );
 
@@ -179,11 +181,29 @@ export default function Patents() {
             <p className="muted">
               {data.count} patents{params.search && <> matching “{params.search}”</>}
             </p>
-            {data.count > 0 && (
-              <a className="button" href={api.exportUrl({ ...params, page: undefined, dataset })} download>
-                Download CSV
-              </a>
-            )}
+            <div className="result-actions">
+              <label className="muted small">
+                Rows{" "}
+                <select
+                  className="select"
+                  value={String(pageSize)}
+                  onChange={(event) => update({ page_size: event.target.value })}
+                >
+                  {PAGE_SIZES.map((size) => (
+                    <option key={size}>{size}</option>
+                  ))}
+                </select>
+              </label>
+              {data.count > 0 && (
+                <a
+                  className="button"
+                  href={api.exportUrl({ ...params, page: undefined, page_size: undefined, dataset })}
+                  download
+                >
+                  Download CSV
+                </a>
+              )}
+            </div>
           </div>
           <PatentTable
             patents={data.results}
@@ -198,7 +218,7 @@ export default function Patents() {
           />
           <Pagination
             page={page}
-            pageSize={PAGE_SIZE}
+            pageSize={pageSize}
             count={data.count}
             onChange={(next) => update({ page: String(next) })}
           />
