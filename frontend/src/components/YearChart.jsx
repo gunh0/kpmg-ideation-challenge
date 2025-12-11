@@ -20,8 +20,42 @@ export function niceMax(value) {
   return step * power;
 }
 
+// The same numbers for screen readers, copying and exact values.
+function YearTable({ data }) {
+  return (
+    <div className="table-wrap">
+      <table className="table">
+        <caption className="visually-hidden">Filings, publications and grants per year</caption>
+        <thead>
+          <tr>
+            <th scope="col">Year</th>
+            {SERIES.map((series) => (
+              <th key={series.key} scope="col" className="numeric">
+                {series.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((point) => (
+            <tr key={point.year}>
+              <th scope="row">{point.year}</th>
+              {SERIES.map((series) => (
+                <td key={series.key} className="numeric">
+                  {point[series.key]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function YearChart({ data }) {
   const [hover, setHover] = useState(null);
+  const [asTable, setAsTable] = useState(false);
   if (!data.length) return <p className="muted">No dated patents in this selection.</p>;
 
   const max = niceMax(Math.max(...data.flatMap((row) => SERIES.map((s) => row[s.key]))));
@@ -36,58 +70,75 @@ export default function YearChart({ data }) {
 
   return (
     <div className="chart">
-      <ul className="legend">
-        {SERIES.map((series) => (
-          <li key={series.key}>
-            <span className="legend-swatch" style={{ background: series.color }} />
-            {series.label}
-          </li>
-        ))}
-      </ul>
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="Filings, publications and grants per year">
-        {ticks.map((tick) => (
-          <g key={tick}>
-            <line x1={PAD.left} x2={WIDTH - PAD.right} y1={y(tick)} y2={y(tick)} className="grid" />
-            <text x={PAD.left - 8} y={y(tick) + 4} textAnchor="end" className="axis">
-              {tick}
-            </text>
-          </g>
-        ))}
-        {data.map((point, i) =>
-          i % labelEvery === 0 ? (
-            <text key={point.year} x={x(i)} y={HEIGHT - 8} textAnchor="middle" className="axis">
-              {point.year}
-            </text>
-          ) : null
-        )}
-        {hover !== null && <line x1={x(hover)} x2={x(hover)} y1={PAD.top} y2={PAD.top + innerH} className="crosshair" />}
-        {SERIES.map((series) => (
-          <g key={series.key}>
-            <polyline
-              fill="none"
-              style={{ stroke: series.color }}
-              strokeWidth="2"
-              points={data.map((point, i) => `${x(i)},${y(point[series.key])}`).join(" ")}
+      <div className="chart-head">
+        <ul className="legend">
+          {SERIES.map((series) => (
+            <li key={series.key}>
+              <span className="legend-swatch" style={{ background: series.color }} />
+              {series.label}
+            </li>
+          ))}
+        </ul>
+        <button type="button" className="link-button" aria-pressed={asTable} onClick={() => setAsTable(!asTable)}>
+          {asTable ? "Show chart" : "Show table"}
+        </button>
+      </div>
+      {asTable ? (
+        <YearTable data={data} />
+      ) : (
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="Filings, publications and grants per year">
+          {ticks.map((tick) => (
+            <g key={tick}>
+              <line x1={PAD.left} x2={WIDTH - PAD.right} y1={y(tick)} y2={y(tick)} className="grid" />
+              <text x={PAD.left - 8} y={y(tick) + 4} textAnchor="end" className="axis">
+                {tick}
+              </text>
+            </g>
+          ))}
+          {data.map((point, i) =>
+            i % labelEvery === 0 ? (
+              <text key={point.year} x={x(i)} y={HEIGHT - 8} textAnchor="middle" className="axis">
+                {point.year}
+              </text>
+            ) : null,
+          )}
+          {hover !== null && (
+            <line x1={x(hover)} x2={x(hover)} y1={PAD.top} y2={PAD.top + innerH} className="crosshair" />
+          )}
+          {SERIES.map((series) => (
+            <g key={series.key}>
+              <polyline
+                fill="none"
+                style={{ stroke: series.color }}
+                strokeWidth="2"
+                points={data.map((point, i) => `${x(i)},${y(point[series.key])}`).join(" ")}
+              />
+              {data.map((point, i) => (
+                <circle
+                  key={point.year}
+                  cx={x(i)}
+                  cy={y(point[series.key])}
+                  r={hover === i ? 4.5 : 3}
+                  style={{ fill: series.color }}
+                />
+              ))}
+            </g>
+          ))}
+          {data.map((point, i) => (
+            <rect
+              key={point.year}
+              x={x(i) - innerW / Math.max(data.length - 1, 1) / 2}
+              y={PAD.top}
+              width={innerW / Math.max(data.length - 1, 1)}
+              height={innerH}
+              fill="transparent"
+              onMouseEnter={() => setHover(i)}
+              onMouseLeave={() => setHover(null)}
             />
-            {data.map((point, i) => (
-              <circle key={point.year} cx={x(i)} cy={y(point[series.key])} r={hover === i ? 4.5 : 3} style={{ fill: series.color }} />
-            ))}
-          </g>
-        ))}
-        {data.map((point, i) => (
-          <rect
-            key={point.year}
-            x={x(i) - innerW / Math.max(data.length - 1, 1) / 2}
-            y={PAD.top}
-            width={innerW / Math.max(data.length - 1, 1)}
-            height={innerH}
-            fill="transparent"
-            onMouseEnter={() => setHover(i)}
-            onMouseLeave={() => setHover(null)}
-          />
-        ))}
-      </svg>
-      {row && (
+          ))}
+        </svg>
+      )}
+      {!asTable && row && (
         <div className="tooltip" role="status">
           <strong>{row.year}</strong>
           {SERIES.map((series) => (

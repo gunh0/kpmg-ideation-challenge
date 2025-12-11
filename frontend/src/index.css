@@ -590,6 +590,18 @@ th[aria-sort="descending"] .sort-arrow {
   height: auto;
 }
 
+.chart-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .chart .grid {
   stroke: var(--border);
 }
