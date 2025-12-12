@@ -909,3 +909,56 @@ select:focus-visible,
   font-size: 0.78rem;
   font-weight: 400;
 }
+
+/* Printing a dashboard or profile: light colours whatever the screen uses,
+   no navigation or controls, and panels kept on one page. */
+@media print {
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --border: #d0d5db;
+    --text: #000000;
+    --muted: #444c56;
+    --accent: #2563eb;
+    --track: #eef1f5;
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    color-scheme: light;
+  }
+
+  .topbar,
+  .skip-link,
+  .toolbar,
+  .pagination,
+  .result-actions,
+  .chart-head button,
+  .drawer-backdrop {
+    display: none;
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .badge-granted {
+    background: #e7f6ec;
+    color: #1a7f37;
+  }
+
+  .badge-pending {
+    background: #fff4e5;
+    color: #9a6700;
+  }
+
+  .card,
+  .panel,
+  .table tr {
+    break-inside: avoid;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
