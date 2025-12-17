@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "django_filters",
+    "drf_spectacular",
     "patents",
 ]
 
@@ -137,6 +138,14 @@ REST_FRAMEWORK = {
     # (see PATENTS_READ_ONLY).
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     "UNAUTHENTICATED_USER": None,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"]
     + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Patent Attorney Without Borders API",
+    "DESCRIPTION": "Google Patents search results: datasets, patents, dashboard statistics.",
+    "VERSION": "1.1.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }

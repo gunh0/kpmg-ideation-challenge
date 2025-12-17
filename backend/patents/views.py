@@ -2,7 +2,8 @@ from django.conf import settings
 from django.db.models import Count
 from django.http import StreamingHttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, permissions, status, viewsets
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import generics, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
@@ -14,7 +15,14 @@ from .filters import NullsLastOrderingFilter, PatentFilter, PatentSearchFilter
 from .importer import import_export
 from .models import Dataset, Patent
 from .pagination import PatentPagination
-from .serializers import DatasetSerializer, DatasetUploadSerializer, PatentSerializer
+from .serializers import (
+    ConfigSerializer,
+    DatasetSerializer,
+    DatasetUploadSerializer,
+    NameCountSerializer,
+    PatentSerializer,
+    StatsSerializer,
+)
 from .stats import summary
 
 
@@ -74,18 +82,24 @@ class PatentViewSet(viewsets.ReadOnlyModelViewSet):
         return response
 
 
-class StatsView(APIView):
+class StatsView(generics.GenericAPIView):
     """Dashboard aggregates. Accepts the same filters and search as /api/patents/,
     plus ?top=N (1-50, default 10) for the length of the ranking lists."""
 
+    queryset = Patent.objects.all()
+    serializer_class = StatsSerializer
+    pagination_class = None
     filter_backends = [DjangoFilterBackend, PatentSearchFilter]
     filterset_class = PatentFilter
     search_fields = PatentViewSet.search_fields
 
+    @extend_schema(
+        responses=StatsSerializer,
+        filters=True,  # a single object, but filtered like a list
+        parameters=[OpenApiParameter("top", int, description="length of the ranking lists, 1-50 (default 10)")],
+    )
     def get(self, request):
-        queryset = Patent.objects.all()
-        for backend in self.filter_backends:
-            queryset = backend().filter_queryset(request, queryset, self)
+        queryset = self.filter_queryset(self.get_queryset())
         try:
             limit = min(max(int(request.query_params.get("top", 10)), 1), 50)
         except ValueError:
@@ -99,6 +113,10 @@ class AssigneeView(APIView):
     ?dataset=<id> limits to one dataset, ?search= matches part of the name.
     """
 
+    @extend_schema(
+        responses=NameCountSerializer(many=True),
+        parameters=[OpenApiParameter("dataset", int), OpenApiParameter("search", str)],
+    )
     def get(self, request):
         queryset = Patent.objects.exclude(assignee="")
         dataset = request.query_params.get("dataset")
@@ -114,5 +132,6 @@ class AssigneeView(APIView):
 class ConfigView(APIView):
     """Instance settings the dashboard adapts to."""
 
+    @extend_schema(responses=ConfigSerializer)
     def get(self, request):
         return Response({"read_only": settings.PATENTS_READ_ONLY})

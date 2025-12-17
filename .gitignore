@@ -178,3 +178,6 @@ cython_debug/
 .vscode/
 node_modules/
 .eslintcache
+
+# make -C backend schema
+backend/openapi.yaml

@@ -54,3 +54,34 @@ class DatasetUploadSerializer(serializers.Serializer):
             return upload.read().decode("utf-8-sig")
         except UnicodeDecodeError:
             raise serializers.ValidationError("The file is not UTF-8 text.")
+
+
+# Shapes of the non-model responses, for the OpenAPI schema.
+
+
+class YearCountSerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+    filed = serializers.IntegerField()
+    published = serializers.IntegerField()
+    granted = serializers.IntegerField()
+
+
+class NameCountSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    count = serializers.IntegerField()
+
+
+class AssigneeCountSerializer(NameCountSerializer):
+    granted = serializers.IntegerField()
+
+
+class StatsSerializer(serializers.Serializer):
+    total = serializers.IntegerField()
+    granted = serializers.IntegerField()
+    by_year = YearCountSerializer(many=True)
+    top_assignees = AssigneeCountSerializer(many=True)
+    top_inventors = NameCountSerializer(many=True)
+
+
+class ConfigSerializer(serializers.Serializer):
+    read_only = serializers.BooleanField()
