@@ -20,6 +20,15 @@ class ImportExportTests(TestCase):
         self.assertEqual(result.skipped, 1)
         self.assertEqual(result.dataset.patents.count(), 3)
 
+    def test_logs_the_import(self):
+        with self.assertLogs("patents.importer", level="INFO") as logs:
+            result = import_export(FIXTURE.read_text())
+
+        self.assertEqual(
+            logs.output,
+            [f"INFO:patents.importer:imported 3 patents into dataset {result.dataset.pk} (0 duplicates, 1 rows skipped)"],
+        )
+
     def test_explicit_name_wins(self):
         result = import_export(FIXTURE.read_text(), name="  Drones  ")
 

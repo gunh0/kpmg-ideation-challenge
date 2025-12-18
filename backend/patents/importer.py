@@ -1,4 +1,5 @@
 """Store parsed Google Patents exports as datasets."""
+import logging
 from dataclasses import dataclass
 from urllib.parse import parse_qs, urlparse
 
@@ -7,6 +8,8 @@ from django.utils import timezone
 
 from .csv_import import parse_export
 from .models import Dataset, Patent
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -42,6 +45,10 @@ def import_export(text, name=""):
     for row in parsed.rows:
         rows[row["patent_id"]] = row
     Patent.objects.bulk_create(Patent(dataset=dataset, **row) for row in rows.values())
+    logger.info(
+        "imported %d patents into dataset %d (%d duplicates, %d rows skipped)",
+        len(rows), dataset.pk, len(parsed.rows) - len(rows), parsed.skipped,
+    )
 
     return ImportResult(
         dataset=dataset,
