@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db.models import Count
 from django.http import StreamingHttpResponse
+from django.utils import timezone
+from django.utils.text import slugify
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics, mixins, permissions, status, viewsets
@@ -78,8 +80,19 @@ class PatentViewSet(viewsets.ReadOnlyModelViewSet):
         """The filtered, ordered list as CSV (Google Patents columns, no pagination)."""
         queryset = self.filter_queryset(self.get_queryset())
         response = StreamingHttpResponse(export_rows(queryset), content_type="text/csv; charset=utf-8")
-        response["Content-Disposition"] = 'attachment; filename="patents.csv"'
+        response["Content-Disposition"] = f'attachment; filename="{self.export_name()}"'
         return response
+
+
+    def export_name(self):
+        """patents-drone-delivery-2025-12-19.csv: the dataset and the day, so
+        downloads of different selections do not overwrite each other."""
+        parts = ["patents"]
+        dataset = Dataset.objects.filter(pk=self.request.query_params.get("dataset") or None).first()
+        if dataset:
+            parts.append(slugify(dataset.name) or f"dataset-{dataset.pk}")
+        parts.append(timezone.localdate().isoformat())
+        return "-".join(parts) + ".csv"
 
 
 class StatsView(generics.GenericAPIView):

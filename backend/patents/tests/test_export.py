@@ -2,6 +2,7 @@ import csv
 import io
 from pathlib import Path
 
+from django.utils import timezone
 from rest_framework.test import APITestCase
 
 from patents.csv_import import parse_export
@@ -24,7 +25,14 @@ class ExportTests(APITestCase):
         response = self.client.get("/api/patents/export/")
 
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
-        self.assertEqual(response["Content-Disposition"], 'attachment; filename="patents.csv"')
+        today = timezone.localdate().isoformat()
+        self.assertEqual(response["Content-Disposition"], f'attachment; filename="patents-{today}.csv"')
+
+    def test_file_is_named_after_the_dataset(self):
+        response = self.client.get(f"/api/patents/export/?dataset={self.dataset.pk}")
+
+        today = timezone.localdate().isoformat()
+        self.assertEqual(response["Content-Disposition"], f'attachment; filename="patents-drone-delivery-{today}.csv"')
 
     def test_applies_filters_and_ordering(self):
         rows = list(csv.reader(io.StringIO(self.export("granted=true&ordering=patent_id"))))
