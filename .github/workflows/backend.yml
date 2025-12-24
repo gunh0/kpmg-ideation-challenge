@@ -6,6 +6,11 @@ on:
   pull_request:
     paths: ["backend/**", ".github/workflows/backend.yml"]
 
+# A newer push to the same branch or pull request replaces the running check.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest

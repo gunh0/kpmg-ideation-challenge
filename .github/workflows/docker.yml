@@ -6,6 +6,11 @@ on:
   pull_request:
     paths: ["backend/**", "frontend/**", "docker-compose.yml", ".github/workflows/docker.yml"]
 
+# A newer push to the same branch or pull request replaces the running check.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   compose:
     runs-on: ubuntu-latest
