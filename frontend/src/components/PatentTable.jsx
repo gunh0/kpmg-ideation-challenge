@@ -45,7 +45,7 @@ function SortHeader({ column, ordering, onSort }) {
 export default function PatentTable({ patents, ordering = "", onSort, onSelect, datasetNames }) {
   return (
     <div className="table-wrap">
-      <table className="table">
+      <table className="table patent-table">
         <thead>
           <tr>
             {COLUMNS.map((column) => (
@@ -63,9 +63,9 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
               onClick={onSelect && (() => onSelect(patent))}
               onKeyDown={onSelect && ((event) => event.key === "Enter" && onSelect(patent))}
             >
-              <td className="mono nowrap">{patent.patent_id}</td>
-              <td>{patent.title}</td>
-              <td>
+              <td className="mono nowrap cell-id">{patent.patent_id}</td>
+              <td className="cell-title">{patent.title}</td>
+              <td className="cell-assignee">
                 {patent.assignee ? (
                   <Link
                     to={`/assignees/${encodeURIComponent(patent.assignee)}`}
@@ -79,13 +79,13 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
                   "—"
                 )}
               </td>
-              <td className="nowrap">{formatDate(patent.publication_date)}</td>
-              <td>
+              <td className="nowrap cell-date">{formatDate(patent.publication_date)}</td>
+              <td className="cell-status">
                 <span className={`badge ${patent.is_granted ? "badge-granted" : "badge-pending"}`}>
                   {patent.is_granted ? "Granted" : "Application"}
                 </span>
               </td>
-              {datasetNames && <td className="muted small">{datasetNames[patent.dataset] || "—"}</td>}
+              {datasetNames && <td className="muted small cell-dataset">{datasetNames[patent.dataset] || "—"}</td>}
             </tr>
           ))}
         </tbody>

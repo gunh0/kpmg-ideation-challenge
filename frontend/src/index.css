@@ -814,6 +814,60 @@ a.button {
     flex-wrap: wrap;
     margin-top: 6px;
   }
+
+  /* Each patent becomes a small card: number and status, the title across
+     the full width, then assignee and date. Sorting stays in the toolbar URL. */
+  .patent-table thead {
+    display: none;
+  }
+
+  .patent-table tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .patent-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .patent-table td {
+    padding: 0;
+    border: 0;
+  }
+
+  .patent-table .cell-status {
+    order: 1;
+  }
+
+  .patent-table .cell-title {
+    order: 2;
+    grid-column: 1 / -1;
+    font-weight: 600;
+  }
+
+  .patent-table .cell-assignee,
+  .patent-table .cell-date {
+    order: 3;
+  }
+
+  .patent-table .cell-dataset {
+    order: 4;
+  }
+
+  .patent-table .cell-status,
+  .patent-table .cell-date {
+    text-align: right;
+  }
+
+  .patent-table .cell-assignee,
+  .patent-table .cell-date,
+  .patent-table .cell-dataset {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
 }
 
 .read-only-note {
