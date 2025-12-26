@@ -4,6 +4,7 @@ Everything that differs between environments is read from environment
 variables, so the same settings module serves development, tests and Docker.
 """
 import os
+import sys
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -143,7 +144,9 @@ REST_FRAMEWORK = {
     + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
 }
 
-# Everything goes to stdout, where Docker and gunicorn collect it.
+# Everything goes to stdout, where Docker and gunicorn collect it. The test
+# run keeps its output to warnings; assertLogs() still sees everything.
+LOG_LEVEL = "WARNING" if sys.argv[1:2] == ["test"] else os.environ.get("DJANGO_LOG_LEVEL", "INFO")
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -151,8 +154,8 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "plain"}},
     "root": {"handlers": ["console"], "level": "WARNING"},
     "loggers": {
-        "django": {"handlers": ["console"], "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"), "propagate": False},
-        "patents": {"handlers": ["console"], "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"), "propagate": False},
+        "django": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
+        "patents": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
     },
 }
 
