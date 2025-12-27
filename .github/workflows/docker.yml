@@ -19,11 +19,7 @@ jobs:
       - name: Build and start
         run: docker compose up -d --build --wait --wait-timeout 180
       - name: Smoke test
-        run: |
-          curl -fsS http://localhost:8080/api/health/
-          curl -fsS http://localhost:8080/ | grep -q '<div id="root">'
-          curl -fsSI http://localhost:8080/ | grep -qi '^content-security-policy:'
-          curl -fsS http://localhost:8080/admin/login/ | grep -q 'Django'
+        run: scripts/smoke.sh
       - name: Logs
         if: failure()
         run: docker compose logs

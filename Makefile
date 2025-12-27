@@ -3,8 +3,9 @@
 #   make up         build and start everything in Docker   -> http://localhost:8080
 #   make backend    API dev server (Python 3.13)           -> http://localhost:8000/api/
 #   make frontend   React dev server, proxies /api          -> http://localhost:3000
+#   make smoke      start the Docker stack and check it end to end (as CI does)
 
-.PHONY: up down logs backend frontend install test lint
+.PHONY: up down logs smoke backend frontend install test lint
 
 up:
 	docker compose up -d --build
@@ -15,6 +16,10 @@ down:
 
 logs:
 	docker compose logs -f
+
+smoke:
+	docker compose up -d --build --wait --wait-timeout 180
+	scripts/smoke.sh
 
 backend:
 	$(MAKE) -C backend run
