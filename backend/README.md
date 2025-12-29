@@ -10,6 +10,7 @@ make install
 make run                      # http://localhost:8000/api/
 make import CSV=export.csv    # or upload through the API / dashboard
 make test
+make check                    # system checks, pending migrations, OpenAPI schema
 ```
 
 With Docker: `docker build -t patent-backend . && docker run -p 8000:8000 -e DJANGO_SECRET_KEY=... patent-backend`
@@ -49,10 +50,12 @@ Each upload becomes a **dataset** named after the search query. A patent listed 
 | `PATCH` | `/api/datasets/{id}/` | `{"name": "..."}` renames a dataset |
 | `GET` | `/api/patents/` | paginated (`page`, `page_size` ≤ 200) |
 | `GET` | `/api/patents/{id}/` | |
-| `GET` | `/api/patents/export/` | CSV in the Google Patents layout; can be imported again |
+| `GET` | `/api/patents/export/` | CSV in the Google Patents layout, named `patents-<dataset>-<date>.csv`; can be imported again |
 | `GET` | `/api/stats/` | `total`, `granted`, `by_year` (filed / published / granted), `top_assignees` (with their `granted` count), `top_inventors` (`top` = 1–50) |
 | `GET` | `/api/assignees/` | assignee names and counts for suggestions (`dataset`, `search`) |
 | `GET` | `/api/health/` | `{"status": "ok"}` when the database answers |
+| `GET` | `/api/config/` | `read_only` flag for the dashboard |
+| `GET` | `/api/schema/` | OpenAPI 3 description of all of the above (`make schema` writes it to `openapi.yaml`) |
 
 `/api/patents/`, `/api/patents/export/` and `/api/stats/` share the filters:
 
