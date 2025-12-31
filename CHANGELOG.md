@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.1.0 — 2025-12-31
+
+### Added
+
+- Assignee and inventor pages: yearly activity, grant rate, latest publications, co-inventors and assignees; names in rankings, the patent list and the details panel link to them.
+- Shareable details: the open patent is kept in the URL (`?patent=<id>`).
+- Patent list: 25, 50 or 100 rows per page, one button to clear all filters, stacked cards on small screens.
+- The yearly chart can be shown as a table. Print styles for dashboards and profiles.
+- OpenAPI schema at `/api/schema/` (drf-spectacular); `make check` validates it.
+- CSV exports are named after the dataset and the day.
+- Logging to stdout (`DJANGO_LOG_LEVEL`); imports are logged.
+- `make smoke` and a CI job that builds both images and checks the running Compose stack.
+
+### Changed
+
+- Python 3.13, Django 5.2 LTS, DRF 3.16, django-filter 25, gunicorn 23 with threaded workers (`GUNICORN_WORKERS`, `GUNICORN_THREADS`).
+- Node.js 22, React 19, React Router 7, Vite 7, Vitest 4, Testing Library 16, ESLint 9 with the React Compiler rules.
+- SQLite runs in WAL mode with immediate transactions; the admin's static files are compressed and content-hashed.
+- The containers run as unprivileged users on read-only file systems without capabilities; nginx is `nginx-unprivileged` 1.28 on port 8080.
+- Dependabot is off; dependencies are upgraded in planned batches like this one.
+
+### Fixed
+
+- A trailing space in the search box was removed while typing.
+- The frontend health check always failed: `localhost` resolved to `::1`, where nginx does not listen.
+- Hashed assets were served without the security headers.
+- Focus moves into the details panel and back to the row when it closes.
+
+### Security
+
+- Content-Security-Policy: scripts and styles from the app only, images also from Google's patent image host.
+
 ## 1.0.0 — 2022-05-30
 
 First release of the rebuilt app.
