@@ -14,15 +14,18 @@ logger = logging.getLogger(__name__)
 
 def read_shard(url, topics, since):
     connection = duckdb.connect()
+    # DuckDB fetches row groups with one thread each, and a remote scan waits
+    # on the network, not the CPU: with as many threads as a file has row
+    # groups (about 50) one file takes seconds instead of minutes on 2 cores.
     # Remote reads over a long scan meet the odd timeout; retry them.
-    connection.execute("SET http_retries = 8; SET http_timeout = 120000")
+    connection.execute("SET threads = 64; SET http_retries = 8; SET http_timeout = 120000")
     try:
-        return opendata.read_topics(url, topics, since, connection)
+        return opendata.read_topics(opendata.direct_url(url), topics, since, connection)
     finally:
         connection.close()
 
 
-def collect(topics=TOPICS, shards=None, workers=4, since=SINCE, revision=None):
+def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
     """Scan the Parquet files for `topics` and replace each topic's patents.
 
     `shards` limits the scan to some files (indexes), for trying things out;
@@ -42,3 +45,4 @@ def collect(topics=TOPICS, shards=None, workers=4, since=SINCE, revision=None):
 
     merged = merge(rows)
     return [store_topic(topic, merged.get(topic.slug, []), revision) for topic in topics]
+

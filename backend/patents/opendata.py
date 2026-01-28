@@ -8,6 +8,7 @@ needs, so matching a topic against all titles does not download the full text
 of every patent.
 """
 import json
+import urllib.error
 import urllib.request
 
 import duckdb
@@ -41,6 +42,30 @@ def shard_urls(revision):
     tree = get_json(f"{API}/tree/{revision}")
     names = sorted(item["path"] for item in tree if item["path"].endswith(".parquet"))
     return [f"{FILES}/{revision}/{name}" for name in names]
+
+
+class _KeepRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+def direct_url(url, timeout=30):
+    """The CDN address behind a Hugging Face file URL.
+
+    Every request to /resolve/ counts against a rate limit of a few thousand
+    per five minutes, and DuckDB sends one range request per column chunk.
+    Asking once where the file lives and reading from there avoids the limit.
+    """
+    if not url.startswith(("https://", "http://")):
+        return url  # a local file
+    request = urllib.request.Request(url, method="HEAD")
+    try:
+        urllib.request.build_opener(_KeepRedirect).open(request, timeout=timeout)
+    except urllib.error.HTTPError as redirect:
+        if 300 <= redirect.code < 400 and redirect.headers.get("Location"):
+            return redirect.headers["Location"]
+        raise
+    return url
 
 
 def topic_query(source, topics, since):

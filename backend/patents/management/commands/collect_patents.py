@@ -24,7 +24,7 @@ class Command(BaseCommand):
                             help="collect only this topic (repeatable; default: all)")
         parser.add_argument("--shards", type=parse_shards,
                             help="only read these Parquet files, e.g. 0-3 (for trying it out: the topics keep only what they contain)")
-        parser.add_argument("--workers", type=int, default=4, help="files read in parallel (default 4)")
+        parser.add_argument("--workers", type=int, default=2, help="files read in parallel (default 2)")
 
     def handle(self, *args, topic, shards, workers, **options):
         topics = [get_topic(slug) for slug in topic] if topic else TOPICS
