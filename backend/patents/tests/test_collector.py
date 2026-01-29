@@ -41,6 +41,25 @@ class CollectTests(TestCase):
         self.assertEqual(list(Dataset.objects.values_list("slug", flat=True)), ["cybersecurity"])
 
 
+    def test_if_changed_skips_a_revision_already_collected(self):
+        call_command("collect_patents", stdout=StringIO())
+        Dataset.objects.filter(slug="drones").update(name="Kept")
+
+        out = StringIO()
+        call_command("collect_patents", "--if-changed", stdout=out)
+
+        self.assertIn("Up to date with revision abc123", out.getvalue())
+        self.assertEqual(Dataset.objects.get(slug="drones").name, "Kept")
+
+    def test_if_changed_collects_a_new_revision(self):
+        call_command("collect_patents", stdout=StringIO())
+        Dataset.objects.filter(slug="drones").update(source_revision="older")
+
+        call_command("collect_patents", "--if-changed", stdout=StringIO())
+
+        self.assertEqual(Dataset.objects.get(slug="drones").source_revision, "abc123")
+
+
 class ShardArgumentTests(TestCase):
     def test_ranges_and_lists(self):
         self.assertEqual(parse_shards("0-3,7"), [0, 1, 2, 3, 7])
