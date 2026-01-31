@@ -55,6 +55,7 @@ class MergeTests(SimpleTestCase):
         self.assertEqual(record["grant_date"], date(2020, 6, 2))
         self.assertEqual(record["inventors"], "Jane Doe, John Roe")
         self.assertEqual(record["assignee"], "Example Robotics Inc.")
+        self.assertEqual(record["result_link"], "https://patents.google.com/patent/US10000001B2/en")
 
     def test_pending_application_keeps_its_publication_number(self):
         [record] = merge([publication("US-2019000001-A1", "A1", 20190103)])["drones"]

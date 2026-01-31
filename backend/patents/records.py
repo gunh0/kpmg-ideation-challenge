@@ -7,6 +7,8 @@ is known by its grant number once there is one.
 """
 from datetime import date
 
+from .google import patent_url
+
 GRANT_KINDS = ("B1", "B2", "E1", "S1", "P2", "P3")
 
 
@@ -55,6 +57,7 @@ def merge(rows):
             "filing_date": to_date(latest["filing_date"]),
             "publication_date": to_date(publications[0]["publication_date"]),
             "grant_date": max((to_date(row["grant_date"]) for row in grants if row["grant_date"]), default=None),
+            "result_link": patent_url(number_from["publication_number"]),
         }
         topics.setdefault(latest["topic"], []).append(record)
     for records in topics.values():
