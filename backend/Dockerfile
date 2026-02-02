@@ -19,4 +19,5 @@ USER app
 VOLUME /data
 EXPOSE 8000
 
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi"]
+# The first start fills the empty database from the bundled snapshot.
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py load_seed && gunicorn config.wsgi"]
