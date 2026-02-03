@@ -10,6 +10,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# DuckDB reads the public patent data over HTTPS with its httpfs extension;
+# install it now, the running container has no writable place to load it from.
+ENV DUCKDB_EXTENSION_DIRECTORY=/opt/duckdb/extensions
+RUN python -c "import duckdb; duckdb.connect(config={'extension_directory': '$DUCKDB_EXTENSION_DIRECTORY'}).install_extension('httpfs')"
+
 COPY . .
 RUN DJANGO_SECRET_KEY=collectstatic python manage.py collectstatic --noinput \
     && useradd --system --uid 1000 app \

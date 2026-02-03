@@ -1,5 +1,7 @@
 """Collect the topics from the public data and store them."""
 import logging
+import os
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 
 import duckdb
@@ -13,8 +15,20 @@ from .topics import SINCE, TOPICS
 logger = logging.getLogger(__name__)
 
 
+def duckdb_config():
+    """DuckDB keeps extensions and secrets under the home directory, which the
+    app user of the image does not have. The image installs the httpfs
+    extension at build time (DUCKDB_EXTENSION_DIRECTORY); /tmp could not hold
+    it, as Docker mounts it without exec permission."""
+    config = {"secret_directory": os.path.join(tempfile.gettempdir(), "duckdb-secrets")}
+    if os.environ.get("DUCKDB_EXTENSION_DIRECTORY"):
+        config["extension_directory"] = os.environ["DUCKDB_EXTENSION_DIRECTORY"]
+        config["autoinstall_known_extensions"] = False
+    return config
+
+
 def read_shard(url, topics, since):
-    connection = duckdb.connect()
+    connection = duckdb.connect(config=duckdb_config())
     # DuckDB fetches row groups with one thread each, and a remote scan waits
     # on the network, not the CPU: with as many threads as a file has row
     # groups (about 50) one file takes seconds instead of minutes on 2 cores.
