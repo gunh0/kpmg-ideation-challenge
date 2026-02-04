@@ -22,6 +22,28 @@ services:
       retries: 5
       start_period: 10s
 
+  # Checks the public data once a day (PATENTS_COLLECT_INTERVAL seconds) and
+  # collects the topics again when it has a new revision.
+  collector:
+    build: ./backend
+    command: >-
+      sh -c 'while true; do python manage.py collect_patents --if-changed;
+      sleep "$${PATENTS_COLLECT_INTERVAL:-86400}"; done'
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-in-production}
+      PATENTS_COLLECT_INTERVAL: ${PATENTS_COLLECT_INTERVAL:-86400}
+    volumes:
+      - backend-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
   frontend:
     build: ./frontend
     ports:
