@@ -37,6 +37,9 @@ class Patent(models.Model):
     grant_date = models.DateField(null=True, blank=True)
     result_link = models.URLField(max_length=500, blank=True)
     figure_link = models.URLField(max_length=500, blank=True)
+    thumbnail_link = models.URLField(max_length=500, blank=True)
+    # When the figure was looked up on Google Patents; set even if none was found.
+    figure_checked_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-publication_date", "patent_id"]
