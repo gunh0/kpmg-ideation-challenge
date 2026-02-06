@@ -47,3 +47,17 @@ class StoreTopicTests(TestCase):
         self.assertEqual(list(drones.patents.values_list("patent_id", flat=True)), ["US-3-A1"])
         self.assertEqual(drones.source_revision, "def456")
         self.assertEqual(Dataset.objects.get(slug="cybersecurity").patents.count(), 1)
+
+    def test_keeps_figures_already_looked_up(self):
+        store_topic(get_topic("drones"), [record("US-1-B2"), record("US-2-A1")], "abc123")
+        Dataset.objects.get(slug="drones").patents.filter(patent_id="US-1-B2").update(
+            thumbnail_link="https://patentimages.storage.googleapis.com/t.png",
+            figure_checked_at=datetime(2026, 1, 21, tzinfo=timezone.utc),
+        )
+
+        store_topic(get_topic("drones"), [record("US-1-B2", title="New title"), record("US-3-A1")], "def456")
+
+        kept = Dataset.objects.get(slug="drones").patents.get(patent_id="US-1-B2")
+        self.assertEqual(kept.title, "New title")
+        self.assertEqual(kept.thumbnail_link, "https://patentimages.storage.googleapis.com/t.png")
+        self.assertIsNone(Dataset.objects.get(slug="drones").patents.get(patent_id="US-3-A1").figure_checked_at)

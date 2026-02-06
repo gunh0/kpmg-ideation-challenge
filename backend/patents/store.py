@@ -25,7 +25,17 @@ def store_topic(topic, records, revision, collected_at=None):
             "collected_at": collected_at or timezone.now(),
         },
     )
+    # Figures were looked up one by one on Google Patents; keep them.
+    figures = {
+        patent_id: {"thumbnail_link": thumbnail, "figure_link": figure, "figure_checked_at": checked}
+        for patent_id, thumbnail, figure, checked in dataset.patents.exclude(figure_checked_at=None).values_list(
+            "patent_id", "thumbnail_link", "figure_link", "figure_checked_at"
+        )
+    }
     dataset.patents.all().delete()
-    Patent.objects.bulk_create((Patent(dataset=dataset, **record) for record in records), batch_size=1000)
+    Patent.objects.bulk_create(
+        (Patent(dataset=dataset, **{**figures.get(record["patent_id"], {}), **record}) for record in records),
+        batch_size=1000,
+    )
     logger.info("stored %d patents for topic %s (source %s)", len(records), topic.slug, revision[:12])
     return dataset
