@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 
 from .csv_import import CSVFormatError
 from .export import export_rows
+from .figures import fill_figures
 from .filters import NullsLastOrderingFilter, PatentFilter, PatentSearchFilter
 from .importer import import_export
 from .models import Dataset, Patent
@@ -21,6 +22,7 @@ from .serializers import (
     ConfigSerializer,
     DatasetSerializer,
     DatasetUploadSerializer,
+    FigureSerializer,
     NameCountSerializer,
     PatentSerializer,
     StatsSerializer,
@@ -140,6 +142,32 @@ class AssigneeView(APIView):
             queryset = queryset.filter(assignee__icontains=search)
         rows = queryset.values("assignee").annotate(count=Count("id")).order_by("-count", "assignee")[:20]
         return Response([{"name": row["assignee"], "count": row["count"]} for row in rows])
+
+
+class FigureView(APIView):
+    """Representative figures of up to 50 patents, ?ids=1,2,3.
+
+    Figures that were never looked up are fetched from Google Patents first
+    (at most FETCH_LIMIT per request, the rest come back unchecked and can be
+    asked for again)."""
+
+    MAX_IDS = 50
+    FETCH_LIMIT = 25
+
+    @extend_schema(
+        responses=FigureSerializer(many=True),
+        parameters=[OpenApiParameter("ids", str, description="comma-separated patent ids", required=True)],
+    )
+    def get(self, request):
+        ids = [int(part) for part in request.query_params.get("ids", "").split(",") if part.strip().isdigit()]
+        if not ids:
+            return Response({"ids": ["Give one or more patent ids, e.g. ?ids=1,2,3."]}, status=status.HTTP_400_BAD_REQUEST)
+        patents = list(Patent.objects.filter(pk__in=ids[: self.MAX_IDS]))
+        unchecked = [patent for patent in patents if patent.figure_checked_at is None]
+        fill_figures(unchecked[: self.FETCH_LIMIT])
+        order = {pk: i for i, pk in enumerate(ids)}
+        patents.sort(key=lambda patent: order[patent.pk])
+        return Response(FigureSerializer(patents, many=True).data)
 
 
 class ConfigView(APIView):

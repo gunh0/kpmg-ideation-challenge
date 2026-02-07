@@ -23,6 +23,7 @@ class PatentSerializer(serializers.ModelSerializer):
             "is_granted",
             "result_link",
             "figure_link",
+            "thumbnail_link",
         )
 
 
@@ -85,3 +86,13 @@ class StatsSerializer(serializers.Serializer):
 
 class ConfigSerializer(serializers.Serializer):
     read_only = serializers.BooleanField()
+
+
+class FigureSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    thumbnail = serializers.CharField(source="thumbnail_link")
+    figure = serializers.CharField(source="figure_link")
+    checked = serializers.SerializerMethodField()
+
+    def get_checked(self, patent) -> bool:
+        return patent.figure_checked_at is not None
