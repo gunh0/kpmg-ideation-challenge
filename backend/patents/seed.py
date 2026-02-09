@@ -19,8 +19,10 @@ SEED_DIR = Path(__file__).parent / "seed"
 FIELDS = (
     "patent_id", "application_number", "family_id", "title", "assignee", "inventors",
     "priority_date", "filing_date", "publication_date", "grant_date", "result_link",
+    "thumbnail_link", "figure_link", "figure_checked_at",
 )
 DATES = ("priority_date", "filing_date", "publication_date", "grant_date")
+DATETIMES = ("figure_checked_at",)
 
 
 def seed_path(topic, directory=SEED_DIR):
@@ -28,9 +30,13 @@ def seed_path(topic, directory=SEED_DIR):
 
 
 def dump(dataset, path):
+    def value(patent, field):
+        value = getattr(patent, field)
+        return value.isoformat() if field in DATES + DATETIMES and value else value
+
+    # Fields left at their default are omitted, which keeps the files small.
     patents = [
-        {field: getattr(patent, field).isoformat() if field in DATES and getattr(patent, field) else getattr(patent, field)
-         for field in FIELDS}
+        {field: value(patent, field) for field in FIELDS if getattr(patent, field) not in ("", None)}
         for patent in dataset.patents.order_by("patent_id")
     ]
     document = {
@@ -52,10 +58,14 @@ def load(topic, path, force=False):
         return None
     with gzip.open(path, "rt", encoding="utf-8") as file:
         document = json.load(file)
-    records = [
-        {field: date.fromisoformat(value) if field in DATES and value else value for field, value in patent.items()}
-        for patent in document["patents"]
-    ]
+    def parse(field, value):
+        if field in DATES:
+            return date.fromisoformat(value)
+        if field in DATETIMES:
+            return parse_datetime(value)
+        return value
+
+    records = [{field: parse(field, value) for field, value in patent.items()} for patent in document["patents"]]
     collected_at = parse_datetime(document["collected_at"]) if document["collected_at"] else None
     return store_topic(topic, records, document["source_revision"], collected_at=collected_at)
 

@@ -19,7 +19,15 @@ class SeedTests(TestCase):
         self.dir = Path(self.tmp.name)
         store_topic(
             get_topic("drones"),
-            [record("US-1-B2", grant_date=date(2020, 6, 2)), record("US-2-A1")],
+            [
+                record(
+                    "US-1-B2",
+                    grant_date=date(2020, 6, 2),
+                    thumbnail_link="https://patentimages.storage.googleapis.com/t.png",
+                    figure_checked_at=datetime(2026, 1, 21, 9, tzinfo=timezone.utc),
+                ),
+                record("US-2-A1", assignee=""),
+            ],
             "abc123",
             collected_at=datetime(2026, 1, 20, 12, tzinfo=timezone.utc),
         )
@@ -37,6 +45,10 @@ class SeedTests(TestCase):
         granted = Patent.objects.get(patent_id="US-1-B2")
         self.assertEqual(granted.grant_date, date(2020, 6, 2))
         self.assertEqual(granted.inventor_list, ["Jane Doe", "John Roe"])
+        self.assertEqual(granted.thumbnail_link, "https://patentimages.storage.googleapis.com/t.png")
+        self.assertEqual(granted.figure_checked_at, datetime(2026, 1, 21, 9, tzinfo=timezone.utc))
+        pending = Patent.objects.get(patent_id="US-2-A1")
+        self.assertEqual((pending.assignee, pending.grant_date, pending.figure_checked_at), ("", None, None))
         self.assertIn("Drones: 2 patents from the snapshot", out.getvalue())
 
     def test_load_keeps_topics_that_have_data(self):

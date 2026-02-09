@@ -94,3 +94,22 @@ class FillTests(TestCase):
             figures.fill_figures(Patent.objects.all())
 
         urlopen.assert_not_called()
+
+
+class FetchFiguresCommandTests(TestCase):
+    def test_looks_up_the_latest_patents_of_each_topic(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        store_topic(
+            get_topic("drones"),
+            [record("US-1-B2", publication_date=date(2019, 1, 1)), record("US-2-A1", publication_date=date(2021, 1, 1))],
+            "abc123",
+        )
+        out = StringIO()
+        with mock.patch.object(figures, "fetch_figure", return_value=("https://patentimages.storage.googleapis.com/t.png", "")) as fetch:
+            call_command("fetch_figures", "--latest", "1", stdout=out)
+
+        fetch.assert_called_once_with("US-2-A1")
+        self.assertIn("Drones: 1 of 1 latest patents have a figure", out.getvalue())
