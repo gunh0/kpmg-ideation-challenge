@@ -1,17 +1,13 @@
-from pathlib import Path
-
 from rest_framework.test import APITestCase
 
-from patents.importer import import_export
-
-FIXTURE = Path(__file__).parent / "fixtures" / "export.csv"
+from patents.tests.factories import example_dataset, make_dataset
 
 
 class PatentApiTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.dataset = import_export(FIXTURE.read_text()).dataset
-        cls.other = import_export("id,title,assignee\nZZ-9-A1,Unrelated antenna,Other Corp.\n", name="Other").dataset
+        cls.dataset = example_dataset()
+        cls.other = make_dataset("Other", [{"patent_id": "ZZ-9-A1", "title": "Unrelated antenna", "assignee": "Other Corp."}])
 
     def ids(self, query=""):
         response = self.client.get(f"/api/patents/?{query}")
