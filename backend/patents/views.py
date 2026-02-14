@@ -1,27 +1,21 @@
-from django.conf import settings
 from django.db.models import Count
 from django.http import StreamingHttpResponse
 from django.utils import timezone
 from django.utils.text import slugify
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework import generics, mixins, permissions, status, viewsets
+from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .csv_import import CSVFormatError
 from .export import export_rows
 from .figures import fill_figures
 from .filters import NullsLastOrderingFilter, PatentFilter, PatentSearchFilter
-from .importer import import_export
 from .models import Dataset, Patent
 from .pagination import PatentPagination
 from .serializers import (
-    ConfigSerializer,
     DatasetSerializer,
-    DatasetUploadSerializer,
     FigureSerializer,
     NameCountSerializer,
     PatentSerializer,
@@ -30,41 +24,12 @@ from .serializers import (
 from .stats import summary
 
 
-class ReadOnlyInstance(permissions.BasePermission):
-    message = "This instance is read-only: uploads and deletions are disabled."
-
-    def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS or not settings.PATENTS_READ_ONLY
-
-
-class DatasetViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
-    """Imported Google Patents exports. POST a CSV file to import a new one,
-    PATCH {"name": ...} to rename one."""
+class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
+    """The collected topics (patents.topics) with their patent counts and the
+    revision of the public data they come from."""
 
     queryset = Dataset.objects.annotate(patent_count=Count("patents"))
     serializer_class = DatasetSerializer
-    parser_classes = [JSONParser, MultiPartParser, FormParser]
-    permission_classes = [ReadOnlyInstance]
-    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
-
-    def create(self, request):
-        upload = DatasetUploadSerializer(data=request.data)
-        upload.is_valid(raise_exception=True)
-        try:
-            result = import_export(upload.validated_data["file"], name=upload.validated_data.get("name", ""))
-        except CSVFormatError as exc:
-            return Response({"file": [f"Not a Google Patents export: {exc}."]}, status=status.HTTP_400_BAD_REQUEST)
-
-        dataset = self.get_queryset().get(pk=result.dataset.pk)
-        body = DatasetSerializer(dataset).data
-        body["import"] = {"imported": result.imported, "duplicates": result.duplicates, "skipped": result.skipped}
-        return Response(body, status=status.HTTP_201_CREATED)
 
 
 class PatentViewSet(viewsets.ReadOnlyModelViewSet):
@@ -168,11 +133,3 @@ class FigureView(APIView):
         order = {pk: i for i, pk in enumerate(ids)}
         patents.sort(key=lambda patent: order[patent.pk])
         return Response(FigureSerializer(patents, many=True).data)
-
-
-class ConfigView(APIView):
-    """Instance settings the dashboard adapts to."""
-
-    @extend_schema(responses=ConfigSerializer)
-    def get(self, request):
-        return Response({"read_only": settings.PATENTS_READ_ONLY})

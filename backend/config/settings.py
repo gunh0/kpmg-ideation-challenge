@@ -126,17 +126,12 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# PATENTS_READ_ONLY=1 serves the imported data but refuses uploads and deletions,
-# e.g. for a public demo. The API has no user accounts.
-PATENTS_READ_ONLY = env_bool("PATENTS_READ_ONLY")
-
 # The React dev server (npm run dev) calls the API from another origin.
 CORS_ALLOWED_ORIGINS = env_list("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
 CORS_URLS_REGEX = r"^/api/.*$"
 
 REST_FRAMEWORK = {
-    # No user accounts: the admin keeps Django's own login, the API is open
-    # (see PATENTS_READ_ONLY).
+    # No user accounts: the API only reads, the admin keeps Django's own login.
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     "UNAUTHENTICATED_USER": None,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",

@@ -32,29 +32,7 @@ class DatasetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dataset
-        fields = ("id", "name", "search_url", "imported_at", "patent_count")
-        read_only_fields = ("search_url", "imported_at")
-
-    def validate_name(self, value):
-        value = value.strip()
-        if not value:
-            raise serializers.ValidationError("The name cannot be empty.")
-        return value
-
-
-class DatasetUploadSerializer(serializers.Serializer):
-    MAX_SIZE = 10 * 1024 * 1024
-
-    file = serializers.FileField()
-    name = serializers.CharField(max_length=200, required=False, allow_blank=True)
-
-    def validate_file(self, upload):
-        if upload.size > self.MAX_SIZE:
-            raise serializers.ValidationError("The file is larger than 10 MB.")
-        try:
-            return upload.read().decode("utf-8-sig")
-        except UnicodeDecodeError:
-            raise serializers.ValidationError("The file is not UTF-8 text.")
+        fields = ("id", "slug", "name", "description", "pattern", "source_revision", "collected_at", "patent_count")
 
 
 # Shapes of the non-model responses, for the OpenAPI schema.
@@ -82,10 +60,6 @@ class StatsSerializer(serializers.Serializer):
     by_year = YearCountSerializer(many=True)
     top_assignees = AssigneeCountSerializer(many=True)
     top_inventors = NameCountSerializer(many=True)
-
-
-class ConfigSerializer(serializers.Serializer):
-    read_only = serializers.BooleanField()
 
 
 class FigureSerializer(serializers.Serializer):

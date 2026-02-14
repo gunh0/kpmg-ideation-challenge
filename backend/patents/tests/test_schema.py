@@ -9,7 +9,7 @@ class SchemaTests(TestCase):
         self.assertEqual(response.status_code, 200)
         schema = response.json()
         self.assertEqual(schema["info"]["title"], "Patent Attorney Without Borders API")
-        for path in ("/api/patents/", "/api/datasets/", "/api/stats/", "/api/assignees/", "/api/config/"):
+        for path in ("/api/patents/", "/api/datasets/", "/api/stats/", "/api/assignees/", "/api/figures/"):
             self.assertIn(path, schema["paths"])
 
     def test_stats_share_the_patent_filters(self):
