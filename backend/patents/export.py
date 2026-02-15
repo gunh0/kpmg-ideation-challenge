@@ -1,7 +1,20 @@
-"""CSV export in the Google Patents column layout, so exports can be re-imported."""
+"""CSV export in the column layout of Google Patents' own CSV download."""
 import csv
 
-from .csv_import import COLUMNS, FORMULA_PREFIXES
+COLUMNS = {
+    "id": "patent_id",
+    "title": "title",
+    "assignee": "assignee",
+    "inventor/author": "inventors",
+    "priority date": "priority_date",
+    "filing/creation date": "filing_date",
+    "publication date": "publication_date",
+    "grant date": "grant_date",
+    "result link": "result_link",
+    "representative figure link": "figure_link",
+}
+# Characters that make a spreadsheet treat a cell as a formula.
+FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
 
 
 class Echo:

@@ -1,20 +1,16 @@
 import csv
 import io
-from pathlib import Path
 
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
-from patents.csv_import import parse_export
-from patents.importer import import_export
-
-FIXTURE = Path(__file__).parent / "fixtures" / "export.csv"
+from patents.tests.factories import example_dataset, make_dataset
 
 
 class ExportTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.dataset = import_export(FIXTURE.read_text()).dataset
+        cls.dataset = example_dataset()
 
     def export(self, query=""):
         response = self.client.get(f"/api/patents/export/?{query}")
@@ -40,19 +36,29 @@ class ExportTests(APITestCase):
         self.assertEqual(rows[0][:2], ["id", "title"])
         self.assertEqual([row[0] for row in rows[1:]], ["ZZ-0000001-B2", "ZZ-0000003-B1"])
 
-    def test_export_can_be_imported_again(self):
-        original = parse_export(FIXTURE.read_text()).rows
+    def test_rows_hold_every_column(self):
+        rows = list(csv.reader(io.StringIO(self.export("ordering=patent_id"))))
 
-        again = parse_export(self.export("ordering=patent_id")).rows
+        self.assertEqual(
+            rows[1],
+            [
+                "ZZ-0000001-B2",
+                "Parcel release mechanism for an unmanned aerial vehicle",
+                "Example Robotics Inc.",
+                "Jane Doe, John Roe",
+                "2016-03-14",
+                "2017-03-10",
+                "2019-08-20",
+                "2019-08-20",
+                "https://patents.google.com/patent/ZZ0000001B2/en",
+                "https://patentimages.storage.googleapis.com/example/ZZ0000001B2.png",
+            ],
+        )
 
-        self.assertEqual(sorted(original, key=lambda row: row["patent_id"]), again)
+    def test_formula_like_values_are_neutralised(self):
+        make_dataset("Hostile", [{"patent_id": "ZZ-7-A1", "title": '=HYPERLINK("http://x")', "assignee": "@Evil Corp"}])
 
-    def test_formula_like_values_are_neutralised_and_restored_on_import(self):
-        import_export('id,title,assignee\nZZ-7-A1,"=HYPERLINK(""http://x"")",@Evil Corp\n', name="Hostile")
-
-        text = self.export("search=ZZ-7")
-        row = list(csv.reader(io.StringIO(text)))[1]
+        row = list(csv.reader(io.StringIO(self.export("search=ZZ-7"))))[1]
 
         self.assertEqual(row[1], "'=HYPERLINK(\"http://x\")")
         self.assertEqual(row[2], "'@Evil Corp")
-        self.assertEqual(parse_export(text).rows[0]["title"], '=HYPERLINK("http://x")')
