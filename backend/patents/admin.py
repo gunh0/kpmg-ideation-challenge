@@ -14,8 +14,8 @@ class PatentInline(admin.TabularInline):
 
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ("name", "imported_at", "patent_count")
-    search_fields = ("name", "search_url")
+    list_display = ("name", "slug", "collected_at", "source_revision", "patent_count")
+    search_fields = ("name", "slug")
     inlines = [PatentInline]
 
     @admin.display(description="patents")

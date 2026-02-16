@@ -2,12 +2,9 @@ from django.db import models
 
 
 class Dataset(models.Model):
-    """One Google Patents search result export, or one collected topic."""
+    """One collected topic (patents.topics), known by its slug."""
 
     name = models.CharField(max_length=200)
-    search_url = models.URLField(max_length=2000, blank=True)
-    imported_at = models.DateTimeField(auto_now_add=True)
-    # Collected topics (patents.topics) are known by their slug.
     slug = models.SlugField(max_length=100, unique=True, null=True, blank=True)
     description = models.TextField(blank=True)
     pattern = models.CharField(max_length=500, blank=True)
@@ -15,14 +12,14 @@ class Dataset(models.Model):
     collected_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        ordering = ["-imported_at"]
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
 
 
 class Patent(models.Model):
-    """A patent or application as listed in a Google Patents export."""
+    """A patent application, known by its grant number once it is granted."""
 
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name="patents")
     patent_id = models.CharField(max_length=64)
