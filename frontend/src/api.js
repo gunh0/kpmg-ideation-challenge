@@ -40,23 +40,9 @@ export function errorMessage(body) {
 
 export const api = {
   datasets: () => request("datasets/"),
-  uploadDataset: (file, name = "") => {
-    const form = new FormData();
-    form.append("file", file);
-    if (name) form.append("name", name);
-    return request("datasets/", { method: "POST", body: form });
-  },
-  deleteDataset: (id) => request(`datasets/${id}/`, { method: "DELETE" }),
-  renameDataset: (id, name) =>
-    request(`datasets/${id}/`, {
-      method: "PATCH",
-      headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
-    }),
   patents: (params) => request(`patents/${toQuery(params)}`),
   patent: (id) => request(`patents/${id}/`),
   stats: (params) => request(`stats/${toQuery(params)}`),
   assignees: (params) => request(`assignees/${toQuery(params)}`),
   exportUrl: (params) => `/api/patents/export/${toQuery(params)}`,
-  config: () => request("config/"),
 };

@@ -1,5 +1,4 @@
 import { api } from "../api";
-import { safeUrl } from "../links";
 import Ranking from "../components/Ranking";
 import YearChart from "../components/YearChart";
 import { useDatasets } from "../DatasetContext";
@@ -18,7 +17,6 @@ export default function Dashboard() {
   const { data, error, loading, retry } = useApi(() => api.stats({ dataset }), [dataset]);
   const current = datasets.find((item) => String(item.id) === dataset);
   const name = current?.name;
-  const searchUrl = current ? safeUrl(current.search_url) : null;
 
   if (loaded && datasets.length === 0) {
     return (
@@ -34,14 +32,6 @@ export default function Dashboard() {
       <h1 className="page-title">Dashboard</h1>
       <p className="page-lead">
         {name ? `Dataset “${name}”` : "All datasets"}
-        {searchUrl && (
-          <>
-            {" · "}
-            <a href={searchUrl} target="_blank" rel="noopener noreferrer">
-              Open the search on Google Patents ↗
-            </a>
-          </>
-        )}
       </p>
 
       <ErrorMessage error={error} onRetry={retry} />

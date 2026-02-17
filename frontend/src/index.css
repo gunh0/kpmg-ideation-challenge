@@ -58,11 +58,6 @@ a {
     color: #e3b341;
   }
 
-  .notice {
-    border-color: #1f5132;
-    background: #12311f;
-  }
-
   .alert {
     border-color: #5c2320;
     background: #2d1414;
@@ -431,17 +426,6 @@ th[aria-sort="descending"] .sort-arrow {
   font-size: 0.8rem;
 }
 
-.ellipsis {
-  max-width: 520px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.refresh {
-  margin-top: 14px;
-}
-
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -449,68 +433,6 @@ th[aria-sort="descending"] .sort-arrow {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
-}
-
-.upload {
-  margin-bottom: 24px;
-}
-
-.dropzone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 28px;
-  border: 2px dashed var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.dropzone:hover,
-.dropzone.dragging {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.upload-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.upload-actions .input {
-  flex: 1;
-}
-
-.notice {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: -10px 0 20px;
-  padding: 10px 14px;
-  border: 1px solid #b7e1c4;
-  border-radius: var(--radius);
-  background: #e7f6ec;
-  font-size: 0.92rem;
-}
-
-.notice .icon-button {
-  margin-left: auto;
-}
-
-.actions {
-  text-align: right;
-}
-
-.button-danger {
-  color: #b42318;
-}
-
-.button-danger:hover:not(:disabled) {
-  border-color: #b42318;
-  background: #fef3f2;
 }
 
 .picker {
@@ -801,10 +723,6 @@ a.button {
     width: 100%;
   }
 
-  .upload-actions {
-    flex-direction: column;
-  }
-
   .pagination {
     flex-wrap: wrap;
   }
@@ -870,15 +788,6 @@ a.button {
   }
 }
 
-.read-only-note {
-  margin: 0 0 20px;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--muted);
-}
-
 .chips {
   margin: 0 0 12px;
 }
@@ -906,13 +815,6 @@ a.button {
 
 .chip button:hover {
   background: var(--hover);
-}
-
-.dataset-name {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
 }
 
 .link-button {
@@ -947,8 +849,7 @@ a.button {
 a:focus-visible,
 button:focus-visible,
 select:focus-visible,
-.clickable:focus-visible,
-.dropzone:focus-within {
+.clickable:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

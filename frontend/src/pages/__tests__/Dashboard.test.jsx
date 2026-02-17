@@ -28,7 +28,6 @@ function renderDashboard() {
 }
 
 beforeEach(() => {
-  vi.spyOn(api, "config").mockResolvedValue({ read_only: false });
 });
 
 afterEach(() => {
@@ -38,7 +37,7 @@ afterEach(() => {
 
 describe("Dashboard", () => {
   it("summarises the selection and links rankings to their pages", async () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", search_url: "", patent_count: 3 }]);
+    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockResolvedValue(stats);
 
     renderDashboard();
@@ -64,7 +63,7 @@ describe("Dashboard", () => {
   });
 
   it("offers a retry when the API fails", async () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", search_url: "", patent_count: 3 }]);
+    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockRejectedValue(new TypeError("Failed to fetch"));
 
     renderDashboard();

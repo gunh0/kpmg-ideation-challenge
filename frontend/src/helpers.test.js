@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { nextOrdering, parseOrdering } from "./components/PatentTable";
-import { checkFile } from "./components/UploadDataset";
 import { niceMax } from "./components/YearChart";
 import { safeUrl } from "./links";
 
@@ -40,16 +39,5 @@ describe("niceMax", () => {
     expect(niceMax(11)).toBe(20);
     expect(niceMax(21)).toBe(50);
     expect(niceMax(120)).toBe(200);
-  });
-});
-
-describe("checkFile", () => {
-  it("accepts CSV files up to 10 MB", () => {
-    expect(checkFile({ name: "gp-search.CSV", size: 1024 })).toBe("");
-  });
-
-  it("rejects other files and large ones", () => {
-    expect(checkFile({ name: "results.xlsx", size: 10 })).toMatch(/\.csv/);
-    expect(checkFile({ name: "big.csv", size: 11 * 1024 * 1024 })).toMatch(/10 MB/);
   });
 });

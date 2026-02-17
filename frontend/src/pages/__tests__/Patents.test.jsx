@@ -39,8 +39,7 @@ function renderAt(path) {
 }
 
 beforeEach(() => {
-  vi.spyOn(api, "config").mockResolvedValue({ read_only: false });
-  vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", search_url: "", patent_count: 1 }]);
+  vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 1 }]);
   vi.spyOn(api, "assignees").mockResolvedValue([]);
   vi.spyOn(api, "patents").mockResolvedValue({ count: 1, results: [patent] });
 });
