@@ -41,7 +41,7 @@ function SortHeader({ column, ordering, onSort }) {
   );
 }
 
-// datasetNames: {id: name}, shown as an extra column when several datasets are listed.
+// datasetNames: {id: name}, shown as an extra column when several topics are listed.
 export default function PatentTable({ patents, ordering = "", onSort, onSelect, datasetNames }) {
   return (
     <div className="table-wrap">
@@ -51,7 +51,7 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
             {COLUMNS.map((column) => (
               <SortHeader key={column.key} column={column} ordering={ordering} onSort={onSort} />
             ))}
-            {datasetNames && <th>Dataset</th>}
+            {datasetNames && <th>Topic</th>}
           </tr>
         </thead>
         <tbody>

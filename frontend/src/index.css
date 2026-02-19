@@ -492,6 +492,38 @@ th[aria-sort="descending"] .sort-arrow {
   background: var(--surface);
 }
 
+.topics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.topic {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.topic p {
+  margin: 0 0 10px;
+}
+
+.topic-count strong {
+  font-size: 1.4rem;
+}
+
+.topic-links {
+  display: flex;
+  gap: 8px;
+  margin-top: auto !important;
+}
+
+.section-title {
+  margin: 8px 0 6px;
+  font-size: 1.05rem;
+}
+
 .panel-more {
   margin: 10px 0 0;
   font-size: 0.9rem;

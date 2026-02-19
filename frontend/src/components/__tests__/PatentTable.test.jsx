@@ -40,7 +40,7 @@ describe("PatentTable", () => {
   it("names the dataset of each patent when asked to", () => {
     render(<PatentTable patents={[{ ...patent, dataset: 7 }]} datasetNames={{ 7: "Drones" }} />);
 
-    expect(screen.getByRole("columnheader", { name: "Dataset" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Topic" })).toBeInTheDocument();
     expect(screen.getByText("Drones")).toBeInTheDocument();
   });
 

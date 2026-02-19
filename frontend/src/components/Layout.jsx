@@ -5,7 +5,7 @@ import DatasetPicker from "./DatasetPicker";
 const links = [
   { to: "/", label: "Dashboard", end: true },
   { to: "/patents", label: "Patents" },
-  { to: "/datasets", label: "Datasets" },
+  { to: "/topics", label: "Topics" },
 ];
 
 export default function Layout() {

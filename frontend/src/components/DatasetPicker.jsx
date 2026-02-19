@@ -6,11 +6,11 @@ export default function DatasetPicker() {
   return (
     <select
       className="select picker"
-      aria-label="Dataset"
+      aria-label="Topic"
       value={selected}
       onChange={(event) => setSelected(event.target.value)}
     >
-      <option value="">All datasets</option>
+      <option value="">All topics</option>
       {datasets.map((dataset) => (
         <option key={dataset.id} value={dataset.id}>
           {dataset.name} ({dataset.patent_count})

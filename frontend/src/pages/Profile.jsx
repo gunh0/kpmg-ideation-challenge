@@ -68,7 +68,7 @@ export default function Profile({ kind }) {
       <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
       {data && data.total === 0 && (
-        <p className="page-lead">No patents of this {kind} in the selected dataset.</p>
+        <p className="page-lead">No patents of this {kind} in the selected topic.</p>
       )}
       {data && data.total > 0 && (
         <>

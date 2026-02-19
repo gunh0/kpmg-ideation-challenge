@@ -31,7 +31,7 @@ export default function Dashboard() {
     <section>
       <h1 className="page-title">Dashboard</h1>
       <p className="page-lead">
-        {name ? `Dataset “${name}”` : "All datasets"}
+        {name ? `Topic “${name}”` : "All topics"}
       </p>
 
       <ErrorMessage error={error} onRetry={retry} />
