@@ -52,14 +52,14 @@ describe("Dashboard", () => {
     expect(screen.getByText("100% granted")).toBeInTheDocument();
   });
 
-  it("asks to import data when there is none", async () => {
+  it("explains where the data comes from when there is none", async () => {
     vi.spyOn(api, "datasets").mockResolvedValue([]);
     vi.spyOn(api, "stats").mockResolvedValue({ ...stats, total: 0 });
 
     renderDashboard();
 
     expect(await screen.findByText("No patents yet")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Import a dataset" })).toHaveAttribute("href", "/datasets");
+    expect(screen.getByRole("link", { name: "About the topics" })).toHaveAttribute("href", "/topics");
   });
 
   it("offers a retry when the API fails", async () => {
