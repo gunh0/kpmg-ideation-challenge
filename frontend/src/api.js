@@ -44,5 +44,6 @@ export const api = {
   patent: (id) => request(`patents/${id}/`),
   stats: (params) => request(`stats/${toQuery(params)}`),
   assignees: (params) => request(`assignees/${toQuery(params)}`),
+  figures: (ids) => request(`figures/?ids=${ids.join(",")}`),
   exportUrl: (params) => `/api/patents/export/${toQuery(params)}`,
 };
