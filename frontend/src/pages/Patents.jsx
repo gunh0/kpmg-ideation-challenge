@@ -11,6 +11,7 @@ import PatentTable from "../components/PatentTable";
 import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
 import useDebounce from "../hooks/useDebounce";
+import useFigures from "../hooks/useFigures";
 import useQueryParams from "../hooks/useQueryParams";
 import useTitle from "../hooks/useTitle";
 
@@ -86,6 +87,7 @@ export default function Patents() {
     [openId, Boolean(data), Boolean(listed)]
   );
   const openPatent = openId ? listed || fetched.data : null;
+  const figures = useFigures(data?.results);
   function setOpen(patent) {
     const next = new URLSearchParams(searchParams);
     if (patent) next.set("patent", patent.id);
@@ -210,6 +212,7 @@ export default function Patents() {
             ordering={params.ordering}
             onSort={(ordering) => update({ ordering })}
             onSelect={setOpen}
+            figures={figures}
             datasetNames={
               !dataset && datasets.length > 1
                 ? Object.fromEntries(datasets.map((item) => [item.id, item.name]))

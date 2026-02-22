@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router";
+
+import { safeUrl } from "../links";
 
 export function formatDate(value) {
   return value || "—";
@@ -41,13 +44,44 @@ function SortHeader({ column, ordering, onSort }) {
   );
 }
 
+const stop = (event) => event.stopPropagation();
+
+// The representative figure, which opens the patent on Google Patents; the
+// rest of the row opens the details. figure: undefined while it is looked up.
+function Thumbnail({ patent, figure }) {
+  const [failed, setFailed] = useState(null);
+  const link = safeUrl(patent.result_link);
+  const src = figure ? safeUrl(figure.thumbnail) : null;
+  const image = src && src !== failed ? (
+    <img src={src} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(src)} />
+  ) : (
+    <span className={figure ? "thumb-none" : "thumb-wait"} aria-hidden="true" />
+  );
+  if (!link) return <span className="thumb">{image}</span>;
+  return (
+    <a
+      className="thumb"
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${patent.patent_id} on Google Patents`}
+      onClick={stop}
+      onKeyDown={stop}
+    >
+      {image}
+    </a>
+  );
+}
+
 // datasetNames: {id: name}, shown as an extra column when several topics are listed.
-export default function PatentTable({ patents, ordering = "", onSort, onSelect, datasetNames }) {
+// figures: {id: {thumbnail, figure}} from useFigures, shown as the first column.
+export default function PatentTable({ patents, ordering = "", onSort, onSelect, datasetNames, figures }) {
   return (
     <div className="table-wrap">
-      <table className="table patent-table">
+      <table className={`table patent-table${figures ? " with-figures" : ""}`}>
         <thead>
           <tr>
+            {figures && <th className="cell-figure">Figure</th>}
             {COLUMNS.map((column) => (
               <SortHeader key={column.key} column={column} ordering={ordering} onSort={onSort} />
             ))}
@@ -63,6 +97,11 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
               onClick={onSelect && (() => onSelect(patent))}
               onKeyDown={onSelect && ((event) => event.key === "Enter" && onSelect(patent))}
             >
+              {figures && (
+                <td className="cell-figure">
+                  <Thumbnail patent={patent} figure={figures[patent.id] ?? undefined} />
+                </td>
+              )}
               <td className="mono nowrap cell-id">{patent.patent_id}</td>
               <td className="cell-title">{patent.title}</td>
               <td className="cell-assignee">
@@ -70,8 +109,8 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
                   <Link
                     to={`/assignees/${encodeURIComponent(patent.assignee)}`}
                     // The row itself opens the details.
-                    onClick={(event) => event.stopPropagation()}
-                    onKeyDown={(event) => event.stopPropagation()}
+                    onClick={stop}
+                    onKeyDown={stop}
                   >
                     {patent.assignee}
                   </Link>

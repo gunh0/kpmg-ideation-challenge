@@ -319,6 +319,51 @@ th[aria-sort="descending"] .sort-arrow {
   width: 220px;
 }
 
+.cell-figure {
+  width: 72px;
+}
+
+.thumb {
+  display: block;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff; /* patent drawings are black on white */
+}
+
+.thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.thumb-wait,
+.thumb-none {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--track);
+}
+
+.thumb-wait {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb-wait {
+    animation: none;
+  }
+}
+
 .clickable {
   cursor: pointer;
 }
@@ -805,6 +850,32 @@ a.button {
 
   .patent-table .cell-dataset {
     order: 4;
+  }
+
+  /* With figures: the thumbnail on the left, beside the whole card. */
+  .patent-table.with-figures tr {
+    grid-template-columns: 56px 1fr auto;
+  }
+
+  .patent-table.with-figures .cell-figure {
+    grid-row: 1 / span 4;
+    grid-column: 1;
+    width: auto;
+  }
+
+  .patent-table.with-figures .cell-id,
+  .patent-table.with-figures .cell-assignee {
+    grid-column: 2;
+  }
+
+  .patent-table.with-figures .cell-status,
+  .patent-table.with-figures .cell-date {
+    grid-column: 3;
+  }
+
+  .patent-table.with-figures .cell-title,
+  .patent-table.with-figures .cell-dataset {
+    grid-column: 2 / -1;
   }
 
   .patent-table .cell-status,

@@ -122,3 +122,28 @@ describe("PatentDetail", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("PatentTable figures", () => {
+  it("shows the thumbnail, linked to Google Patents without opening the details", () => {
+    const onSelect = vi.fn();
+    const figures = { 1: { thumbnail: "https://patentimages.storage.googleapis.com/t.png", figure: "" }, 2: undefined };
+    const { container } = render(<PatentTable patents={[patent, application]} onSelect={onSelect} figures={figures} />);
+
+    const link = screen.getByRole("link", { name: "ZZ-0000001-B2 on Google Patents" });
+    expect(link).toHaveAttribute("href", patent.result_link);
+    expect(link.querySelector("img")).toHaveAttribute("src", "https://patentimages.storage.googleapis.com/t.png");
+    fireEvent.click(link);
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(container.querySelector(".thumb-wait")).toBeInTheDocument();
+  });
+
+  it("falls back to an empty frame when the image cannot be loaded", () => {
+    const figures = { 1: { thumbnail: "https://patentimages.storage.googleapis.com/gone.png", figure: "" } };
+    const { container } = render(<PatentTable patents={[patent]} figures={figures} />);
+
+    fireEvent.error(container.querySelector(".thumb img"));
+
+    expect(container.querySelector(".thumb img")).not.toBeInTheDocument();
+    expect(container.querySelector(".thumb-none")).toBeInTheDocument();
+  });
+});

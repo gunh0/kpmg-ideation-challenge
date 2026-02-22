@@ -9,6 +9,7 @@ import PatentTable from "../components/PatentTable";
 import Ranking from "../components/Ranking";
 import YearChart from "../components/YearChart";
 import useApi from "../hooks/useApi";
+import useFigures from "../hooks/useFigures";
 import useTitle from "../hooks/useTitle";
 
 const LATEST = 5;
@@ -55,6 +56,7 @@ export default function Profile({ kind }) {
     [kind, name, dataset]
   );
   const [open, setOpen] = useState(null);
+  const figures = useFigures(latest.data?.results);
   const listUrl = `/patents?${kind}=${encodeURIComponent(name)}`;
   const { label, rankings } = KINDS[kind];
 
@@ -98,7 +100,7 @@ export default function Profile({ kind }) {
           {latest.data && (
             <div className="panel">
               <h2 className="panel-title">Latest publications</h2>
-              <PatentTable patents={latest.data.results} onSelect={setOpen} />
+              <PatentTable patents={latest.data.results} onSelect={setOpen} figures={figures} />
               {data.total > LATEST && (
                 <p className="panel-more">
                   <Link to={listUrl}>All {data.total} patents →</Link>
