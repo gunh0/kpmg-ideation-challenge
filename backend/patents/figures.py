@@ -38,9 +38,23 @@ def parse_figure(html):
     return first(THUMBNAIL), first(FULL)
 
 
+def image_available(url, timeout=10):
+    """Pages of the newest publications name images that Google does not
+    serve yet (403), so a figure is only kept once its image loads."""
+    request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return response.status == 200
+    except urllib.error.HTTPError as error:
+        if error.code in (403, 404):
+            return False
+        raise
+
+
 def fetch_figure(publication_number, timeout=10):
     """Look the figure up on the patent's page. Returns ("", "") when the page
-    has no drawing or does not exist; raises on network errors."""
+    has no drawing, its image is not served or the page does not exist;
+    raises on network errors."""
     request = urllib.request.Request(patent_url(publication_number), headers={"User-Agent": USER_AGENT})
     with _slots:
         try:
@@ -50,7 +64,10 @@ def fetch_figure(publication_number, timeout=10):
             if error.code == 404:
                 return "", ""
             raise
-    return parse_figure(html)
+        thumbnail, full = parse_figure(html)
+        if thumbnail and not image_available(thumbnail, timeout):
+            return "", ""
+    return thumbnail, full
 
 
 def fill_figures(patents, workers=4):

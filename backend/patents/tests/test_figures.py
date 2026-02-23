@@ -46,6 +46,11 @@ class ParseTests(SimpleTestCase):
 
 
 class FetchTests(SimpleTestCase):
+    def setUp(self):
+        patcher = mock.patch.object(figures, "image_available", return_value=True)
+        self.image_available = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_requests_the_google_patents_page(self):
         with mock.patch("urllib.request.urlopen", return_value=response(PAGE)) as urlopen:
             thumbnail, _ = figures.fetch_figure("US-10186348-B2")
@@ -55,14 +60,36 @@ class FetchTests(SimpleTestCase):
         self.assertIn("PatentAttorneyWithoutBorders", request.get_header("User-agent"))
         self.assertTrue(thumbnail)
 
+    def test_images_google_does_not_serve_yet_are_dropped(self):
+        self.image_available.return_value = False
+        with mock.patch("urllib.request.urlopen", return_value=response(PAGE)):
+            self.assertEqual(figures.fetch_figure("US-12434682-B1"), ("", ""))
+
     def test_missing_page_means_no_figure(self):
         error = urllib.error.HTTPError("url", 404, "Not Found", {}, None)
         with mock.patch("urllib.request.urlopen", side_effect=error):
             self.assertEqual(figures.fetch_figure("US-1-B2"), ("", ""))
 
 
+class ImageAvailableTests(SimpleTestCase):
+    def test_served_image(self):
+        ok = mock.MagicMock(status=200)
+        ok.__enter__.return_value = ok
+        with mock.patch("urllib.request.urlopen", return_value=ok) as urlopen:
+            self.assertTrue(figures.image_available("https://patentimages.storage.googleapis.com/x.png"))
+        self.assertEqual(urlopen.call_args.args[0].get_method(), "HEAD")
+
+    def test_forbidden_image(self):
+        forbidden = urllib.error.HTTPError("url", 403, "Forbidden", {}, None)
+        with mock.patch("urllib.request.urlopen", side_effect=forbidden):
+            self.assertFalse(figures.image_available("https://patentimages.storage.googleapis.com/x.png"))
+
+
 class FillTests(TestCase):
     def setUp(self):
+        patcher = mock.patch.object(figures, "image_available", return_value=True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
         store_topic(get_topic("drones"), [record("US-10186348-B2"), record("US-2-A1")], "abc123")
 
     def test_stores_what_was_found_and_that_it_was_checked(self):
