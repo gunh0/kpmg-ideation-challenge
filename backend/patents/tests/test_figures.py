@@ -124,19 +124,25 @@ class FillTests(TestCase):
 
 
 class FetchFiguresCommandTests(TestCase):
-    def test_looks_up_the_latest_patents_of_each_topic(self):
+    def test_walks_back_until_enough_figures_are_found(self):
         from io import StringIO
 
         from django.core.management import call_command
 
         store_topic(
             get_topic("drones"),
-            [record("US-1-B2", publication_date=date(2019, 1, 1)), record("US-2-A1", publication_date=date(2021, 1, 1))],
+            [record(f"US-{n}-B1", publication_date=date(2020, 1, n)) for n in range(1, 31)],
             "abc123",
         )
-        out = StringIO()
-        with mock.patch.object(figures, "fetch_figure", return_value=("https://patentimages.storage.googleapis.com/t.png", "")) as fetch:
-            call_command("fetch_figures", "--latest", "1", stdout=out)
+        newest = {f"US-{n}-B1" for n in range(21, 31)}  # published last, no image yet
 
-        fetch.assert_called_once_with("US-2-A1")
-        self.assertIn("Drones: 1 of 1 latest patents have a figure", out.getvalue())
+        def fetch(number):
+            return ("", "") if number in newest else ("https://patentimages.storage.googleapis.com/t.png", "")
+
+        out = StringIO()
+        with mock.patch.object(figures, "fetch_figure", side_effect=fetch):
+            call_command("fetch_figures", "--latest", "3", stdout=out)
+
+        newest_with_figure = Patent.objects.exclude(thumbnail_link="").order_by("-publication_date").first()
+        self.assertEqual(newest_with_figure.patent_id, "US-20-B1")
+        self.assertIn("Drones: 14 patents with a figure (24 looked up)", out.getvalue())

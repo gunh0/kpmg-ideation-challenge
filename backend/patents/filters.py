@@ -12,10 +12,16 @@ class PatentFilter(django_filters.FilterSet):
     granted = django_filters.BooleanFilter(field_name="grant_date", lookup_expr="isnull", exclude=True)
     year_from = django_filters.NumberFilter(field_name="publication_date", lookup_expr="year__gte")
     year_to = django_filters.NumberFilter(field_name="publication_date", lookup_expr="year__lte")
+    has_figure = django_filters.BooleanFilter(field_name="thumbnail_link", lookup_expr="exact", exclude=True,
+                                              method="filter_has_figure")
 
     class Meta:
         model = Patent
-        fields = ["dataset", "assignee", "inventor", "granted", "year_from", "year_to"]
+        fields = ["dataset", "assignee", "inventor", "granted", "year_from", "year_to", "has_figure"]
+
+    def filter_has_figure(self, queryset, name, value):
+        """Patents whose representative figure is known (true) or not (false)."""
+        return queryset.exclude(thumbnail_link="") if value else queryset.filter(thumbnail_link="")
 
     def filter_inventor(self, queryset, name, value):
         """Whole names within the comma-separated inventor list, case-insensitive."""

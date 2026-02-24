@@ -29,6 +29,12 @@ class PatentApiTests(APITestCase):
         self.assertTrue(body["is_granted"])
         self.assertEqual(body["publication_date"], "2019-08-20")
 
+    def test_filter_by_figure(self):
+        self.dataset.patents.filter(patent_id="ZZ-0000003-B1").update(thumbnail_link="https://patentimages.storage.googleapis.com/t.png")
+
+        self.assertEqual(self.ids("has_figure=true"), ["ZZ-0000003-B1"])
+        self.assertNotIn("ZZ-0000003-B1", self.ids("has_figure=false"))
+
     def test_filter_by_dataset(self):
         self.assertEqual(self.ids(f"dataset={self.other.pk}"), ["ZZ-9-A1"])
 
