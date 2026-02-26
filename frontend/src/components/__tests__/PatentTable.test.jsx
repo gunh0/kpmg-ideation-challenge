@@ -1,6 +1,8 @@
 import { fireEvent, render as renderPlain, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { api } from "../../api";
 
 import PatentDetail from "../PatentDetail";
 import PatentTable from "../PatentTable";
@@ -79,6 +81,24 @@ describe("PatentTable", () => {
 });
 
 describe("PatentDetail", () => {
+  beforeEach(() => {
+    vi.spyOn(api, "figures").mockResolvedValue([]);
+  });
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it("shows the figure, linked to Google Patents", async () => {
+    const figure = "https://patentimages.storage.googleapis.com/full/ZZ0000001B2.png";
+    api.figures.mockResolvedValue([{ id: 1, thumbnail: "t", figure, checked: true }]);
+
+    render(<PatentDetail patent={{ ...patent, figure_link: "", thumbnail_link: "" }} onClose={() => {}} />);
+
+    const image = await screen.findByRole("img", { name: "Representative figure of ZZ-0000001-B2" });
+    expect(image).toHaveAttribute("src", figure);
+    expect(image.closest("a")).toHaveAttribute("href", patent.result_link);
+    expect(api.figures).toHaveBeenCalledWith([1]);
+  });
+
   it("lists inventors and dates and links to Google Patents", () => {
     render(<PatentDetail patent={patent} onClose={() => {}} />);
 

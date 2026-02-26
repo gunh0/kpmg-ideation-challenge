@@ -467,6 +467,11 @@ th[aria-sort="descending"] .sort-arrow {
   max-height: 320px;
 }
 
+.figure figcaption {
+  margin-top: 6px;
+  color: #5b6573; /* on the white drawing background in both themes */
+}
+
 .small {
   font-size: 0.8rem;
 }

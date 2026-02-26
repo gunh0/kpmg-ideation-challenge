@@ -1,6 +1,7 @@
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
+import useFigures from "../hooks/useFigures";
 import { safeUrl } from "../links";
 import { formatDate } from "./PatentTable";
 
@@ -13,7 +14,10 @@ const DATES = [
 
 export default function PatentDetail({ patent, onClose }) {
   const link = safeUrl(patent.result_link);
-  const figure = safeUrl(patent.figure_link);
+  // The full drawing if known, else the thumbnail; looked up if never checked.
+  const found = useFigures([patent])[patent.id];
+  const figure = found ? safeUrl(found.figure) || safeUrl(found.thumbnail) : null;
+  const [failed, setFailed] = useState(null);
 
   const drawer = useRef(null);
 
@@ -101,9 +105,18 @@ export default function PatentDetail({ patent, onClose }) {
           ))}
         </dl>
 
-        {figure && (
+        {figure && figure !== failed && (
           <figure className="figure">
-            <img src={figure} alt={`Representative figure of ${patent.patent_id}`} loading="lazy" referrerPolicy="no-referrer" />
+            <a href={link || figure} target="_blank" rel="noopener noreferrer">
+              <img
+                src={figure}
+                alt={`Representative figure of ${patent.patent_id}`}
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={() => setFailed(figure)}
+              />
+            </a>
+            <figcaption className="muted small">Representative figure · Google Patents</figcaption>
           </figure>
         )}
         {link && (
