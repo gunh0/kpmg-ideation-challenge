@@ -1,4 +1,7 @@
 import { api } from "../api";
+import { Link } from "react-router";
+
+import LatestPatents from "../components/LatestPatents";
 import Ranking from "../components/Ranking";
 import YearChart from "../components/YearChart";
 import { useDatasets } from "../DatasetContext";
@@ -15,6 +18,10 @@ export default function Dashboard() {
   useTitle("Dashboard");
   const { selected: dataset, datasets, loaded } = useDatasets();
   const { data, error, loading, retry } = useApi(() => api.stats({ dataset }), [dataset]);
+  const latest = useApi(
+    () => api.patents({ dataset, has_figure: true, ordering: "-publication_date", page_size: 8 }),
+    [dataset]
+  );
   const current = datasets.find((item) => String(item.id) === dataset);
   const name = current?.name;
 
@@ -56,6 +63,17 @@ export default function Dashboard() {
             <div className="card-value card-value-text">{data.top_assignees[0]?.name || "—"}</div>
             {data.top_assignees[0] && <div className="card-note">{data.top_assignees[0].count} patents</div>}
           </div>
+        </div>
+      )}
+      {latest.data && (
+        <div className="panel">
+          <div className="panel-head">
+            <h2 className="panel-title">Latest patents</h2>
+            <Link to="/patents" className="small">
+              All patents →
+            </Link>
+          </div>
+          <LatestPatents patents={latest.data.results} />
         </div>
       )}
       {data && (

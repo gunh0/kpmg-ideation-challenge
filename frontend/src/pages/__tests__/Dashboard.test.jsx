@@ -37,6 +37,7 @@ afterEach(() => {
 
 describe("Dashboard", () => {
   it("summarises the selection and links rankings to their pages", async () => {
+    vi.spyOn(api, "patents").mockResolvedValue({ count: 0, results: [] });
     vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockResolvedValue(stats);
 
@@ -50,6 +51,32 @@ describe("Dashboard", () => {
     );
     expect(screen.getByRole("link", { name: "John Roe" })).toHaveAttribute("href", "/inventors/John%20Roe");
     expect(screen.getByText("100% granted")).toBeInTheDocument();
+  });
+
+  it("shows the latest patents with their figures, linked to Google Patents", async () => {
+    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "stats").mockResolvedValue(stats);
+    vi.spyOn(api, "patents").mockResolvedValue({
+      count: 1,
+      results: [
+        {
+          id: 7,
+          patent_id: "US-12351339-B2",
+          title: "Drone landing gear",
+          assignee: "Example Robotics Inc.",
+          publication_date: "2025-07-08",
+          result_link: "https://patents.google.com/patent/US12351339B2/en",
+          thumbnail_link: "https://patentimages.storage.googleapis.com/t.png",
+        },
+      ],
+    });
+
+    renderDashboard();
+
+    const card = await screen.findByRole("link", { name: /Drone landing gear/ });
+    expect(card).toHaveAttribute("href", "https://patents.google.com/patent/US12351339B2/en");
+    expect(card.querySelector("img")).toHaveAttribute("src", "https://patentimages.storage.googleapis.com/t.png");
+    expect(api.patents).toHaveBeenCalledWith(expect.objectContaining({ has_figure: true, page_size: 8 }));
   });
 
   it("explains where the data comes from when there is none", async () => {
