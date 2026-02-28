@@ -5,6 +5,7 @@ An application is usually published twice: as an application (kind A1) about
 The dashboard counts inventions, so both publications become one record that
 is known by its grant number once there is one.
 """
+import html
 from datetime import date
 
 from .google import patent_url
@@ -20,9 +21,14 @@ def to_date(value):
     return date(value // 10000, value // 100 % 100, value % 100)
 
 
+def text(value):
+    """Some titles and names carry HTML entities (&#39;, &amp;, &ldquo;)."""
+    return " ".join(html.unescape(value or "").split())
+
+
 def person_name(raw):
     """Inventors are listed as "MOLNAR, DEZSO"; show them as "Dezso Molnar"."""
-    last, _, first = raw.partition(",")
+    last, _, first = text(raw).partition(",")
     name = f"{first.strip()} {last.strip()}".strip()
     if name.isupper():
         name = name.title()
@@ -45,12 +51,12 @@ def merge(rows):
         grants = [row for row in publications if row["kind_code"] in GRANT_KINDS or row["grant_date"]]
         number_from = grants[-1] if grants else latest
         inventors = [person_name(name) for name in latest["inventor"] or []]
-        assignees = [name.strip() for name in latest["assignee"] or [] if name.strip()]
+        assignees = [text(name) for name in latest["assignee"] or [] if text(name)]
         record = {
             "patent_id": number_from["publication_number"],
             "application_number": application,
             "family_id": latest["family_id"] or "",
-            "title": latest["title"],
+            "title": text(latest["title"]),
             "assignee": assignees[0] if assignees else "",
             "inventors": ", ".join(dict.fromkeys(name for name in inventors if name)),
             "priority_date": to_date(latest["priority_date"]),

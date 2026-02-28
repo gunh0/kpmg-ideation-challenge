@@ -57,6 +57,16 @@ class MergeTests(SimpleTestCase):
         self.assertEqual(record["assignee"], "Example Robotics Inc.")
         self.assertEqual(record["result_link"], "https://patents.google.com/patent/US10000001B2/en")
 
+    def test_html_entities_are_decoded(self):
+        rows = [publication("US-2019000001-A1", "A1", 20190103, title="Controlling vehicles based on edge servers&#39; load",
+                            assignee=["Smith &amp; Sons"], inventor=["O&#39;BRIEN, PAT"])]
+
+        [record] = merge(rows)["drones"]
+
+        self.assertEqual(record["title"], "Controlling vehicles based on edge servers' load")
+        self.assertEqual(record["assignee"], "Smith & Sons")
+        self.assertEqual(record["inventors"], "Pat O'Brien")
+
     def test_pending_application_keeps_its_publication_number(self):
         [record] = merge([publication("US-2019000001-A1", "A1", 20190103)])["drones"]
 
