@@ -1,6 +1,6 @@
-import { api } from "../api";
 import { Link } from "react-router";
 
+import { api } from "../api";
 import LatestPatents from "../components/LatestPatents";
 import Ranking from "../components/Ranking";
 import YearChart from "../components/YearChart";
@@ -9,6 +9,7 @@ import EmptyState from "../components/EmptyState";
 import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
 import useTitle from "../hooks/useTitle";
+import { formatNumber } from "../format";
 
 function percent(part, whole) {
   return whole ? `${Math.round((100 * part) / whole)}%` : "—";
@@ -47,21 +48,21 @@ export default function Dashboard() {
         <div className="cards">
           <div className="card">
             <div className="card-label">Patents</div>
-            <div className="card-value">{data.total}</div>
+            <div className="card-value">{formatNumber(data.total)}</div>
           </div>
           <div className="card">
             <div className="card-label">Granted</div>
-            <div className="card-value">{data.granted}</div>
+            <div className="card-value">{formatNumber(data.granted)}</div>
             <div className="card-note">{percent(data.granted, data.total)} of all</div>
           </div>
           <div className="card">
             <div className="card-label">Applications</div>
-            <div className="card-value">{data.total - data.granted}</div>
+            <div className="card-value">{formatNumber(data.total - data.granted)}</div>
           </div>
           <div className="card">
             <div className="card-label">Top assignee</div>
             <div className="card-value card-value-text">{data.top_assignees[0]?.name || "—"}</div>
-            {data.top_assignees[0] && <div className="card-note">{data.top_assignees[0].count} patents</div>}
+            {data.top_assignees[0] && <div className="card-note">{formatNumber(data.top_assignees[0].count)} patents</div>}
           </div>
         </div>
       )}

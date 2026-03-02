@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { nextOrdering, parseOrdering } from "./components/PatentTable";
 import { niceMax } from "./components/YearChart";
+import { formatNumber } from "./format";
 import { safeUrl } from "./links";
 
 describe("safeUrl", () => {
@@ -39,5 +40,12 @@ describe("niceMax", () => {
     expect(niceMax(11)).toBe(20);
     expect(niceMax(21)).toBe(50);
     expect(niceMax(120)).toBe(200);
+  });
+});
+
+describe("formatNumber", () => {
+  it("groups thousands", () => {
+    expect(formatNumber(20152)).toBe("20,152");
+    expect(formatNumber(7)).toBe("7");
   });
 });

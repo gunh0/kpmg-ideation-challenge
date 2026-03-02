@@ -1,3 +1,5 @@
+import { formatNumber } from "../format";
+
 export default function Pagination({ page, pageSize, count, onChange }) {
   const pages = Math.max(1, Math.ceil(count / pageSize));
   if (pages === 1) return null;
@@ -10,7 +12,7 @@ export default function Pagination({ page, pageSize, count, onChange }) {
         ← Previous
       </button>
       <span className="muted">
-        {first}–{last} of {count} · page {page} of {pages}
+        {formatNumber(first)}–{formatNumber(last)} of {formatNumber(count)} · page {page} of {formatNumber(pages)}
       </span>
       <button type="button" className="button" disabled={page >= pages} onClick={() => onChange(page + 1)}>
         Next →

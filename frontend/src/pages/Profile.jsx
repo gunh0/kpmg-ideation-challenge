@@ -11,6 +11,7 @@ import YearChart from "../components/YearChart";
 import useApi from "../hooks/useApi";
 import useFigures from "../hooks/useFigures";
 import useTitle from "../hooks/useTitle";
+import { formatNumber } from "../format";
 
 const LATEST = 5;
 
@@ -77,14 +78,14 @@ export default function Profile({ kind }) {
           <div className="cards">
             <div className="card">
               <div className="card-label">Patents</div>
-              <div className="card-value">{data.total}</div>
+              <div className="card-value">{formatNumber(data.total)}</div>
               <div className="card-note">
                 <Link to={listUrl}>Show all</Link>
               </div>
             </div>
             <div className="card">
               <div className="card-label">Granted</div>
-              <div className="card-value">{data.granted}</div>
+              <div className="card-value">{formatNumber(data.granted)}</div>
               <div className="card-note">{percent(data.granted, data.total)} of all</div>
             </div>
             <div className="card">
@@ -103,7 +104,7 @@ export default function Profile({ kind }) {
               <PatentTable patents={latest.data.results} onSelect={setOpen} figures={figures} />
               {data.total > LATEST && (
                 <p className="panel-more">
-                  <Link to={listUrl}>All {data.total} patents →</Link>
+                  <Link to={listUrl}>All {formatNumber(data.total)} patents →</Link>
                 </p>
               )}
             </div>

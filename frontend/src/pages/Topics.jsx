@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { api } from "../api";
 import { useDatasets } from "../DatasetContext";
 import ErrorMessage from "../components/ErrorMessage";
+import { formatNumber } from "../format";
 import useApi from "../hooks/useApi";
 import useTitle from "../hooks/useTitle";
 
@@ -43,7 +44,7 @@ export default function Topics() {
               <h2 className="panel-title">{topic.name}</h2>
               <p>{topic.description}</p>
               <p className="topic-count">
-                <strong>{topic.patent_count.toLocaleString()}</strong> patents
+                <strong>{formatNumber(topic.patent_count)}</strong> patents
                 <span className="muted"> · collected {formatDate(topic.collected_at)}</span>
               </p>
               {topic.pattern && (

@@ -14,6 +14,7 @@ import useDebounce from "../hooks/useDebounce";
 import useFigures from "../hooks/useFigures";
 import useQueryParams from "../hooks/useQueryParams";
 import useTitle from "../hooks/useTitle";
+import { formatNumber } from "../format";
 
 const PAGE_SIZES = ["25", "50", "100"];
 const FILTERS = ["search", "assignee", "inventor", "granted", "year_from", "year_to"];
@@ -181,7 +182,7 @@ export default function Patents() {
         <>
           <div className="result-bar">
             <p className="muted">
-              {data.count} patents{params.search && <> matching “{params.search}”</>}
+              {formatNumber(data.count)} patents{params.search && <> matching “{params.search}”</>}
             </p>
             <div className="result-actions">
               <label className="muted small">

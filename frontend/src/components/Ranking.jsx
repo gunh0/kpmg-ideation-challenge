@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { formatNumber } from "../format";
 
 // Horizontal bars for a ranked list. One hue: the bars compare magnitude,
 // the names carry identity. linkTo(row) turns names into links.
@@ -23,7 +24,7 @@ export default function Ranking({ rows, linkTo, emptyText = "Nothing to rank." }
             <span style={{ width: `${(100 * row.count) / max}%` }} />
           </span>
           <span className="ranking-count">
-            {row.count}
+            {formatNumber(row.count)}
             {row.granted !== undefined && (
               <span className="ranking-rate" title={`${row.granted} of ${row.count} granted`}>
                 {Math.round((100 * row.granted) / row.count)}% granted
