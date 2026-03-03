@@ -1033,6 +1033,23 @@ select:focus-visible,
   outline-offset: 2px;
 }
 
+.footer {
+  max-width: 1200px;
+  margin: 32px auto 0;
+  padding: 16px 24px 32px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.footer p {
+  margin: 0 0 4px;
+}
+
+.footer a {
+  color: inherit;
+}
+
 .content:focus {
   outline: none;
 }
@@ -1062,6 +1079,7 @@ select:focus-visible,
   }
 
   .topbar,
+  .footer,
   .skip-link,
   .toolbar,
   .pagination,

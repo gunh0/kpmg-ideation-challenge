@@ -33,6 +33,20 @@ export default function Layout() {
       <main id="main" className="content" tabIndex={-1}>
         <Outlet />
       </main>
+      <footer className="footer">
+        <p>
+          Patent data:{" "}
+          <a href="https://console.cloud.google.com/marketplace/product/google_patents_public_datasets/google-patents-public-data">
+            Google Patents Public Data
+          </a>{" "}
+          by IFI CLAIMS Patent Services and Google, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+          Figures and links: <a href="https://patents.google.com">Google Patents</a>.
+        </p>
+        <p>
+          <a href="https://github.com/gunh0/kpmg-ideation-challenge">Source code</a> · KPMG Ideation Challenge 2020,
+          team Jackpop
+        </p>
+      </footer>
     </div>
   );
 }
