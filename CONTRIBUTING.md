@@ -9,7 +9,7 @@ make backend      # terminal 1
 make frontend     # terminal 2 -> http://localhost:3000
 ```
 
-A test export to play with: `backend/patents/tests/fixtures/export.csv` (fictional `ZZ-` patents).
+`make backend` loads the bundled snapshot into an empty database, so the dashboard has data from the start.
 
 ## Before opening a pull request
 
@@ -28,6 +28,8 @@ CI runs the same commands for each app (`.github/workflows/`) and `make smoke`, 
 ## Conventions
 
 - Commit messages follow `type: summary` — `feat`, `fix`, `test`, `docs`, `build`, `ci`, `perf`, `refactor`, `chore`.
-- Data from uploaded files is untrusted: render links through `safeUrl()`, never with `dangerouslySetInnerHTML`, and keep exported cells escaped (`patents/export.py`).
+- Patent data comes from a third party and is untrusted: render links through `safeUrl()`, never with `dangerouslySetInnerHTML`, and keep exported cells escaped (`patents/export.py`).
+- Tests never touch the network: the collector reads a small Parquet file written by `patents/tests/opendata_fixture.py`, and figure lookups are mocked. Try a real collection on one file with `python manage.py collect_patents --shards 0` against a scratch database (`DJANGO_DB_PATH=/tmp/try.db`).
+- A new topic goes into `patents/topics.py`; collect it and refresh the snapshot (`make -C backend collect seed`) in the same pull request.
 - Colors of chart series come from `--series-*` in `frontend/src/index.css`, with separate light and dark steps.
 - Images may only come from Google's patent image host; widen the Content-Security-Policy in `frontend/security-headers.conf` if that changes.
