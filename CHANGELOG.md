@@ -1,5 +1,33 @@
 # Changelog
 
+## 2.0.0 — 2026-03-07
+
+The dashboard fills itself: patents are collected from Google Patents Public Data instead of imported by hand.
+
+### Added
+
+- Topics — drones, autonomous driving, cybersecurity (`patents/topics.py`): US publications since 2015 whose title matches, one patent per application with its grant.
+- `collect_patents` reads Google Patents Public Data (CC BY 4.0) from its Parquet copy with DuckDB, without an account; `--if-changed` skips a revision that was collected already.
+- A snapshot of about 20,000 patents in `patents/seed/` (`dump_seed`, `load_seed`), loaded on the first start, so `docker compose up` shows a complete dashboard.
+- A `collector` Compose service that checks the data daily and collects again when it changes.
+- Representative figures from Google Patents: in the dashboard's latest patents, the patent list and the details, each opening the patent on Google Patents. `/api/figures/` looks up missing figures, `fetch_figures` prepares the dashboard's; filter `has_figure`.
+- Topics page with each topic's description, pattern, patent count, collection date and the data source; a footer credits the data.
+- Counts with thousands separators.
+
+### Changed
+
+- `/api/datasets/` lists the topics, read-only, with `slug`, `description`, `pattern`, `source_revision` and `collected_at`.
+- The CSV export keeps the Google Patents column layout but is no longer meant to be imported.
+
+### Removed
+
+- The CSV import: upload, rename and delete of datasets, `import_patents`, and the read-only mode (`PATENTS_READ_ONLY`, `/api/config/`), as nothing is written through the API any more.
+
+### Fixed
+
+- HTML entities in titles and names of the public data (`&#39;`, `&amp;`) are decoded.
+- Figures whose image Google does not serve yet (publications since August 2025) are not stored.
+
 ## 1.1.0 — 2025-12-31
 
 ### Added
