@@ -6,7 +6,7 @@ from django.test import SimpleTestCase
 
 from patents import opendata
 from patents.tests import opendata_fixture
-from patents.topics import TOPICS
+from patents.topics import TOPICS, get_topic
 
 
 class ReadTopicsTests(SimpleTestCase):
@@ -21,17 +21,25 @@ class ReadTopicsTests(SimpleTestCase):
         cls.tmp.cleanup()
         super().tearDownClass()
 
-    def test_keeps_recent_us_publications_matching_a_topic(self):
+    def test_keeps_recent_us_publications_matching_a_topic_in_title_or_abstract(self):
         rows = opendata.read_topics(self.source, TOPICS, since=20150101)
 
         self.assertEqual(
-            sorted((row["publication_number"], row["topic"]) for row in rows),
+            sorted((row["publication_number"], row["topics"]) for row in rows),
             [
-                ("US-10000001-B2", "drones"),
-                ("US-2019000001-A1", "drones"),
-                ("US-2021000002-A1", "cybersecurity"),
+                ("US-10000001-B2", ["drones"]),
+                ("US-2019000001-A1", ["drones"]),
+                ("US-2021000002-A1", ["autonomous-driving", "cybersecurity"]),
+                ("US-2022000006-A1", ["drones"]),
             ],
         )
+
+    def test_patterns_are_parameters_not_sql(self):
+        sql, parameters = opendata.topic_query("x.parquet", TOPICS, since=20150101)
+
+        self.assertNotIn("drone", sql)
+        self.assertIn(get_topic("drones").pattern, parameters)
+        self.assertEqual(parameters[-1], 20150101)
 
     def test_returns_the_columns_the_store_needs(self):
         row = next(
@@ -43,6 +51,8 @@ class ReadTopicsTests(SimpleTestCase):
         self.assertEqual(row["application_number"], "US-201816000001-A")
         self.assertEqual((row["filing_date"], row["grant_date"]), (20180305, 20200602))
         self.assertEqual(row["inventor"], ["DOE, JANE", "ROE, JOHN"])
+        self.assertEqual(row["abstract"], "A drone lowers parcels onto balconies.")
+        self.assertEqual(row["assignee_country"], "US")
 
 
 class SourceTests(SimpleTestCase):

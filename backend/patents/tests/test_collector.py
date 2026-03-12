@@ -28,12 +28,12 @@ class CollectTests(TestCase):
 
         self.assertEqual(
             {dataset.slug: dataset.patents.count() for dataset in Dataset.objects.all()},
-            {"drones": 1, "autonomous-driving": 0, "cybersecurity": 1},
+            {"drones": 2, "autonomous-driving": 1, "cybersecurity": 1},
         )
-        drone = Dataset.objects.get(slug="drones").patents.get()
+        drone = Dataset.objects.get(slug="drones").patents.get(application_number="US-201816000001-A")
         self.assertEqual((drone.patent_id, drone.is_granted), ("US-10000001-B2", True))
         self.assertEqual(Dataset.objects.get(slug="drones").source_revision, "abc123")
-        self.assertIn("Drones: 1 patents", out.getvalue())
+        self.assertIn("Drones: 2 patents", out.getvalue())
 
     def test_command_can_collect_one_topic(self):
         call_command("collect_patents", "--topic", "cybersecurity", stdout=StringIO())

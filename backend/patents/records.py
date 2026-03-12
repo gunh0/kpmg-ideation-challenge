@@ -38,7 +38,8 @@ def person_name(raw):
 def merge(rows):
     """Group publication rows (dicts from opendata.read_topics) by application.
 
-    Returns {topic slug: [record, ...]} where a record holds Patent fields.
+    Returns {topic slug: [record, ...]} where a record holds Patent fields; a
+    record is listed under each topic it matches.
     """
     applications = {}
     for row in rows:
@@ -65,7 +66,9 @@ def merge(rows):
             "grant_date": max((to_date(row["grant_date"]) for row in grants if row["grant_date"]), default=None),
             "result_link": patent_url(number_from["publication_number"]),
         }
-        topics.setdefault(latest["topic"], []).append(record)
+        # A patent belongs to every topic one of its publications matches.
+        for slug in sorted({slug for row in publications for slug in row["topics"]}):
+            topics.setdefault(slug, []).append(record)
     for records in topics.values():
         records.sort(key=lambda record: record["patent_id"])
     return topics

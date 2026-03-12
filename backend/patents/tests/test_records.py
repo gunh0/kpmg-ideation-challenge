@@ -7,7 +7,7 @@ from patents.records import merge, person_name, to_date
 
 def publication(number, kind, published, granted=0, **values):
     row = {
-        "topic": "drones",
+        "topics": ["drones"],
         "publication_number": number,
         "application_number": "US-201816000001-A",
         "kind_code": kind,
@@ -73,10 +73,21 @@ class MergeTests(SimpleTestCase):
         self.assertEqual(record["patent_id"], "US-2019000001-A1")
         self.assertIsNone(record["grant_date"])
 
-    def test_records_are_grouped_by_the_topic_of_the_latest_publication(self):
+    def test_a_record_is_listed_under_every_topic_it_matches(self):
+        rows = [
+            publication("US-2019000001-A1", "A1", 20190103, topics=["drones"]),
+            publication("US-10000001-B2", "B2", 20200602, 20200602, topics=["drones", "cybersecurity"]),
+        ]
+
+        topics = merge(rows)
+
+        self.assertEqual(sorted(topics), ["cybersecurity", "drones"])
+        self.assertIs(topics["drones"][0], topics["cybersecurity"][0])
+
+    def test_records_are_grouped_by_topic(self):
         rows = [
             publication("US-2019000001-A1", "A1", 20190103),
-            publication("US-2021000002-A1", "A1", 20210304, application_number="US-202016000002-A", topic="cybersecurity",
+            publication("US-2021000002-A1", "A1", 20210304, application_number="US-202016000002-A", topics=["cybersecurity"],
                         assignee=[], inventor=[]),
         ]
 
