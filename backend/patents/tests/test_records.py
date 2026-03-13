@@ -19,6 +19,8 @@ def publication(number, kind, published, granted=0, **values):
         "grant_date": granted,
         "assignee": ["Example Robotics Inc."],
         "inventor": ["DOE, JANE", "ROE, JOHN"],
+        "abstract": "A drone lowers parcels on a tether.",
+        "assignee_country": "US",
     }
     row.update(values)
     return row
@@ -56,6 +58,9 @@ class MergeTests(SimpleTestCase):
         self.assertEqual(record["inventors"], "Jane Doe, John Roe")
         self.assertEqual(record["assignee"], "Example Robotics Inc.")
         self.assertEqual(record["result_link"], "https://patents.google.com/patent/US10000001B2/en")
+        self.assertEqual(record["abstract"], "A drone lowers parcels on a tether.")
+        self.assertEqual(record["assignee_country"], "US")
+        self.assertEqual(record["publication_numbers"], "US-2019000001-A1,US-10000001-B2")
 
     def test_html_entities_are_decoded(self):
         rows = [publication("US-2019000001-A1", "A1", 20190103, title="Controlling vehicles based on edge servers&#39; load",

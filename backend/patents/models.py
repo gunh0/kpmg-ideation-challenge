@@ -26,7 +26,10 @@ class Patent(models.Model):
     application_number = models.CharField(max_length=64, blank=True)
     family_id = models.CharField(max_length=32, blank=True)
     title = models.TextField()
+    abstract = models.TextField(blank=True)
     assignee = models.CharField(max_length=500, blank=True)
+    # ISO country of the first assignee, as harmonised by Google (US, CN, KR, ...)
+    assignee_country = models.CharField(max_length=2, blank=True)
     inventors = models.TextField(blank=True)
     priority_date = models.DateField(null=True, blank=True)
     filing_date = models.DateField(null=True, blank=True)
@@ -35,6 +38,11 @@ class Patent(models.Model):
     result_link = models.URLField(max_length=500, blank=True)
     figure_link = models.URLField(max_length=500, blank=True)
     thumbnail_link = models.URLField(max_length=500, blank=True)
+    # All publications of the application (its A1 and B2 ...), comma-separated;
+    # citations name publications, so counting them needs every number.
+    publication_numbers = models.TextField(blank=True)
+    # How many publications cite this patent (any of its publication numbers).
+    cited_by = models.PositiveIntegerField(default=0)
     # When the figure was looked up on Google Patents; set even if none was found.
     figure_checked_at = models.DateTimeField(null=True, blank=True)
 

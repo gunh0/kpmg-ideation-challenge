@@ -17,9 +17,9 @@ from .topics import TOPICS
 
 SEED_DIR = Path(__file__).parent / "seed"
 FIELDS = (
-    "patent_id", "application_number", "family_id", "title", "assignee", "inventors",
+    "patent_id", "application_number", "family_id", "title", "abstract", "assignee", "assignee_country", "inventors",
     "priority_date", "filing_date", "publication_date", "grant_date", "result_link",
-    "thumbnail_link", "figure_link", "figure_checked_at",
+    "thumbnail_link", "figure_link", "figure_checked_at", "publication_numbers", "cited_by",
 )
 DATES = ("priority_date", "filing_date", "publication_date", "grant_date")
 DATETIMES = ("figure_checked_at",)
