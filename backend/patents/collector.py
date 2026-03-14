@@ -7,9 +7,9 @@ from concurrent.futures import ThreadPoolExecutor
 import duckdb
 
 from . import opendata
-from .models import Dataset
+from .models import Topic
 from .records import merge
-from .store import store_topic
+from .store import store_topics
 from .topics import SINCE, TOPICS
 
 logger = logging.getLogger(__name__)
@@ -58,11 +58,10 @@ def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
             rows.extend(batch)
             logger.info("file %d/%d: %d matches", done, len(urls), len(batch))
 
-    merged = merge(rows)
-    return [store_topic(topic, merged.get(topic.slug, []), revision) for topic in topics]
+    return store_topics(topics, merge(rows), revision)
 
 
 def up_to_date(topics, revision):
     """True when every topic was collected from `revision` already."""
-    stored = dict(Dataset.objects.filter(slug__in=[t.slug for t in topics]).values_list("slug", "source_revision"))
+    stored = dict(Topic.objects.filter(slug__in=[t.slug for t in topics]).values_list("slug", "source_revision"))
     return all(stored.get(topic.slug) == revision for topic in topics)

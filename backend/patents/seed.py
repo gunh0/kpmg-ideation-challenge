@@ -11,7 +11,7 @@ from pathlib import Path
 
 from django.utils.dateparse import parse_datetime
 
-from .models import Dataset
+from .models import Topic
 from .store import store_topic
 from .topics import TOPICS
 
@@ -54,7 +54,7 @@ def dump(dataset, path):
 def load(topic, path, force=False):
     """Store the snapshot of `topic`; returns the dataset, or None when the
     topic already has data and `force` is off."""
-    if not force and Dataset.objects.filter(slug=topic.slug).exists():
+    if not force and Topic.objects.filter(slug=topic.slug).exists():
         return None
     with gzip.open(path, "rt", encoding="utf-8") as file:
         document = json.load(file)

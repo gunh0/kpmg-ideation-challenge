@@ -1,8 +1,8 @@
 from django.db import models
 
 
-class Dataset(models.Model):
-    """One collected topic (patents.topics), known by its slug."""
+class Topic(models.Model):
+    """A technology field: the patents whose title or abstract match its keywords."""
 
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=100, unique=True, null=True, blank=True)
@@ -21,7 +21,8 @@ class Dataset(models.Model):
 class Patent(models.Model):
     """A patent application, known by its grant number once it is granted."""
 
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name="patents")
+    # A patent is stored once and belongs to every topic it matches.
+    topics = models.ManyToManyField(Topic, related_name="patents")
     patent_id = models.CharField(max_length=64)
     application_number = models.CharField(max_length=64, blank=True)
     family_id = models.CharField(max_length=32, blank=True)
@@ -49,7 +50,7 @@ class Patent(models.Model):
     class Meta:
         ordering = ["-publication_date", "patent_id"]
         constraints = [
-            models.UniqueConstraint(fields=["dataset", "patent_id"], name="unique_patent_per_dataset"),
+            models.UniqueConstraint(fields=["patent_id"], name="unique_patent_id"),
         ]
         indexes = [
             # default ordering and the year filters

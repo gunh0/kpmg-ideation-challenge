@@ -12,34 +12,38 @@ from rest_framework.views import APIView
 from .export import export_rows
 from .figures import fill_figures
 from .filters import NullsLastOrderingFilter, PatentFilter, PatentSearchFilter
-from .models import Dataset, Patent
+from .models import Patent, Topic
 from .pagination import PatentPagination
 from .serializers import (
-    DatasetSerializer,
     FigureSerializer,
     NameCountSerializer,
     PatentSerializer,
     StatsSerializer,
+    TopicSerializer,
 )
 from .stats import summary
 
 
-class DatasetViewSet(viewsets.ReadOnlyModelViewSet):
-    """The collected topics (patents.topics) with their patent counts and the
-    revision of the public data they come from."""
+class TopicViewSet(viewsets.ReadOnlyModelViewSet):
+    """The topics with their patent counts and the revision of the public data
+    they were collected from."""
 
-    queryset = Dataset.objects.annotate(patent_count=Count("patents"))
-    serializer_class = DatasetSerializer
+    queryset = Topic.objects.annotate(patent_count=Count("patents"))
+    serializer_class = TopicSerializer
 
 
 class PatentViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Patent.objects.select_related("dataset")
+    queryset = Patent.objects.prefetch_related("topics")
     serializer_class = PatentSerializer
     pagination_class = PatentPagination
-    filter_backends = [DjangoFilterBackend, PatentSearchFilter, NullsLastOrderingFilter]
+    # Search first: it combines querysets, which the topic filter's grouping
+    # does not survive.
+    filter_backends = [PatentSearchFilter, DjangoFilterBackend, NullsLastOrderingFilter]
     filterset_class = PatentFilter
-    search_fields = ["patent_id", "title", "assignee", "inventors"]
-    ordering_fields = ["publication_date", "priority_date", "filing_date", "grant_date", "patent_id", "title"]
+    search_fields = ["patent_id", "title", "abstract", "assignee", "inventors"]
+    ordering_fields = [
+        "matched", "publication_date", "priority_date", "filing_date", "grant_date", "patent_id", "title", "cited_by",
+    ]
     ordering = ["-publication_date", "patent_id"]
 
     @action(detail=False, url_path="export")
@@ -52,12 +56,13 @@ class PatentViewSet(viewsets.ReadOnlyModelViewSet):
 
 
     def export_name(self):
-        """patents-drone-delivery-2025-12-19.csv: the dataset and the day, so
-        downloads of different selections do not overwrite each other."""
+        """patents-drones-cybersecurity-2026-03-14.csv: the topics and the day,
+        so downloads of different selections do not overwrite each other."""
         parts = ["patents"]
-        dataset = Dataset.objects.filter(pk=self.request.query_params.get("dataset") or None).first()
-        if dataset:
-            parts.append(slugify(dataset.name) or f"dataset-{dataset.pk}")
+        ids = self.request.query_params.get("topics") or self.request.query_params.get("dataset") or ""
+        ids = [int(item) for item in ids.split(",") if item.strip().isdigit()]
+        for topic in Topic.objects.filter(pk__in=ids).order_by("name"):
+            parts.append(slugify(topic.name) or f"topic-{topic.pk}")
         parts.append(timezone.localdate().isoformat())
         return "-".join(parts) + ".csv"
 
@@ -69,7 +74,7 @@ class StatsView(generics.GenericAPIView):
     queryset = Patent.objects.all()
     serializer_class = StatsSerializer
     pagination_class = None
-    filter_backends = [DjangoFilterBackend, PatentSearchFilter]
+    filter_backends = [PatentSearchFilter, DjangoFilterBackend]
     filterset_class = PatentFilter
     search_fields = PatentViewSet.search_fields
 
@@ -79,7 +84,9 @@ class StatsView(generics.GenericAPIView):
         parameters=[OpenApiParameter("top", int, description="length of the ranking lists, 1-50 (default 10)")],
     )
     def get(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
+        # The aggregates group by other columns than the topic filter does;
+        # select the filtered patents by key instead of stacking the groupings.
+        queryset = Patent.objects.filter(pk__in=self.filter_queryset(self.get_queryset()).values("pk"))
         try:
             limit = min(max(int(request.query_params.get("top", 10)), 1), 50)
         except ValueError:
@@ -90,18 +97,19 @@ class StatsView(generics.GenericAPIView):
 class AssigneeView(APIView):
     """Assignee names with their patent counts, for filter suggestions.
 
-    ?dataset=<id> limits to one dataset, ?search= matches part of the name.
+    ?topics=1,2 limits to patents of these topics, ?search= matches part of the name.
     """
 
     @extend_schema(
         responses=NameCountSerializer(many=True),
-        parameters=[OpenApiParameter("dataset", int), OpenApiParameter("search", str)],
+        parameters=[OpenApiParameter("topics", str), OpenApiParameter("search", str)],
     )
     def get(self, request):
         queryset = Patent.objects.exclude(assignee="")
-        dataset = request.query_params.get("dataset")
-        if dataset and dataset.isdigit():
-            queryset = queryset.filter(dataset_id=dataset)
+        ids = request.query_params.get("topics") or request.query_params.get("dataset") or ""
+        ids = [int(item) for item in ids.split(",") if item.strip().isdigit()]
+        if ids:
+            queryset = queryset.filter(pk__in=Patent.objects.filter(topics__in=ids).values("pk"))
         search = request.query_params.get("search", "").strip()
         if search:
             queryset = queryset.filter(assignee__icontains=search)

@@ -6,7 +6,7 @@ from pathlib import Path
 from django.core.management import call_command
 from django.test import TestCase
 
-from patents.models import Dataset, Patent
+from patents.models import Topic, Patent
 from patents.store import store_topic
 from patents.tests.test_store import record
 from patents.topics import get_topic
@@ -34,12 +34,12 @@ class SeedTests(TestCase):
 
     def test_dump_and_load_round_trip(self):
         call_command("dump_seed", "--dir", self.dir, stdout=StringIO(), stderr=StringIO())
-        Dataset.objects.all().delete()
+        Topic.objects.all().delete()
 
         out = StringIO()
         call_command("load_seed", "--dir", self.dir, stdout=out)
 
-        dataset = Dataset.objects.get(slug="drones")
+        dataset = Topic.objects.get(slug="drones")
         self.assertEqual(dataset.source_revision, "abc123")
         self.assertEqual(dataset.collected_at, datetime(2026, 1, 20, 12, tzinfo=timezone.utc))
         granted = Patent.objects.get(patent_id="US-1-B2")

@@ -38,5 +38,5 @@ def cell(value):
 def export_rows(queryset):
     writer = csv.writer(Echo())
     yield writer.writerow(COLUMNS.keys())
-    for patent in queryset.iterator():
+    for patent in queryset.iterator(chunk_size=1000):
         yield writer.writerow([cell(getattr(patent, field)) for field in COLUMNS.values()])

@@ -8,7 +8,7 @@ from django.test import TestCase
 
 from patents import opendata
 from patents.management.commands.collect_patents import parse_shards
-from patents.models import Dataset
+from patents.models import Topic
 from patents.tests import opendata_fixture
 
 
@@ -27,37 +27,37 @@ class CollectTests(TestCase):
         call_command("collect_patents", stdout=out)
 
         self.assertEqual(
-            {dataset.slug: dataset.patents.count() for dataset in Dataset.objects.all()},
+            {dataset.slug: dataset.patents.count() for dataset in Topic.objects.all()},
             {"drones": 2, "autonomous-driving": 1, "cybersecurity": 1},
         )
-        drone = Dataset.objects.get(slug="drones").patents.get(application_number="US-201816000001-A")
+        drone = Topic.objects.get(slug="drones").patents.get(application_number="US-201816000001-A")
         self.assertEqual((drone.patent_id, drone.is_granted), ("US-10000001-B2", True))
-        self.assertEqual(Dataset.objects.get(slug="drones").source_revision, "abc123")
+        self.assertEqual(Topic.objects.get(slug="drones").source_revision, "abc123")
         self.assertIn("Drones: 2 patents", out.getvalue())
 
     def test_command_can_collect_one_topic(self):
         call_command("collect_patents", "--topic", "cybersecurity", stdout=StringIO())
 
-        self.assertEqual(list(Dataset.objects.values_list("slug", flat=True)), ["cybersecurity"])
+        self.assertEqual(list(Topic.objects.values_list("slug", flat=True)), ["cybersecurity"])
 
 
     def test_if_changed_skips_a_revision_already_collected(self):
         call_command("collect_patents", stdout=StringIO())
-        Dataset.objects.filter(slug="drones").update(name="Kept")
+        Topic.objects.filter(slug="drones").update(name="Kept")
 
         out = StringIO()
         call_command("collect_patents", "--if-changed", stdout=out)
 
         self.assertIn("Up to date with revision abc123", out.getvalue())
-        self.assertEqual(Dataset.objects.get(slug="drones").name, "Kept")
+        self.assertEqual(Topic.objects.get(slug="drones").name, "Kept")
 
     def test_if_changed_collects_a_new_revision(self):
         call_command("collect_patents", stdout=StringIO())
-        Dataset.objects.filter(slug="drones").update(source_revision="older")
+        Topic.objects.filter(slug="drones").update(source_revision="older")
 
         call_command("collect_patents", "--if-changed", stdout=StringIO())
 
-        self.assertEqual(Dataset.objects.get(slug="drones").source_revision, "abc123")
+        self.assertEqual(Topic.objects.get(slug="drones").source_revision, "abc123")
 
 
 class ShardArgumentTests(TestCase):

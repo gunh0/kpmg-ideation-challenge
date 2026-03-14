@@ -3,10 +3,12 @@ from drf_spectacular.views import SpectacularAPIView
 from rest_framework.routers import DefaultRouter
 
 from .health import health
-from .views import AssigneeView, DatasetViewSet, FigureView, PatentViewSet, StatsView
+from .views import AssigneeView, FigureView, PatentViewSet, StatsView, TopicViewSet
 
 router = DefaultRouter()
-router.register("datasets", DatasetViewSet)
+router.register("topics", TopicViewSet)
+# the name of 2.0, until the dashboard has moved to /api/topics/
+router.register("datasets", TopicViewSet, basename="dataset")
 router.register("patents", PatentViewSet)
 
 urlpatterns = router.urls + [
