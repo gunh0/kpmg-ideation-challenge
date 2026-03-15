@@ -6,8 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 import duckdb
 
-from . import opendata
-from .models import Topic
+from . import citations, opendata
+from .models import Patent, Topic
 from .records import merge
 from .store import store_topics
 from .topics import SINCE, TOPICS
@@ -40,6 +40,15 @@ def read_shard(url, topics, since):
         connection.close()
 
 
+def read_citations(url, numbers):
+    connection = duckdb.connect(config=duckdb_config())
+    connection.execute("SET threads = 64; SET http_retries = 8; SET http_timeout = 120000")
+    try:
+        return citations.citing_pairs(opendata.direct_url(url), numbers, connection)
+    finally:
+        connection.close()
+
+
 def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
     """Scan the Parquet files for `topics` and replace each topic's patents.
 
@@ -57,8 +66,18 @@ def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
         for done, batch in enumerate(pool.map(lambda url: read_shard(url, topics, since), urls), start=1):
             rows.extend(batch)
             logger.info("file %d/%d: %d matches", done, len(urls), len(batch))
+    stored = store_topics(topics, merge(rows), revision)
 
-    return store_topics(topics, merge(rows), revision)
+    # A second pass: who cites the patents of these topics.
+    patents = Patent.objects.filter(topics__in=stored).distinct()
+    numbers = citations.ours(patents)
+    pairs = []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for done, batch in enumerate(pool.map(lambda url: read_citations(url, numbers), urls), start=1):
+            pairs.extend(batch)
+            logger.info("citations %d/%d: %d", done, len(urls), len(batch))
+    citations.store_citations(citations.count_citations(pairs, numbers), patents)
+    return stored
 
 
 def up_to_date(topics, revision):

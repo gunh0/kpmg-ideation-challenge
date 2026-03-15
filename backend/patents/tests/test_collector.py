@@ -8,7 +8,7 @@ from django.test import TestCase
 
 from patents import opendata
 from patents.management.commands.collect_patents import parse_shards
-from patents.models import Topic
+from patents.models import Patent, Topic
 from patents.tests import opendata_fixture
 
 
@@ -34,6 +34,15 @@ class CollectTests(TestCase):
         self.assertEqual((drone.patent_id, drone.is_granted), ("US-10000001-B2", True))
         self.assertEqual(Topic.objects.get(slug="drones").source_revision, "abc123")
         self.assertIn("Drones: 2 patents", out.getvalue())
+
+    def test_counts_the_applications_citing_each_patent(self):
+        call_command("collect_patents", stdout=StringIO())
+
+        cited = dict(Patent.objects.values_list("patent_id", "cited_by"))
+        # cited by the coffee machine (via its A1) and by the parcel locker (via its B2)
+        self.assertEqual(cited["US-10000001-B2"], 2)
+        self.assertEqual(cited["US-2021000002-A1"], 1)
+        self.assertEqual(cited["US-2022000006-A1"], 0)
 
     def test_command_can_collect_one_topic(self):
         call_command("collect_patents", "--topic", "cybersecurity", stdout=StringIO())
