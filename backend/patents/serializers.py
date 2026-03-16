@@ -64,12 +64,32 @@ class AssigneeCountSerializer(NameCountSerializer):
     granted = serializers.IntegerField()
 
 
+class CountryCountSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    count = serializers.IntegerField()
+    granted = serializers.IntegerField()
+
+
+class TopicYearSerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+    published = serializers.IntegerField()
+
+
+class TopicTrendSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    count = serializers.IntegerField()
+    by_year = TopicYearSerializer(many=True)
+
+
 class StatsSerializer(serializers.Serializer):
     total = serializers.IntegerField()
     granted = serializers.IntegerField()
     by_year = YearCountSerializer(many=True)
     top_assignees = AssigneeCountSerializer(many=True)
     top_inventors = NameCountSerializer(many=True)
+    top_countries = CountryCountSerializer(many=True)
+    by_topic = TopicTrendSerializer(many=True)
 
 
 class FigureSerializer(serializers.Serializer):

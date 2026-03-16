@@ -18,12 +18,13 @@ class PatentFilter(django_filters.FilterSet):
     granted = django_filters.BooleanFilter(field_name="grant_date", lookup_expr="isnull", exclude=True)
     year_from = django_filters.NumberFilter(field_name="publication_date", lookup_expr="year__gte")
     year_to = django_filters.NumberFilter(field_name="publication_date", lookup_expr="year__lte")
+    country = django_filters.CharFilter(field_name="assignee_country", lookup_expr="iexact")
     has_figure = django_filters.BooleanFilter(field_name="thumbnail_link", lookup_expr="exact", exclude=True,
                                               method="filter_has_figure")
 
     class Meta:
         model = Patent
-        fields = ["topics", "match", "dataset", "assignee", "inventor", "granted", "year_from", "year_to", "has_figure"]
+        fields = ["topics", "match", "dataset", "assignee", "inventor", "granted", "year_from", "year_to", "country", "has_figure"]
 
     def keep(self, queryset, name, value):
         return queryset  # read by filter_topics
