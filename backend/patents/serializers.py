@@ -39,10 +39,14 @@ class PatentSerializer(serializers.ModelSerializer):
 
 class TopicSerializer(serializers.ModelSerializer):
     patent_count = serializers.IntegerField(read_only=True)
+    keywords = serializers.ListField(source="keyword_list", child=serializers.CharField(), read_only=True)
 
     class Meta:
         model = Topic
-        fields = ("id", "slug", "name", "description", "pattern", "source_revision", "collected_at", "patent_count")
+        fields = (
+            "id", "slug", "name", "description", "keywords", "pattern", "source_revision", "collected_at",
+            "patent_count", "status", "progress", "progress_total", "error",
+        )
 
 
 # Shapes of the non-model responses, for the OpenAPI schema.

@@ -11,6 +11,7 @@ class DatasetApiTests(APITestCase):
             name="Drones",
             slug="drones",
             description="Unmanned aerial vehicles.",
+            keywords="drone",
             pattern=r"\bdrones?\b",
             source_revision="abc123",
             collected_at=datetime(2026, 2, 1, 2, 17, tzinfo=timezone.utc),
@@ -25,10 +26,15 @@ class DatasetApiTests(APITestCase):
                     "slug": "drones",
                     "name": "Drones",
                     "description": "Unmanned aerial vehicles.",
+                    "keywords": ["drone"],
                     "pattern": r"\bdrones?\b",
                     "source_revision": "abc123",
                     "collected_at": "2026-02-01T02:17:00Z",
                     "patent_count": 3,
+                    "status": "ready",
+                    "progress": 0,
+                    "progress_total": 0,
+                    "error": "",
                 }
             ],
         )

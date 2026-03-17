@@ -67,6 +67,7 @@ def store_topics(topics, records_by_topic, revision, collected_at=None):
             defaults={
                 "name": topic.name,
                 "description": topic.description,
+                "keywords": ",".join(topic.keywords) if isinstance(topic.keywords, (list, tuple)) else topic.keywords,
                 "pattern": topic.pattern,
                 "source_revision": revision,
                 "collected_at": collected_at or timezone.now(),

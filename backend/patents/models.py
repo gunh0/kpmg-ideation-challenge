@@ -1,21 +1,45 @@
 from django.db import models
 
+from .keywords import topic_pattern
+
 
 class Topic(models.Model):
     """A technology field: the patents whose title or abstract match its keywords."""
 
+    READY, QUEUED, COLLECTING, FAILED = "ready", "queued", "collecting", "failed"
+    STATUSES = [(READY, "ready"), (QUEUED, "queued"), (COLLECTING, "collecting"), (FAILED, "failed")]
+
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=100, unique=True, null=True, blank=True)
     description = models.TextField(blank=True)
-    pattern = models.CharField(max_length=500, blank=True)
+    # Comma-separated, as normalised by keywords.parse_keywords; the pattern
+    # is derived from them.
+    keywords = models.TextField(blank=True)
+    pattern = models.CharField(max_length=2000, blank=True)
     source_revision = models.CharField(max_length=64, blank=True)
     collected_at = models.DateTimeField(null=True, blank=True)
+    # Collection from the public data: files read of the total, and why the
+    # last one failed.
+    status = models.CharField(max_length=20, choices=STATUSES, default=READY)
+    progress = models.PositiveIntegerField(default=0)
+    progress_total = models.PositiveIntegerField(default=0)
+    error = models.TextField(blank=True)
+    status_changed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["name"]
 
     def __str__(self):
         return self.name
+
+    @property
+    def keyword_list(self):
+        return [keyword for keyword in self.keywords.split(",") if keyword]
+
+    def set_keywords(self, keywords):
+        """Store validated keywords (keywords.parse_keywords) and their pattern."""
+        self.keywords = ",".join(keywords)
+        self.pattern = topic_pattern(keywords)
 
 
 class Patent(models.Model):
