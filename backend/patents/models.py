@@ -25,6 +25,9 @@ class Topic(models.Model):
     progress_total = models.PositiveIntegerField(default=0)
     error = models.TextField(blank=True)
     status_changed_at = models.DateTimeField(null=True, blank=True)
+    # The worker collecting the topic (jobs.claim), so that two processes never
+    # collect the same topic and an edit can take it back from a running job.
+    job = models.CharField(max_length=32, blank=True)
 
     class Meta:
         ordering = ["name"]

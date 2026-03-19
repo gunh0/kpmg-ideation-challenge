@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 from django.test import TestCase
 
 from patents.models import Topic
-from patents.store import store_topic
+from patents.store import store_topic, store_topics
 from patents.topics import get_topic
 
 
@@ -61,3 +61,16 @@ class StoreTopicTests(TestCase):
         self.assertEqual(kept.title, "New title")
         self.assertEqual(kept.thumbnail_link, "https://patentimages.storage.googleapis.com/t.png")
         self.assertIsNone(Topic.objects.get(slug="drones").patents.get(patent_id="US-3-A1").figure_checked_at)
+
+    def test_stored_topics_keep_their_names_and_deleted_ones_stay_deleted(self):
+        mine = Topic.objects.create(name="My lockers", slug="my-lockers", keywords="locker")
+        gone = Topic.objects.create(name="Gone", slug="gone")
+        Topic.objects.filter(pk=gone.pk).delete()
+
+        stored = store_topics([mine, gone], {"my-lockers": [record("US-5-A1")], "gone": [record("US-6-A1")]}, "rev9")
+
+        self.assertEqual(stored, [mine])
+        mine.refresh_from_db()
+        self.assertEqual((mine.name, mine.source_revision), ("My lockers", "rev9"))
+        self.assertEqual(list(mine.patents.values_list("patent_id", flat=True)), ["US-5-A1"])
+        self.assertFalse(Topic.objects.filter(slug="gone").exists())

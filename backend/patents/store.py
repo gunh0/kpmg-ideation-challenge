@@ -62,6 +62,15 @@ def store_topics(topics, records_by_topic, revision, collected_at=None):
     pks = upsert_patents(list(records.values()))
     stored = []
     for topic in topics:
+        if isinstance(topic, Topic):
+            # A stored topic keeps its name and keywords, which may have been
+            # edited meanwhile; one deleted during its collection stays deleted.
+            if not Topic.objects.filter(pk=topic.pk).update(source_revision=revision,
+                                                             collected_at=collected_at or timezone.now()):
+                continue
+            link(topic, {pks[record["patent_id"]] for record in records_by_topic.get(topic.slug, [])})
+            stored.append(topic)
+            continue
         stored_topic, _ = Topic.objects.update_or_create(
             slug=topic.slug,
             defaults={

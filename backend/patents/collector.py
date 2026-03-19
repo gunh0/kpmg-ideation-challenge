@@ -49,12 +49,15 @@ def read_citations(url, numbers):
         connection.close()
 
 
-def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
+def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None, progress=None):
     """Scan the Parquet files for `topics` and replace each topic's patents.
 
-    `shards` limits the scan to some files (indexes), for trying things out;
-    the stored topics then only hold what those files contain.
+    `topics` are topics.Topic defaults or stored Topic rows. `shards` limits
+    the scan to some files (indexes), for trying things out; the stored topics
+    then only hold what those files contain. `progress(done, total)` is called
+    after each file of the two passes.
     """
+    progress = progress or (lambda done, total: None)
     revision = revision or opendata.source_revision()
     urls = opendata.shard_urls(revision)
     if shards is not None:
@@ -66,6 +69,7 @@ def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
         for done, batch in enumerate(pool.map(lambda url: read_shard(url, topics, since), urls), start=1):
             rows.extend(batch)
             logger.info("file %d/%d: %d matches", done, len(urls), len(batch))
+            progress(done, 2 * len(urls))
     stored = store_topics(topics, merge(rows), revision)
 
     # A second pass: who cites the patents of these topics.
@@ -76,6 +80,7 @@ def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
         for done, batch in enumerate(pool.map(lambda url: read_citations(url, numbers), urls), start=1):
             pairs.extend(batch)
             logger.info("citations %d/%d: %d", done, len(urls), len(batch))
+            progress(len(urls) + done, 2 * len(urls))
     citations.store_citations(citations.count_citations(pairs, numbers), patents)
     return stored
 
