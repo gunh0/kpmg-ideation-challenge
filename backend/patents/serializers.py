@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from .keywords import parse_keywords
 from .models import Patent, Topic
 
 
@@ -47,6 +48,31 @@ class TopicSerializer(serializers.ModelSerializer):
             "id", "slug", "name", "description", "keywords", "pattern", "source_revision", "collected_at",
             "patent_count", "status", "progress", "progress_total", "error",
         )
+
+
+class TopicInputSerializer(serializers.Serializer):
+    """What the dashboard sends to add or edit a topic."""
+
+    name = serializers.CharField(min_length=2, max_length=80)
+    description = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    keywords = serializers.JSONField(help_text="a list of keywords, or one string separated by commas")
+
+    def validate_name(self, value):
+        value = " ".join(value.split())
+        others = Topic.objects.filter(name__iexact=value)
+        if self.instance is not None:
+            others = others.exclude(pk=self.instance.pk)
+        if others.exists():
+            raise serializers.ValidationError("A topic with this name exists already.")
+        return value
+
+    def validate_keywords(self, value):
+        if not isinstance(value, (str, list)):
+            raise serializers.ValidationError("Give a list of keywords or a comma-separated string.")
+        try:
+            return parse_keywords(value)
+        except ValueError as error:
+            raise serializers.ValidationError(str(error))
 
 
 # Shapes of the non-model responses, for the OpenAPI schema.

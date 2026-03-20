@@ -139,6 +139,12 @@ REST_FRAMEWORK = {
     + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
 }
 
+# Topics can be added, edited and deleted from the dashboard. Turn it off for
+# a public instance (the API has no accounts); PATENTS_MAX_TOPICS bounds how
+# many exist, as every one is collected from the public data.
+PATENTS_ALLOW_TOPIC_EDITS = env_bool("PATENTS_ALLOW_TOPIC_EDITS", default=True)
+PATENTS_MAX_TOPICS = int(os.environ.get("PATENTS_MAX_TOPICS", 20))
+
 # Everything goes to stdout, where Docker and gunicorn collect it. The test
 # run keeps its output to warnings; assertLogs() still sees everything.
 LOG_LEVEL = "WARNING" if sys.argv[1:2] == ["test"] else os.environ.get("DJANGO_LOG_LEVEL", "INFO")

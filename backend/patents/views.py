@@ -1,17 +1,22 @@
+from django.conf import settings
+from django.db import transaction
 from django.db.models import Count
 from django.http import StreamingHttpResponse
 from django.utils import timezone
 from django.utils.text import slugify
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from . import jobs
 from .export import export_rows
 from .figures import fill_figures
 from .filters import NullsLastOrderingFilter, PatentFilter, PatentSearchFilter
+from .matcher import match_stored
 from .models import Patent, Topic
 from .pagination import PatentPagination
 from .serializers import (
@@ -19,17 +24,101 @@ from .serializers import (
     NameCountSerializer,
     PatentSerializer,
     StatsSerializer,
+    TopicInputSerializer,
     TopicSerializer,
 )
+from .store import delete_orphans
 from .stats import summary
 
 
-class TopicViewSet(viewsets.ReadOnlyModelViewSet):
-    """The topics with their patent counts and the revision of the public data
-    they were collected from."""
+class TopicEdits(permissions.BasePermission):
+    message = "Topics cannot be changed on this instance (PATENTS_ALLOW_TOPIC_EDITS is off)."
+
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS or settings.PATENTS_ALLOW_TOPIC_EDITS
+
+
+def unique_slug(name):
+    base = slugify(name)[:90] or "topic"
+    slug, n = base, 2
+    while Topic.objects.filter(slug=slug).exists():
+        slug, n = f"{base}-{n}", n + 1
+    return slug
+
+
+class TopicViewSet(viewsets.ModelViewSet):
+    """The topics with their patent counts and collection state.
+
+    POST {"name", "keywords", "description"} adds a topic: it is matched
+    against the stored patents at once and queued for collection from the
+    public data. PATCH edits one (new keywords are matched and collected
+    again), DELETE removes it with the patents no other topic keeps, and
+    POST /collect/ queues it again, e.g. after a failure.
+    """
 
     queryset = Topic.objects.annotate(patent_count=Count("patents"))
     serializer_class = TopicSerializer
+    permission_classes = [TopicEdits]
+    # JSON only: a form on another site cannot post here without CORS consent.
+    parser_classes = [JSONParser]
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+
+    def respond(self, topic, code=status.HTTP_200_OK):
+        return Response(TopicSerializer(self.get_queryset().get(pk=topic.pk)).data, status=code)
+
+    def collect(self, topic):
+        jobs.enqueue([topic])
+        transaction.on_commit(jobs.start_worker)
+
+    @extend_schema(request=TopicInputSerializer, responses={201: TopicSerializer})
+    def create(self, request):
+        data = TopicInputSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        if Topic.objects.count() >= settings.PATENTS_MAX_TOPICS:
+            return Response({"detail": f"There are {settings.PATENTS_MAX_TOPICS} topics already, the most allowed."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            topic = Topic(name=data.validated_data["name"], slug=unique_slug(data.validated_data["name"]),
+                          description=data.validated_data.get("description", ""))
+            topic.set_keywords(data.validated_data["keywords"])
+            topic.save()
+            match_stored(topic)
+            self.collect(topic)
+        return self.respond(topic, status.HTTP_201_CREATED)
+
+    @extend_schema(request=TopicInputSerializer, responses=TopicSerializer)
+    def partial_update(self, request, pk=None):
+        topic = self.get_object()
+        data = TopicInputSerializer(topic, data=request.data, partial=True)
+        data.is_valid(raise_exception=True)
+        with transaction.atomic():
+            for field in ("name", "description"):
+                if field in data.validated_data:
+                    setattr(topic, field, data.validated_data[field])
+            keywords = data.validated_data.get("keywords")
+            if keywords is not None and keywords != topic.keyword_list:
+                topic.set_keywords(keywords)
+                topic.save()
+                match_stored(topic)
+                self.collect(topic)
+            else:
+                topic.save()
+        return self.respond(topic)
+
+    def destroy(self, request, pk=None):
+        with transaction.atomic():
+            self.get_object().delete()
+            delete_orphans()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(request=None, responses=TopicSerializer)
+    @action(detail=True, methods=["post"], url_path="collect")
+    def collect_again(self, request, pk=None):
+        """Queue the topic for collection again."""
+        topic = self.get_object()
+        with transaction.atomic():
+            self.collect(topic)
+        return self.respond(topic)
 
 
 class PatentViewSet(viewsets.ReadOnlyModelViewSet):
