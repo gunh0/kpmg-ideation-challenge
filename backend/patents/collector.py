@@ -27,13 +27,41 @@ def duckdb_config():
     return config
 
 
-def read_shard(url, topics, since):
+def memory_bytes():
+    """Memory available to this process: the container's limit if there is
+    one, else the machine's."""
+    try:
+        with open("/sys/fs/cgroup/memory.max") as file:
+            limit = file.read().strip()
+        if limit.isdigit():
+            return int(limit)
+    except OSError:
+        pass
+    return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
+
+
+def scan_threads(memory=None):
+    """DuckDB reads a file's row groups with one thread each, and a remote
+    scan waits on the network rather than the CPU, so many threads pay off.
+    Each holds a decompressed column chunk, though — about 100 MB for the
+    abstracts — so their number follows the memory: 8 per 2 GB, 8 to 64."""
+    memory = memory if memory is not None else memory_bytes()
+    return max(8, min(64, int(memory / 2**30 * 4)))
+
+
+def connect():
     connection = duckdb.connect(config=duckdb_config())
-    # DuckDB fetches row groups with one thread each, and a remote scan waits
-    # on the network, not the CPU: with as many threads as a file has row
-    # groups (about 50) one file takes seconds instead of minutes on 2 cores.
-    # Remote reads over a long scan meet the odd timeout; retry them.
-    connection.execute("SET threads = 64; SET http_retries = 8; SET http_timeout = 120000")
+    # Remote reads over a long scan meet the odd timeout; retry them. Order
+    # does not matter to the collector, and keeping it costs memory.
+    connection.execute(
+        f"SET threads = {scan_threads()}; SET memory_limit = '{int(memory_bytes() * 0.6)}B'; "
+        "SET preserve_insertion_order = false; SET http_retries = 8; SET http_timeout = 120000"
+    )
+    return connection
+
+
+def read_shard(url, topics, since):
+    connection = connect()
     try:
         return opendata.read_topics(opendata.direct_url(url), topics, since, connection)
     finally:
@@ -41,15 +69,14 @@ def read_shard(url, topics, since):
 
 
 def read_citations(url, numbers):
-    connection = duckdb.connect(config=duckdb_config())
-    connection.execute("SET threads = 64; SET http_retries = 8; SET http_timeout = 120000")
+    connection = connect()
     try:
         return citations.citing_pairs(opendata.direct_url(url), numbers, connection)
     finally:
         connection.close()
 
 
-def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None, progress=None):
+def collect(topics=TOPICS, shards=None, workers=1, since=SINCE, revision=None, progress=None):
     """Scan the Parquet files for `topics` and replace each topic's patents.
 
     `topics` are topics.Topic defaults or stored Topic rows. `shards` limits

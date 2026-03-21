@@ -76,3 +76,12 @@ class ShardArgumentTests(TestCase):
     def test_invalid(self):
         with self.assertRaises(CommandError):
             parse_shards("a-b")
+
+
+class ScanThreadsTests(TestCase):
+    def test_threads_follow_the_memory(self):
+        from patents.collector import scan_threads
+
+        self.assertEqual(scan_threads(1 * 2**30), 8)
+        self.assertEqual(scan_threads(6 * 2**30), 24)
+        self.assertEqual(scan_threads(64 * 2**30), 64)

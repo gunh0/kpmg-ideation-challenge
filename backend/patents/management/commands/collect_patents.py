@@ -27,7 +27,8 @@ class Command(BaseCommand):
                             help="only read these Parquet files, e.g. 0-3 (for trying it out: the topics keep only what they contain)")
         parser.add_argument("--if-changed", action="store_true",
                             help="do nothing when the topics were collected from the current revision of the data")
-        parser.add_argument("--workers", type=int, default=2, help="files read in parallel (default 2)")
+        parser.add_argument("--workers", type=int, default=1,
+                            help="files read in parallel (default 1; each uses the threads the memory allows)")
 
     def handle(self, *args, topic, shards, workers, if_changed, **options):
         topics = [get_topic(slug) for slug in topic] if topic else TOPICS
