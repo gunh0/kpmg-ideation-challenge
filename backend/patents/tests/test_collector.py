@@ -47,8 +47,34 @@ class CollectTests(TestCase):
     def test_command_can_collect_one_topic(self):
         call_command("collect_patents", "--topic", "cybersecurity", stdout=StringIO())
 
-        self.assertEqual(list(Topic.objects.values_list("slug", flat=True)), ["cybersecurity"])
+        collected = {topic.slug: topic.patents.count() for topic in Topic.objects.all()}
+        self.assertEqual(collected, {"drones": 0, "autonomous-driving": 0, "cybersecurity": 1})
+        self.assertEqual(Topic.objects.get(slug="drones").source_revision, "")
 
+    def test_command_collects_topics_added_from_the_dashboard(self):
+        call_command("collect_patents", "--topic", "drones", stdout=StringIO())
+        lockers = Topic(name="Lockers", slug="lockers")
+        lockers.set_keywords(["locker"])
+        lockers.save()
+
+        call_command("collect_patents", "--topic", "lockers", stdout=StringIO())
+
+        self.assertEqual(list(lockers.patents.values_list("patent_id", flat=True)), ["US-2022000006-A1"])
+        self.assertEqual(Topic.objects.get(slug="lockers").status, Topic.READY)
+
+    def test_unknown_topic(self):
+        with self.assertRaises(CommandError):
+            call_command("collect_patents", "--topic", "nope", stdout=StringIO())
+
+    def test_run_collector_collects_topics_of_an_older_revision(self):
+        call_command("collect_patents", stdout=StringIO())
+        Topic.objects.filter(slug="drones").update(source_revision="older")
+
+        out = StringIO()
+        call_command("run_collector", "--once", stdout=out)
+
+        self.assertIn("Revision abc123: collecting Drones", out.getvalue())
+        self.assertEqual(Topic.objects.get(slug="drones").source_revision, "abc123")
 
     def test_if_changed_skips_a_revision_already_collected(self):
         call_command("collect_patents", stdout=StringIO())

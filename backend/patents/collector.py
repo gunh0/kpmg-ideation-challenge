@@ -111,8 +111,3 @@ def collect(topics=TOPICS, shards=None, workers=1, since=SINCE, revision=None, p
     citations.store_citations(citations.count_citations(pairs, numbers), patents)
     return stored
 
-
-def up_to_date(topics, revision):
-    """True when every topic was collected from `revision` already."""
-    stored = dict(Topic.objects.filter(slug__in=[t.slug for t in topics]).values_list("slug", "source_revision"))
-    return all(stored.get(topic.slug) == revision for topic in topics)
