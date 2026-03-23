@@ -11,6 +11,7 @@ import threading
 import uuid
 from datetime import timedelta
 
+from django.conf import settings
 from django.db import close_old_connections
 from django.utils import timezone
 
@@ -78,9 +79,11 @@ _worker = None
 
 
 def start_worker():
-    """Process the queue in a thread of this process unless one is running;
-    returns True when a thread was started."""
+    """Process the queue in a thread of this process unless one is running
+    or PATENTS_COLLECT_IN_BACKEND is off; returns True when a thread started."""
     global _worker
+    if not settings.PATENTS_COLLECT_IN_BACKEND:
+        return False
     with _lock:
         if _worker is not None:
             return False

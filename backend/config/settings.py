@@ -144,6 +144,9 @@ REST_FRAMEWORK = {
 # many exist, as every one is collected from the public data.
 PATENTS_ALLOW_TOPIC_EDITS = env_bool("PATENTS_ALLOW_TOPIC_EDITS", default=True)
 PATENTS_MAX_TOPICS = int(os.environ.get("PATENTS_MAX_TOPICS", 20))
+# Collect added or edited topics in a thread of the web process. Docker
+# Compose turns it off: its collector service picks them up instead.
+PATENTS_COLLECT_IN_BACKEND = env_bool("PATENTS_COLLECT_IN_BACKEND", default=True)
 
 # Everything goes to stdout, where Docker and gunicorn collect it. The test
 # run keeps its output to warnings; assertLogs() still sees everything.

@@ -73,3 +73,10 @@ class QueueTests(TestCase):
         self.assertEqual(jobs.requeue_stale(), 1)
         drones.refresh_from_db()
         self.assertEqual(drones.status, Topic.QUEUED)
+
+
+class WorkerTests(TestCase):
+    def test_the_web_process_does_not_collect_when_turned_off(self):
+        with self.settings(PATENTS_COLLECT_IN_BACKEND=False), mock.patch("threading.Thread") as thread:
+            self.assertFalse(jobs.start_worker())
+        thread.assert_not_called()
