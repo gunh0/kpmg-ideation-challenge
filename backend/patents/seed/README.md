@@ -1,6 +1,6 @@
 # Snapshot of the collected topics
 
-One gzipped JSON file per topic of [`patents/topics.py`](../topics.py), written by `python manage.py dump_seed` after a full `collect_patents`. A new instance loads them on its first start (`load_seed`), so the dashboard is complete without waiting for a collection.
+`patents.json.gz` holds the topics (with their keywords) and their patents, each patent once with the slugs of the topics it belongs to. It is written by `python manage.py dump_seed` after a full `collect_patents`, and loaded by `load_seed` into an empty database on the first start, so the dashboard is complete without waiting for a collection. Topics deleted later do not come back.
 
 | | |
 |---|---|
