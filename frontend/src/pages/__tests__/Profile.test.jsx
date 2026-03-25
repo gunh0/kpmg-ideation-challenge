@@ -3,7 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "../../api";
-import { DatasetProvider } from "../../DatasetContext";
+import { TopicProvider } from "../../TopicContext";
 import Profile from "../Profile";
 
 const stats = {
@@ -24,7 +24,7 @@ const latest = {
   results: [
     {
       id: 1,
-      dataset: 1,
+      topics: [1],
       patent_id: "ZZ-0000001-B2",
       title: "Parcel release mechanism",
       assignee: "Example Robotics Inc.",
@@ -39,18 +39,18 @@ const latest = {
 function renderAt(path) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <DatasetProvider>
+      <TopicProvider>
         <Routes>
           <Route path="/assignees/:name" element={<Profile kind="assignee" />} />
           <Route path="/inventors/:name" element={<Profile kind="inventor" />} />
         </Routes>
-      </DatasetProvider>
+      </TopicProvider>
     </MemoryRouter>
   );
 }
 
 beforeEach(() => {
-  vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 2 }]);
+  vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 2 }]);
   vi.spyOn(api, "patents").mockResolvedValue(latest);
 });
 
@@ -68,7 +68,7 @@ describe("Profile", () => {
     expect(await screen.findByRole("heading", { name: "Example Robotics Inc." })).toBeInTheDocument();
     expect(await screen.findByText("2019–2021")).toBeInTheDocument();
     expect(screen.getByText("50% of all")).toBeInTheDocument();
-    expect(api.stats).toHaveBeenCalledWith({ assignee: "Example Robotics Inc.", dataset: "" });
+    expect(api.stats).toHaveBeenCalledWith({ assignee: "Example Robotics Inc.", topics: "" });
     expect(screen.getByRole("link", { name: "Jane Doe" })).toHaveAttribute("href", "/inventors/Jane%20Doe");
     expect(await screen.findByText("Parcel release mechanism")).toBeInTheDocument();
   });
@@ -79,7 +79,7 @@ describe("Profile", () => {
     renderAt("/inventors/John%20Roe");
 
     expect(await screen.findByRole("heading", { name: "Co-inventors" })).toBeInTheDocument();
-    expect(api.stats).toHaveBeenCalledWith({ inventor: "John Roe", dataset: "" });
+    expect(api.stats).toHaveBeenCalledWith({ inventor: "John Roe", topics: "" });
     expect(screen.getByRole("link", { name: "Jane Doe" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "John Roe" })).not.toBeInTheDocument();
     // in the assignee ranking and in the latest publications
@@ -88,7 +88,7 @@ describe("Profile", () => {
     }
   });
 
-  it("says so when the name has no patents in the dataset", async () => {
+  it("says so when the name has no patents in the selected topics", async () => {
     vi.spyOn(api, "stats").mockResolvedValue({ ...stats, total: 0, granted: 0, by_year: [] });
 
     renderAt("/assignees/Nobody");

@@ -39,7 +39,7 @@ export function errorMessage(body) {
 }
 
 export const api = {
-  datasets: () => request("datasets/"),
+  topics: () => request("topics/"),
   patents: (params) => request(`patents/${toQuery(params)}`),
   patent: (id) => request(`patents/${id}/`),
   stats: (params) => request(`stats/${toQuery(params)}`),

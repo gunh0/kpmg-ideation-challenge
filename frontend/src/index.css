@@ -924,7 +924,7 @@ a.button {
     order: 3;
   }
 
-  .patent-table .cell-dataset {
+  .patent-table .cell-topics {
     order: 4;
   }
 
@@ -950,7 +950,7 @@ a.button {
   }
 
   .patent-table.with-figures .cell-title,
-  .patent-table.with-figures .cell-dataset {
+  .patent-table.with-figures .cell-topics {
     grid-column: 2 / -1;
   }
 
@@ -961,7 +961,7 @@ a.button {
 
   .patent-table .cell-assignee,
   .patent-table .cell-date,
-  .patent-table .cell-dataset {
+  .patent-table .cell-topics {
     color: var(--muted);
     font-size: 0.85rem;
   }

@@ -3,7 +3,7 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "../../api";
-import { DatasetProvider, useDatasets } from "../../DatasetContext";
+import { TopicProvider, useTopics } from "../../TopicContext";
 import Topics from "../Topics";
 
 const topics = [
@@ -21,7 +21,7 @@ const topics = [
 
 function Where() {
   const location = useLocation();
-  const { selected } = useDatasets();
+  const { selected } = useTopics();
   return (
     <output data-testid="where">
       {location.pathname} {selected}
@@ -30,7 +30,7 @@ function Where() {
 }
 
 beforeEach(() => {
-  vi.spyOn(api, "datasets").mockResolvedValue(topics);
+  vi.spyOn(api, "topics").mockResolvedValue(topics);
 });
 
 afterEach(() => {
@@ -42,9 +42,9 @@ describe("Topics", () => {
   it("describes each topic and credits the source", async () => {
     render(
       <MemoryRouter>
-        <DatasetProvider>
+        <TopicProvider>
           <Topics />
-        </DatasetProvider>
+        </TopicProvider>
       </MemoryRouter>
     );
 
@@ -61,13 +61,13 @@ describe("Topics", () => {
   it("opens the dashboard of a topic", async () => {
     render(
       <MemoryRouter initialEntries={["/topics"]}>
-        <DatasetProvider>
+        <TopicProvider>
           <Routes>
             <Route path="/topics" element={<Topics />} />
             <Route path="/" element={<p>dashboard</p>} />
           </Routes>
           <Where />
-        </DatasetProvider>
+        </TopicProvider>
       </MemoryRouter>
     );
 

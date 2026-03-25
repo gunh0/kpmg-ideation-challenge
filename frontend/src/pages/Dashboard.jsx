@@ -4,7 +4,7 @@ import { api } from "../api";
 import LatestPatents from "../components/LatestPatents";
 import Ranking from "../components/Ranking";
 import YearChart from "../components/YearChart";
-import { useDatasets } from "../DatasetContext";
+import { useTopics } from "../TopicContext";
 import EmptyState from "../components/EmptyState";
 import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
@@ -17,16 +17,15 @@ function percent(part, whole) {
 
 export default function Dashboard() {
   useTitle("Dashboard");
-  const { selected: dataset, datasets, loaded } = useDatasets();
-  const { data, error, loading, retry } = useApi(() => api.stats({ dataset }), [dataset]);
+  const { selected, topicsParam: topics, topics: allTopics, loaded } = useTopics();
+  const { data, error, loading, retry } = useApi(() => api.stats({ topics }), [topics]);
   const latest = useApi(
-    () => api.patents({ dataset, has_figure: true, ordering: "-publication_date", page_size: 8 }),
-    [dataset]
+    () => api.patents({ topics, has_figure: true, ordering: "-publication_date", page_size: 8 }),
+    [topics]
   );
-  const current = datasets.find((item) => String(item.id) === dataset);
-  const name = current?.name;
+  const names = allTopics.filter((topic) => selected.includes(String(topic.id))).map((topic) => topic.name);
 
-  if (loaded && datasets.length === 0) {
+  if (loaded && allTopics.length === 0) {
     return (
       <section>
         <h1 className="page-title">Dashboard</h1>
@@ -39,7 +38,7 @@ export default function Dashboard() {
     <section>
       <h1 className="page-title">Dashboard</h1>
       <p className="page-lead">
-        {name ? `Topic “${name}”` : "All topics"}
+        {names.length ? names.map((name) => `“${name}”`).join(" + ") : "All topics"}
       </p>
 
       <ErrorMessage error={error} onRetry={retry} />

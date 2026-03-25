@@ -9,6 +9,7 @@ import PatentTable from "../PatentTable";
 
 const patent = {
   id: 1,
+  topics: [1],
   patent_id: "ZZ-0000001-B2",
   title: "Parcel release mechanism",
   assignee: "Example Robotics Inc.",
@@ -39,11 +40,11 @@ describe("PatentTable", () => {
     expect(within(rows[1]).getByText("—")).toBeInTheDocument();
   });
 
-  it("names the dataset of each patent when asked to", () => {
-    render(<PatentTable patents={[{ ...patent, dataset: 7 }]} datasetNames={{ 7: "Drones" }} />);
+  it("names the topics of each patent when asked to", () => {
+    render(<PatentTable patents={[{ ...patent, topics: [7, 8] }]} topicNames={{ 7: "Drones", 8: "Lockers" }} />);
 
-    expect(screen.getByRole("columnheader", { name: "Topic" })).toBeInTheDocument();
-    expect(screen.getByText("Drones")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Topics" })).toBeInTheDocument();
+    expect(screen.getByText("Drones, Lockers")).toBeInTheDocument();
   });
 
   it("sorts through the column headers", () => {

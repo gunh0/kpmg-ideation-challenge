@@ -3,7 +3,7 @@ import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "../../api";
-import { DatasetProvider } from "../../DatasetContext";
+import { TopicProvider } from "../../TopicContext";
 import Dashboard from "../Dashboard";
 
 const stats = {
@@ -20,9 +20,9 @@ const stats = {
 function renderDashboard() {
   return render(
     <MemoryRouter>
-      <DatasetProvider>
+      <TopicProvider>
         <Dashboard />
-      </DatasetProvider>
+      </TopicProvider>
     </MemoryRouter>
   );
 }
@@ -38,7 +38,7 @@ afterEach(() => {
 describe("Dashboard", () => {
   it("summarises the selection and links rankings to their pages", async () => {
     vi.spyOn(api, "patents").mockResolvedValue({ count: 0, results: [] });
-    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockResolvedValue(stats);
 
     renderDashboard();
@@ -54,7 +54,7 @@ describe("Dashboard", () => {
   });
 
   it("shows the latest patents with their figures, linked to Google Patents", async () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockResolvedValue(stats);
     vi.spyOn(api, "patents").mockResolvedValue({
       count: 1,
@@ -80,7 +80,7 @@ describe("Dashboard", () => {
   });
 
   it("explains where the data comes from when there is none", async () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([]);
+    vi.spyOn(api, "topics").mockResolvedValue([]);
     vi.spyOn(api, "stats").mockResolvedValue({ ...stats, total: 0 });
 
     renderDashboard();
@@ -90,7 +90,7 @@ describe("Dashboard", () => {
   });
 
   it("offers a retry when the API fails", async () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockRejectedValue(new TypeError("Failed to fetch"));
 
     renderDashboard();

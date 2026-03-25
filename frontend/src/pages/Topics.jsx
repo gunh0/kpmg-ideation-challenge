@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router";
 
 import { api } from "../api";
-import { useDatasets } from "../DatasetContext";
+import { useTopics } from "../TopicContext";
 import ErrorMessage from "../components/ErrorMessage";
 import { formatNumber } from "../format";
 import useApi from "../hooks/useApi";
@@ -18,12 +18,12 @@ function formatDate(value) {
 export default function Topics() {
   useTitle("Topics");
   const navigate = useNavigate();
-  const { setSelected } = useDatasets();
-  const { data, error, loading, retry } = useApi(() => api.datasets(), []);
+  const { setSelected } = useTopics();
+  const { data, error, loading, retry } = useApi(() => api.topics(), []);
   const revision = data?.find((topic) => topic.source_revision)?.source_revision;
 
   function open(topic, path) {
-    setSelected(String(topic.id));
+    setSelected([String(topic.id)]);
     navigate(path);
   }
 

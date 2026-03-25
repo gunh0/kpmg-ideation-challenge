@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 
 import { api } from "../api";
-import { useDatasets } from "../DatasetContext";
+import { useTopics } from "../TopicContext";
 import EmptyState from "../components/EmptyState";
 import AssigneeFilter from "../components/AssigneeFilter";
 import Pagination from "../components/Pagination";
@@ -51,7 +51,7 @@ function useDebouncedParam(value, onChange) {
 export default function Patents() {
   useTitle("Patents");
   const [params, update] = useQueryParams(DEFAULTS);
-  const { selected: dataset, datasets, loaded } = useDatasets();
+  const { topicsParam: topics, topics: allTopics, loaded } = useTopics();
   const page = Number(params.page) || 1;
   const pageSize = PAGE_SIZES.includes(params.page_size) ? Number(params.page_size) : 25;
   const [search, setSearch] = useDebouncedParam(params.search, (value) => update({ search: value.trim() }));
@@ -74,8 +74,8 @@ export default function Patents() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   const { data, error, loading, retry } = useApi(
-    () => api.patents({ ...params, dataset, page, page_size: pageSize }),
-    [params, dataset]
+    () => api.patents({ ...params, topics, page, page_size: pageSize }),
+    [params, topics]
   );
 
   // The open patent is part of the URL (?patent=<id>), so it can be shared and
@@ -96,7 +96,7 @@ export default function Patents() {
     setSearchParams(next);
   }
 
-  if (loaded && datasets.length === 0) {
+  if (loaded && allTopics.length === 0) {
     return (
       <section>
         <h1 className="page-title">Patents</h1>
@@ -108,7 +108,7 @@ export default function Patents() {
   return (
     <section>
       <h1 className="page-title">Patents</h1>
-      <p className="page-lead">Search and filter the patents of the selected topic.</p>
+      <p className="page-lead">Search and filter the patents of the selected topics.</p>
 
       <div className="toolbar">
         <input
@@ -120,7 +120,7 @@ export default function Patents() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
-        <AssigneeFilter value={params.assignee} dataset={dataset} onChange={(value) => update({ assignee: value })} />
+        <AssigneeFilter value={params.assignee} topics={topics} onChange={(value) => update({ assignee: value })} />
         <select
           className="select"
           aria-label="Grant status"
@@ -200,7 +200,7 @@ export default function Patents() {
               {data.count > 0 && (
                 <a
                   className="button"
-                  href={api.exportUrl({ ...params, page: undefined, page_size: undefined, dataset })}
+                  href={api.exportUrl({ ...params, page: undefined, page_size: undefined, topics })}
                   download
                 >
                   Download CSV
@@ -214,10 +214,8 @@ export default function Patents() {
             onSort={(ordering) => update({ ordering })}
             onSelect={setOpen}
             figures={figures}
-            datasetNames={
-              !dataset && datasets.length > 1
-                ? Object.fromEntries(datasets.map((item) => [item.id, item.name]))
-                : undefined
+            topicNames={
+              allTopics.length > 1 ? Object.fromEntries(allTopics.map((item) => [item.id, item.name])) : undefined
             }
           />
           <Pagination

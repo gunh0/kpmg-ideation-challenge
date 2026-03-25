@@ -73,9 +73,9 @@ function Thumbnail({ patent, figure }) {
   );
 }
 
-// datasetNames: {id: name}, shown as an extra column when several topics are listed.
+// topicNames: {id: name}; given, a column names the topics of each patent.
 // figures: {id: {thumbnail, figure}} from useFigures, shown as the first column.
-export default function PatentTable({ patents, ordering = "", onSort, onSelect, datasetNames, figures }) {
+export default function PatentTable({ patents, ordering = "", onSort, onSelect, topicNames, figures }) {
   return (
     <div className="table-wrap">
       <table className={`table patent-table${figures ? " with-figures" : ""}`}>
@@ -85,7 +85,7 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
             {COLUMNS.map((column) => (
               <SortHeader key={column.key} column={column} ordering={ordering} onSort={onSort} />
             ))}
-            {datasetNames && <th>Topic</th>}
+            {topicNames && <th>Topics</th>}
           </tr>
         </thead>
         <tbody>
@@ -124,7 +124,11 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
                   {patent.is_granted ? "Granted" : "Application"}
                 </span>
               </td>
-              {datasetNames && <td className="muted small cell-dataset">{datasetNames[patent.dataset] || "—"}</td>}
+              {topicNames && (
+                <td className="muted small cell-topics">
+                  {patent.topics.map((id) => topicNames[id]).filter(Boolean).join(", ") || "—"}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

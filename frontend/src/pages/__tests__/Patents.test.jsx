@@ -3,12 +3,12 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "../../api";
-import { DatasetProvider } from "../../DatasetContext";
+import { TopicProvider } from "../../TopicContext";
 import Patents from "../Patents";
 
 const patent = {
   id: 1,
-  dataset: 1,
+  topics: [1],
   patent_id: "ZZ-0000001-B2",
   title: "Parcel release mechanism",
   assignee: "Example Robotics Inc.",
@@ -28,18 +28,18 @@ function Location() {
 function renderAt(path) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <DatasetProvider>
+      <TopicProvider>
         <Routes>
           <Route path="/patents" element={<Patents />} />
         </Routes>
         <Location />
-      </DatasetProvider>
+      </TopicProvider>
     </MemoryRouter>
   );
 }
 
 beforeEach(() => {
-  vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 1 }]);
+  vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 1 }]);
   vi.spyOn(api, "assignees").mockResolvedValue([]);
   vi.spyOn(api, "patents").mockResolvedValue({ count: 1, results: [patent] });
 });

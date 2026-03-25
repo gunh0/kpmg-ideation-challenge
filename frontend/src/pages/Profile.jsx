@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { api } from "../api";
-import { useDatasets } from "../DatasetContext";
+import { useTopics } from "../TopicContext";
 import ErrorMessage from "../components/ErrorMessage";
 import PatentDetail from "../components/PatentDetail";
 import PatentTable from "../components/PatentTable";
@@ -44,17 +44,17 @@ const KINDS = {
   },
 };
 
-// One assignee or inventor across the selected dataset: how much they file,
+// One assignee or inventor across the selected topics: how much they file,
 // since when, and with whom. The filters are those of the patent list.
 export default function Profile({ kind }) {
   const { name } = useParams();
   useTitle(name);
-  const { selected: dataset } = useDatasets();
+  const { topicsParam: topics } = useTopics();
   const filter = { [kind]: name };
-  const { data, error, loading, retry } = useApi(() => api.stats({ ...filter, dataset }), [kind, name, dataset]);
+  const { data, error, loading, retry } = useApi(() => api.stats({ ...filter, topics }), [kind, name, topics]);
   const latest = useApi(
-    () => api.patents({ ...filter, dataset, ordering: "-publication_date", page_size: LATEST }),
-    [kind, name, dataset]
+    () => api.patents({ ...filter, topics, ordering: "-publication_date", page_size: LATEST }),
+    [kind, name, topics]
   );
   const [open, setOpen] = useState(null);
   const figures = useFigures(latest.data?.results);
@@ -71,7 +71,7 @@ export default function Profile({ kind }) {
       <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
       {data && data.total === 0 && (
-        <p className="page-lead">No patents of this {kind} in the selected topic.</p>
+        <p className="page-lead">No patents of this {kind} in the selected topics.</p>
       )}
       {data && data.total > 0 && (
         <>
