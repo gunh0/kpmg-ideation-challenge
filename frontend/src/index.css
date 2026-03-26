@@ -486,14 +486,52 @@ th[aria-sort="descending"] .sort-arrow {
 }
 
 .picker {
-  max-width: 240px;
+  position: relative;
+}
+
+.picker-button {
+  max-width: 260px;
+  overflow: hidden;
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.08);
   color: #f1f5f9;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
-.picker option {
+.picker-menu {
+  position: absolute;
+  right: 0;
+  z-index: 20;
+  min-width: 240px;
+  max-height: 60vh;
+  margin: 6px 0 0;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
   color: var(--text);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+}
+
+.picker-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.picker-option:hover {
+  background: var(--hover);
+}
+
+.picker-option .small {
+  margin-left: auto;
 }
 
 .cards {
@@ -851,8 +889,8 @@ a.button {
     overflow-x: auto;
   }
 
-  .picker {
-    max-width: 50%;
+  .picker-button {
+    max-width: 50vw;
   }
 
   .topbar-inner,
