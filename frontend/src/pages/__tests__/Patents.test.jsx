@@ -90,6 +90,25 @@ describe("Patents", () => {
     await waitFor(() => expect(api.patents).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, page_size: 100 })));
   });
 
+  it("ranks by the selected topics that a patent matches", async () => {
+    window.localStorage.setItem("selected-topics", JSON.stringify(["1", "2"]));
+    vi.spyOn(api, "topics").mockResolvedValue([
+      { id: 1, name: "Drones", patent_count: 2 },
+      { id: 2, name: "Lockers", patent_count: 1 },
+    ]);
+    api.patents.mockResolvedValue({ count: 1, results: [{ ...patent, topics: [1, 2], matched: 2 }] });
+    renderAt("/patents");
+
+    expect(await screen.findByText("2 of 2")).toBeInTheDocument();
+    expect(api.patents).toHaveBeenLastCalledWith(expect.objectContaining({ topics: "1,2", ordering: "-matched" }));
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Topics to match" }), { target: { value: "all" } });
+    await waitFor(() => expect(api.patents).toHaveBeenLastCalledWith(expect.objectContaining({ match: "all" })));
+
+    fireEvent.click(screen.getByRole("button", { name: /published/i }));
+    await waitFor(() => expect(api.patents).toHaveBeenLastCalledWith(expect.objectContaining({ ordering: "publication_date" })));
+  });
+
   it("opens a shared link to a patent that is not on the page", async () => {
     const other = { ...patent, id: 9, title: "Landing pad for parcel drones" };
     vi.spyOn(api, "patent").mockResolvedValue(other);

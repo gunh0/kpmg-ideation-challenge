@@ -74,14 +74,19 @@ function Thumbnail({ patent, figure }) {
 }
 
 // topicNames: {id: name}; given, a column names the topics of each patent.
+// matchOf: the number of selected topics; above 0, a column shows how many of
+// them each patent matches.
 // figures: {id: {thumbnail, figure}} from useFigures, shown as the first column.
-export default function PatentTable({ patents, ordering = "", onSort, onSelect, topicNames, figures }) {
+const MATCHES = { key: "matched", label: "Matches", sortable: true };
+
+export default function PatentTable({ patents, ordering = "", onSort, onSelect, topicNames, figures, matchOf = 0 }) {
   return (
     <div className="table-wrap">
       <table className={`table patent-table${figures ? " with-figures" : ""}`}>
         <thead>
           <tr>
             {figures && <th className="cell-figure">Figure</th>}
+            {matchOf > 0 && <SortHeader column={MATCHES} ordering={ordering} onSort={onSort} />}
             {COLUMNS.map((column) => (
               <SortHeader key={column.key} column={column} ordering={ordering} onSort={onSort} />
             ))}
@@ -100,6 +105,13 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
               {figures && (
                 <td className="cell-figure">
                   <Thumbnail patent={patent} figure={figures[patent.id] ?? undefined} />
+                </td>
+              )}
+              {matchOf > 0 && (
+                <td className="nowrap cell-matches">
+                  <span className={`badge badge-match${patent.matched === matchOf ? " badge-match-all" : ""}`}>
+                    {patent.matched} of {matchOf}
+                  </span>
                 </td>
               )}
               <td className="mono nowrap cell-id">{patent.patent_id}</td>

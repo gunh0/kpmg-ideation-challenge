@@ -25,7 +25,10 @@ const DEFAULTS = {
   granted: "",
   year_from: "",
   year_to: "",
-  ordering: "-publication_date",
+  // "" until a column is chosen: the newest first, or the best matches when
+  // several topics are selected
+  ordering: "",
+  match: "",
   page: "1",
   page_size: "25",
 };
@@ -51,7 +54,10 @@ function useDebouncedParam(value, onChange) {
 export default function Patents() {
   useTitle("Patents");
   const [params, update] = useQueryParams(DEFAULTS);
-  const { topicsParam: topics, topics: allTopics, loaded } = useTopics();
+  const { topicsParam: topics, topics: allTopics, selected, loaded } = useTopics();
+  const ranking = selected.length > 1;
+  const ordering = params.ordering || (ranking ? "-matched" : "-publication_date");
+  const match = ranking ? params.match : "";
   const page = Number(params.page) || 1;
   const pageSize = PAGE_SIZES.includes(params.page_size) ? Number(params.page_size) : 25;
   const [search, setSearch] = useDebouncedParam(params.search, (value) => update({ search: value.trim() }));
@@ -74,8 +80,8 @@ export default function Patents() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   const { data, error, loading, retry } = useApi(
-    () => api.patents({ ...params, topics, page, page_size: pageSize }),
-    [params, topics]
+    () => api.patents({ ...params, ordering, match, topics, page, page_size: pageSize }),
+    [params, topics, ordering, match]
   );
 
   // The open patent is part of the URL (?patent=<id>), so it can be shared and
@@ -131,6 +137,17 @@ export default function Patents() {
           <option value="true">Granted</option>
           <option value="false">Applications</option>
         </select>
+        {ranking && (
+          <select
+            className="select"
+            aria-label="Topics to match"
+            value={params.match}
+            onChange={(event) => update({ match: event.target.value })}
+          >
+            <option value="">Any selected topic, best matches first</option>
+            <option value="all">All {selected.length} selected topics</option>
+          </select>
+        )}
         <div className="year-range">
           <input
             type="number"
@@ -200,7 +217,7 @@ export default function Patents() {
               {data.count > 0 && (
                 <a
                   className="button"
-                  href={api.exportUrl({ ...params, page: undefined, page_size: undefined, topics })}
+                  href={api.exportUrl({ ...params, ordering, match, page: undefined, page_size: undefined, topics })}
                   download
                 >
                   Download CSV
@@ -210,7 +227,8 @@ export default function Patents() {
           </div>
           <PatentTable
             patents={data.results}
-            ordering={params.ordering}
+            ordering={ordering}
+            matchOf={ranking ? selected.length : 0}
             onSort={(ordering) => update({ ordering })}
             onSelect={setOpen}
             figures={figures}

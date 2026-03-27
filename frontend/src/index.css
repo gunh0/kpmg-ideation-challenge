@@ -58,6 +58,17 @@ a {
     color: #e3b341;
   }
 
+/* Matches of the selected topics: the accent, not the status colours. */
+.badge-match {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge-match-all {
+  background: var(--accent);
+  color: #fff;
+}
+
   .alert {
     border-color: #5c2320;
     background: #2d1414;
@@ -947,7 +958,8 @@ a.button {
     border: 0;
   }
 
-  .patent-table .cell-status {
+  .patent-table .cell-status,
+  .patent-table .cell-matches {
     order: 1;
   }
 
