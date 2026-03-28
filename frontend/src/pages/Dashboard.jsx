@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { api } from "../api";
 import LatestPatents from "../components/LatestPatents";
 import Ranking from "../components/Ranking";
+import TopicTrends from "../components/TopicTrends";
 import YearChart from "../components/YearChart";
 import { useTopics } from "../TopicContext";
 import EmptyState from "../components/EmptyState";
@@ -80,6 +81,12 @@ export default function Dashboard() {
         <div className="panel">
           <h2 className="panel-title">Patents per year</h2>
           <YearChart data={data.by_year} />
+        </div>
+      )}
+      {data && data.by_topic.length > 1 && (
+        <div className="panel">
+          <h2 className="panel-title">Topics per year</h2>
+          <TopicTrends topics={data.by_topic} allTopics={allTopics} />
         </div>
       )}
       {data && (

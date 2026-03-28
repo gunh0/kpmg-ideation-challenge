@@ -11,6 +11,11 @@
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
   --radius: 10px;
   color-scheme: light;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
@@ -45,6 +50,11 @@ a {
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #008300;
+    --series-7: #9085e9;
+    --series-8: #e66767;
     color-scheme: dark;
   }
 
@@ -727,6 +737,11 @@ th[aria-sort="descending"] .sort-arrow {
   font-size: 11px;
 }
 
+.chart .end-label {
+  fill: var(--text);
+  font-size: 12px;
+}
+
 .chart .crosshair {
   stroke: #9aa4b2;
   stroke-dasharray: 3 3;
@@ -1125,6 +1140,11 @@ select:focus-visible,
     --series-1: #2a78d6;
     --series-2: #eb6834;
     --series-3: #1baf7a;
+    --series-4: #eda100;
+    --series-5: #e87ba4;
+    --series-6: #008300;
+    --series-7: #4a3aa7;
+    --series-8: #e34948;
     color-scheme: light;
   }
 

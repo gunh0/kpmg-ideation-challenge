@@ -15,6 +15,8 @@ const stats = {
   ],
   top_assignees: [{ name: "Example Robotics Inc.", count: 2, granted: 2 }],
   top_inventors: [{ name: "John Roe", count: 2 }],
+  top_countries: [],
+  by_topic: [],
 };
 
 function renderDashboard() {
