@@ -795,6 +795,10 @@ th[aria-sort="descending"] .sort-arrow {
   margin-bottom: 0;
 }
 
+.grid-gap {
+  margin-bottom: 20px;
+}
+
 .ranking {
   margin: 0;
   padding: 0;

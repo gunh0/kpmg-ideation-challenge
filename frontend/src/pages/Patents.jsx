@@ -14,14 +14,15 @@ import useDebounce from "../hooks/useDebounce";
 import useFigures from "../hooks/useFigures";
 import useQueryParams from "../hooks/useQueryParams";
 import useTitle from "../hooks/useTitle";
-import { formatNumber } from "../format";
+import { countryName, formatNumber } from "../format";
 
 const PAGE_SIZES = ["25", "50", "100"];
-const FILTERS = ["search", "assignee", "inventor", "granted", "year_from", "year_to"];
+const FILTERS = ["search", "assignee", "inventor", "country", "granted", "year_from", "year_to"];
 const DEFAULTS = {
   search: "",
   assignee: "",
   inventor: "",
+  country: "",
   granted: "",
   year_from: "",
   year_to: "",
@@ -182,14 +183,24 @@ export default function Patents() {
         )}
       </div>
 
-      {params.inventor && (
+      {(params.inventor || params.country) && (
         <p className="chips">
-          <span className="chip">
-            Inventor: {params.inventor}
-            <button type="button" aria-label="Remove inventor filter" onClick={() => update({ inventor: "" })}>
-              ×
-            </button>
-          </span>
+          {params.inventor && (
+            <span className="chip">
+              Inventor: {params.inventor}
+              <button type="button" aria-label="Remove inventor filter" onClick={() => update({ inventor: "" })}>
+                ×
+              </button>
+            </span>
+          )}
+          {params.country && (
+            <span className="chip">
+              Assignee country: {countryName(params.country)}
+              <button type="button" aria-label="Remove country filter" onClick={() => update({ country: "" })}>
+                ×
+              </button>
+            </span>
+          )}
         </p>
       )}
 

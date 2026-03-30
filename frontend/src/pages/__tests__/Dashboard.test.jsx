@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -79,6 +79,21 @@ describe("Dashboard", () => {
     expect(card).toHaveAttribute("href", "https://patents.google.com/patent/US12351339B2/en");
     expect(card.querySelector("img")).toHaveAttribute("src", "https://patentimages.storage.googleapis.com/t.png");
     expect(api.patents).toHaveBeenCalledWith(expect.objectContaining({ has_figure: true, page_size: 8 }));
+  });
+
+  it("ranks the assignee countries and narrows the dashboard to one", async () => {
+    vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "patents").mockResolvedValue({ count: 0, results: [] });
+    vi.spyOn(api, "stats").mockResolvedValue({ ...stats, top_countries: [{ code: "KR", count: 2, granted: 1 }] });
+
+    renderDashboard();
+
+    const korea = await screen.findByRole("link", { name: "South Korea" });
+    expect(korea).toHaveAttribute("href", "/?country=KR");
+    fireEvent.click(korea);
+
+    expect(await screen.findByText("Assignees from South Korea")).toBeInTheDocument();
+    await waitFor(() => expect(api.stats).toHaveBeenLastCalledWith({ topics: "", country: "KR" }));
   });
 
   it("explains where the data comes from when there is none", async () => {

@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import { api } from "../api";
 import LatestPatents from "../components/LatestPatents";
@@ -10,7 +10,7 @@ import EmptyState from "../components/EmptyState";
 import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
 import useTitle from "../hooks/useTitle";
-import { formatNumber } from "../format";
+import { countryName, formatNumber } from "../format";
 
 function percent(part, whole) {
   return whole ? `${Math.round((100 * part) / whole)}%` : "—";
@@ -19,10 +19,13 @@ function percent(part, whole) {
 export default function Dashboard() {
   useTitle("Dashboard");
   const { selected, topicsParam: topics, topics: allTopics, loaded } = useTopics();
-  const { data, error, loading, retry } = useApi(() => api.stats({ topics }), [topics]);
+  // ?country=KR narrows the whole dashboard to one country's assignees.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const country = searchParams.get("country") || "";
+  const { data, error, loading, retry } = useApi(() => api.stats({ topics, country }), [topics, country]);
   const latest = useApi(
-    () => api.patents({ topics, has_figure: true, ordering: "-publication_date", page_size: 8 }),
-    [topics]
+    () => api.patents({ topics, country, has_figure: true, ordering: "-publication_date", page_size: 8 }),
+    [topics, country]
   );
   const names = allTopics.filter((topic) => selected.includes(String(topic.id))).map((topic) => topic.name);
 
@@ -41,6 +44,16 @@ export default function Dashboard() {
       <p className="page-lead">
         {names.length ? names.map((name) => `“${name}”`).join(" + ") : "All topics"}
       </p>
+      {country && (
+        <p className="chips">
+          <span className="chip">
+            Assignees from {countryName(country)}
+            <button type="button" aria-label="Show all countries" onClick={() => setSearchParams({})}>
+              ×
+            </button>
+          </span>
+        </p>
+      )}
 
       <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
@@ -87,6 +100,18 @@ export default function Dashboard() {
         <div className="panel">
           <h2 className="panel-title">Topics per year</h2>
           <TopicTrends topics={data.by_topic} allTopics={allTopics} />
+        </div>
+      )}
+      {data && (
+        <div className="grid-2 grid-gap">
+          <div className="panel">
+            <h2 className="panel-title">Assignee countries</h2>
+            <Ranking
+              rows={data.top_countries.map((row) => ({ ...row, name: countryName(row.code) }))}
+              linkTo={(row) => `/?country=${row.code}`}
+              emptyText="No assignee countries in this selection."
+            />
+          </div>
         </div>
       )}
       {data && (
