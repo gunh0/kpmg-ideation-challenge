@@ -10,6 +10,7 @@ import PatentTable from "../PatentTable";
 const patent = {
   id: 1,
   topics: [1],
+  cited_by: 3,
   patent_id: "ZZ-0000001-B2",
   title: "Parcel release mechanism",
   assignee: "Example Robotics Inc.",

@@ -12,6 +12,7 @@ const COLUMNS = [
   { key: "title", label: "Title", sortable: true },
   { key: "assignee", label: "Assignee" },
   { key: "publication_date", label: "Published", sortable: true },
+  { key: "cited_by", label: "Cited by", sortable: true },
   { key: "grant_date", label: "Status", sortable: true },
 ];
 
@@ -131,6 +132,7 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
                 )}
               </td>
               <td className="nowrap cell-date">{formatDate(patent.publication_date)}</td>
+              <td className="numeric cell-cited">{patent.cited_by ?? "—"}</td>
               <td className="cell-status">
                 <span className={`badge ${patent.is_granted ? "badge-granted" : "badge-pending"}`}>
                   {patent.is_granted ? "Granted" : "Application"}

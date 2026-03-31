@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router";
 
 import { api } from "../api";
 import LatestPatents from "../components/LatestPatents";
+import MostCited from "../components/MostCited";
 import Ranking from "../components/Ranking";
 import TopicTrends from "../components/TopicTrends";
 import YearChart from "../components/YearChart";
@@ -27,6 +28,7 @@ export default function Dashboard() {
     () => api.patents({ topics, country, has_figure: true, ordering: "-publication_date", page_size: 8 }),
     [topics, country]
   );
+  const cited = useApi(() => api.patents({ topics, country, ordering: "-cited_by", page_size: 8 }), [topics, country]);
   const names = allTopics.filter((topic) => selected.includes(String(topic.id))).map((topic) => topic.name);
 
   if (loaded && allTopics.length === 0) {
@@ -111,6 +113,15 @@ export default function Dashboard() {
               linkTo={(row) => `/?country=${row.code}`}
               emptyText="No assignee countries in this selection."
             />
+          </div>
+          <div className="panel">
+            <div className="panel-head">
+              <h2 className="panel-title">Most cited</h2>
+              <Link to="/patents?ordering=-cited_by" className="small">
+                All by citations →
+              </Link>
+            </div>
+            {cited.data && <MostCited patents={cited.data.results} />}
           </div>
         </div>
       )}

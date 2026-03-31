@@ -696,6 +696,38 @@ th[aria-sort="descending"] .sort-arrow {
   font-size: 0.8rem;
 }
 
+.cited {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cited li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.cited li:last-child {
+  border-bottom: 0;
+}
+
+.cited .small {
+  grid-column: 1;
+}
+
+.cited-count {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .panel-more {
   margin: 10px 0 0;
   font-size: 0.9rem;
@@ -991,6 +1023,10 @@ a.button {
   .patent-table .cell-assignee,
   .patent-table .cell-date {
     order: 3;
+  }
+
+  .patent-table .cell-cited {
+    display: none;
   }
 
   .patent-table .cell-topics {
