@@ -89,6 +89,15 @@ describe("PatentDetail", () => {
 
   afterEach(() => vi.restoreAllMocks());
 
+  it("shows the abstract, the assignee's country and the citations", () => {
+    render(<PatentDetail patent={{ ...patent, abstract: "A drone lowers parcels.", assignee_country: "KR" }} onClose={() => {}} />);
+
+    expect(screen.getByRole("heading", { name: "Abstract" })).toBeInTheDocument();
+    expect(screen.getByText("A drone lowers parcels.")).toBeInTheDocument();
+    expect(screen.getByText(/South Korea/)).toBeInTheDocument();
+    expect(screen.getByText("3 applications")).toBeInTheDocument();
+  });
+
   it("shows the figure, linked to Google Patents", async () => {
     const figure = "https://patentimages.storage.googleapis.com/full/ZZ0000001B2.png";
     api.figures.mockResolvedValue([{ id: 1, thumbnail: "t", figure, checked: true }]);
