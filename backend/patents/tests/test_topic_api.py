@@ -120,9 +120,11 @@ class TopicEditTests(APITestCase):
         self.assertEqual(response.status_code, 415)
 
     def test_edits_can_be_turned_off(self, start_worker):
+        self.assertEqual(self.client.get("/api/config/").json(), {"topic_edits": True, "max_topics": 20})
         with self.settings(PATENTS_ALLOW_TOPIC_EDITS=False):
             response = self.post({"name": "Lockers", "keywords": ["locker"]})
             self.assertEqual(self.client.get("/api/topics/").status_code, 200)
+            self.assertFalse(self.client.get("/api/config/").json()["topic_edits"])
 
         self.assertEqual(response.status_code, 403)
         self.assertIn("PATENTS_ALLOW_TOPIC_EDITS", response.json()["detail"])

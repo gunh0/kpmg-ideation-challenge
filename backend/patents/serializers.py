@@ -94,6 +94,11 @@ class AssigneeCountSerializer(NameCountSerializer):
     granted = serializers.IntegerField()
 
 
+class ConfigSerializer(serializers.Serializer):
+    topic_edits = serializers.BooleanField(help_text="topics can be added, edited and deleted")
+    max_topics = serializers.IntegerField()
+
+
 class CountryCountSerializer(serializers.Serializer):
     code = serializers.CharField()
     count = serializers.IntegerField()

@@ -23,6 +23,7 @@ from .serializers import (
     FigureSerializer,
     NameCountSerializer,
     PatentSerializer,
+    ConfigSerializer,
     StatsSerializer,
     TopicInputSerializer,
     TopicSerializer,
@@ -230,3 +231,11 @@ class FigureView(APIView):
         order = {pk: i for i, pk in enumerate(ids)}
         patents.sort(key=lambda patent: order[patent.pk])
         return Response(FigureSerializer(patents, many=True).data)
+
+
+class ConfigView(APIView):
+    """What this instance allows, for the dashboard to adapt to."""
+
+    @extend_schema(responses=ConfigSerializer)
+    def get(self, request):
+        return Response({"topic_edits": settings.PATENTS_ALLOW_TOPIC_EDITS, "max_topics": settings.PATENTS_MAX_TOPICS})
