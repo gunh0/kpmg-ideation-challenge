@@ -31,6 +31,14 @@ async function request(path, options = {}) {
   return body;
 }
 
+function json(method, body) {
+  return {
+    method,
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  };
+}
+
 // DRF errors look like {"detail": "..."} or {"field": ["..."]}.
 export function errorMessage(body) {
   if (!body || typeof body !== "object") return "";
@@ -40,6 +48,8 @@ export function errorMessage(body) {
 
 export const api = {
   topics: () => request("topics/"),
+  createTopic: (data) => request("topics/", json("POST", data)),
+  config: () => request("config/"),
   patents: (params) => request(`patents/${toQuery(params)}`),
   patent: (id) => request(`patents/${id}/`),
   stats: (params) => request(`stats/${toQuery(params)}`),

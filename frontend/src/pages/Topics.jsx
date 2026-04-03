@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { api } from "../api";
 import { useTopics } from "../TopicContext";
 import ErrorMessage from "../components/ErrorMessage";
+import TopicForm from "../components/TopicForm";
 import { formatNumber } from "../format";
 import useApi from "../hooks/useApi";
 import useTitle from "../hooks/useTitle";
@@ -18,8 +20,22 @@ function formatDate(value) {
 export default function Topics() {
   useTitle("Topics");
   const navigate = useNavigate();
-  const { setSelected } = useTopics();
-  const { data, error, loading, retry } = useApi(() => api.topics(), []);
+  const { setSelected, reload: reloadPicker } = useTopics();
+  const [version, setVersion] = useState(0);
+  const { data, error, loading, retry } = useApi(() => api.topics(), [version]);
+  const config = useApi(() => api.config(), []);
+  const [adding, setAdding] = useState(false);
+
+  function changed() {
+    setVersion((v) => v + 1);
+    reloadPicker();
+  }
+
+  async function add(values) {
+    await api.createTopic(values);
+    setAdding(false);
+    changed();
+  }
   const revision = data?.find((topic) => topic.source_revision)?.source_revision;
 
   function open(topic, path) {
@@ -31,9 +47,27 @@ export default function Topics() {
     <section>
       <h1 className="page-title">Topics</h1>
       <p className="page-lead">
-        US patents published since 2015 whose title matches a topic, one entry per application. They are collected from
-        Google Patents Public Data and refreshed when it changes.
+        US patents published since 2015 whose title or abstract matches a topic’s keywords, one entry per application.
+        They are collected from Google Patents Public Data and refreshed when it changes.
       </p>
+
+      {config.data?.topic_edits &&
+        (adding ? (
+          <div className="panel">
+            <h2 className="panel-title">New topic</h2>
+            <p className="muted small">
+              It shows the stored patents that match at once, then grows while the public data is searched — that takes a
+              while.
+            </p>
+            <TopicForm submitLabel="Add topic" onSave={add} onCancel={() => setAdding(false)} />
+          </div>
+        ) : (
+          <p>
+            <button type="button" className="button button-primary" onClick={() => setAdding(true)}>
+              Add a topic
+            </button>
+          </p>
+        ))}
 
       <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
@@ -47,9 +81,13 @@ export default function Topics() {
                 <strong>{formatNumber(topic.patent_count)}</strong> patents
                 <span className="muted"> · collected {formatDate(topic.collected_at)}</span>
               </p>
-              {topic.pattern && (
-                <p className="muted small">
-                  Title matches <code>{topic.pattern}</code>
+              {topic.keywords.length > 0 && (
+                <p className="keywords" aria-label="Keywords">
+                  {topic.keywords.map((keyword) => (
+                    <span key={keyword} className="keyword">
+                      {keyword}
+                    </span>
+                  ))}
                 </p>
               )}
               <p className="topic-links">

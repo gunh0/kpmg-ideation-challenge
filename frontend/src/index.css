@@ -652,6 +652,38 @@ th[aria-sort="descending"] .sort-arrow {
   margin-top: auto !important;
 }
 
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyword {
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.topic-form {
+  display: grid;
+  gap: 12px;
+  max-width: 640px;
+}
+
+.topic-form label {
+  display: grid;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.topic-form-actions {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+
 .section-title {
   margin: 8px 0 6px;
   font-size: 1.05rem;
