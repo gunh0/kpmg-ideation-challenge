@@ -49,6 +49,8 @@ export function errorMessage(body) {
 export const api = {
   topics: () => request("topics/"),
   createTopic: (data) => request("topics/", json("POST", data)),
+  updateTopic: (id, data) => request(`topics/${id}/`, json("PATCH", data)),
+  deleteTopic: (id) => request(`topics/${id}/`, { method: "DELETE" }),
   config: () => request("config/"),
   patents: (params) => request(`patents/${toQuery(params)}`),
   patent: (id) => request(`patents/${id}/`),

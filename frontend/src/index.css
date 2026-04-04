@@ -1167,6 +1167,10 @@ a.button {
   cursor: pointer;
 }
 
+.link-button.danger {
+  color: #cf222e;
+}
+
 .link-button:hover {
   text-decoration: underline;
 }

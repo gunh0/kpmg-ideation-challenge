@@ -90,6 +90,31 @@ describe("Topics", () => {
     expect(create).toHaveBeenLastCalledWith({ name: "Lockers", keywords: "locker, parcel box", description: "" });
   });
 
+  it("edits and deletes a topic", async () => {
+    const update = vi.spyOn(api, "updateTopic").mockResolvedValue({});
+    const remove = vi.spyOn(api, "deleteTopic").mockResolvedValue(null);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(
+      <MemoryRouter>
+        <TopicProvider>
+          <Topics />
+        </TopicProvider>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Edit" }));
+    expect(screen.getByRole("textbox", { name: /^Keywords/ })).toHaveValue("drone, uav");
+    fireEvent.change(screen.getByRole("textbox", { name: /^Keywords/ }), { target: { value: "drone, uav, quadcopter" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith(1, expect.objectContaining({ keywords: "drone, uav, quadcopter" }))
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(remove).toHaveBeenCalledWith(1));
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining("Delete “Drones”"));
+  });
+
   it("hides editing where the instance does not allow it", async () => {
     api.config.mockResolvedValue({ topic_edits: false, max_topics: 20 });
     render(
@@ -102,6 +127,7 @@ describe("Topics", () => {
 
     await screen.findByRole("heading", { name: "Drones" });
     expect(screen.queryByRole("button", { name: "Add a topic" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
   });
 
   it("opens the dashboard of a topic", async () => {

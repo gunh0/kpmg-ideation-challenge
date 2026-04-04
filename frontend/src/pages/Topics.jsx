@@ -25,10 +25,33 @@ export default function Topics() {
   const { data, error, loading, retry } = useApi(() => api.topics(), [version]);
   const config = useApi(() => api.config(), []);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [actionError, setActionError] = useState("");
+  const edits = Boolean(config.data?.topic_edits);
 
   function changed() {
     setVersion((v) => v + 1);
     reloadPicker();
+  }
+
+  async function save(topic, values) {
+    await api.updateTopic(topic.id, values);
+    setEditing(null);
+    changed();
+  }
+
+  async function remove(topic) {
+    const ok = window.confirm(
+      `Delete “${topic.name}”? Its patents that belong to no other topic are deleted with it.`
+    );
+    if (!ok) return;
+    setActionError("");
+    try {
+      await api.deleteTopic(topic.id);
+      changed();
+    } catch (error) {
+      setActionError(error.message);
+    }
   }
 
   async function add(values) {
@@ -51,7 +74,8 @@ export default function Topics() {
         They are collected from Google Patents Public Data and refreshed when it changes.
       </p>
 
-      {config.data?.topic_edits &&
+      {actionError && <p className="error">{actionError}</p>}
+      {edits &&
         (adding ? (
           <div className="panel">
             <h2 className="panel-title">New topic</h2>
@@ -73,33 +97,55 @@ export default function Topics() {
       {loading && !data && <p className="muted">Loading…</p>}
       {data && (
         <div className="topics">
-          {data.map((topic) => (
-            <article key={topic.id} className="panel topic">
-              <h2 className="panel-title">{topic.name}</h2>
-              <p>{topic.description}</p>
-              <p className="topic-count">
-                <strong>{formatNumber(topic.patent_count)}</strong> patents
-                <span className="muted"> · collected {formatDate(topic.collected_at)}</span>
-              </p>
-              {topic.keywords.length > 0 && (
-                <p className="keywords" aria-label="Keywords">
-                  {topic.keywords.map((keyword) => (
-                    <span key={keyword} className="keyword">
-                      {keyword}
-                    </span>
-                  ))}
+          {data.map((topic) =>
+            editing === topic.id ? (
+              <article key={topic.id} className="panel topic">
+                <h2 className="panel-title">Edit “{topic.name}”</h2>
+                <TopicForm
+                  initial={topic}
+                  submitLabel="Save"
+                  onSave={(values) => save(topic, values)}
+                  onCancel={() => setEditing(null)}
+                />
+              </article>
+            ) : (
+              <article key={topic.id} className="panel topic">
+                <h2 className="panel-title">{topic.name}</h2>
+                <p>{topic.description}</p>
+                <p className="topic-count">
+                  <strong>{formatNumber(topic.patent_count)}</strong> patents
+                  <span className="muted"> · collected {formatDate(topic.collected_at)}</span>
                 </p>
-              )}
-              <p className="topic-links">
-                <button type="button" className="button button-primary" onClick={() => open(topic, "/")}>
-                  Dashboard
-                </button>
-                <button type="button" className="button" onClick={() => open(topic, "/patents")}>
-                  Patents
-                </button>
-              </p>
-            </article>
-          ))}
+                {topic.keywords.length > 0 && (
+                  <p className="keywords" aria-label="Keywords">
+                    {topic.keywords.map((keyword) => (
+                      <span key={keyword} className="keyword">
+                        {keyword}
+                      </span>
+                    ))}
+                  </p>
+                )}
+                <p className="topic-links">
+                  <button type="button" className="button button-primary" onClick={() => open(topic, "/")}>
+                    Dashboard
+                  </button>
+                  <button type="button" className="button" onClick={() => open(topic, "/patents")}>
+                    Patents
+                  </button>
+                  {edits && (
+                    <>
+                      <button type="button" className="link-button" onClick={() => setEditing(topic.id)}>
+                        Edit
+                      </button>
+                      <button type="button" className="link-button danger" onClick={() => remove(topic)}>
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </p>
+              </article>
+            )
+          )}
         </div>
       )}
 
