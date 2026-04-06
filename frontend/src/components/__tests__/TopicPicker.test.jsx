@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "../../api";
@@ -61,5 +61,28 @@ describe("TopicPicker", () => {
     expect(pickerLabel(topics, [])).toBe("All topics");
     expect(pickerLabel(topics, ["2"])).toBe("Autonomous driving");
     expect(pickerLabel(topics, ["1", "2", "3"])).toBe("3 topics");
+  });
+});
+
+describe("TopicProvider", () => {
+  it("follows a running collection until it is done", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    api.topics
+      .mockResolvedValueOnce([{ ...topics[0], status: "collecting" }])
+      .mockResolvedValueOnce([{ ...topics[0], status: "ready", patent_count: 7500 }]);
+    render(
+      <TopicProvider>
+        <TopicPicker />
+      </TopicProvider>
+    );
+
+    await screen.findByRole("button", { name: "All topics" });
+    await act(() => vi.advanceTimersByTimeAsync(5100));
+    expect(api.topics).toHaveBeenCalledTimes(2);
+
+    // ready now: no more polling
+    await act(() => vi.advanceTimersByTimeAsync(10000));
+    expect(api.topics).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
   });
 });

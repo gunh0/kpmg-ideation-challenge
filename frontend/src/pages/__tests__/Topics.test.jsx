@@ -115,6 +115,26 @@ describe("Topics", () => {
     expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining("Delete “Drones”"));
   });
 
+  it("shows the progress of a collection and retries a failed one", async () => {
+    api.topics.mockResolvedValue([
+      { ...topics[0], status: "collecting", progress: 28, progress_total: 112 },
+      { ...topics[0], id: 2, name: "Lockers", slug: "lockers", status: "failed", error: "HTTP 503" },
+    ]);
+    const collect = vi.spyOn(api, "collectTopic").mockResolvedValue({});
+    render(
+      <MemoryRouter>
+        <TopicProvider>
+          <Topics />
+        </TopicProvider>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByRole("progressbar", { name: "Collecting Drones" })).toHaveAttribute("aria-valuenow", "25");
+    expect(screen.getByText(/Collection failed: HTTP 503/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    await waitFor(() => expect(collect).toHaveBeenCalledWith(2));
+  });
+
   it("hides editing where the instance does not allow it", async () => {
     api.config.mockResolvedValue({ topic_edits: false, max_topics: 20 });
     render(

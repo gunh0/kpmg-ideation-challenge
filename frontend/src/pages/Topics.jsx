@@ -3,13 +3,51 @@ import { Link, useNavigate } from "react-router";
 
 import { api } from "../api";
 import { useTopics } from "../TopicContext";
-import ErrorMessage from "../components/ErrorMessage";
 import TopicForm from "../components/TopicForm";
 import { formatNumber } from "../format";
 import useApi from "../hooks/useApi";
 import useTitle from "../hooks/useTitle";
 
 const SOURCE = "https://huggingface.co/datasets/labofsahil/patents-publications-dataset";
+
+// Where the topic's collection from the public data stands.
+function CollectionState({ topic, onRetry }) {
+  if (topic.status === "queued") return <p className="collection muted small">Waiting to be collected…</p>;
+  if (topic.status === "collecting") {
+    const share = topic.progress_total ? Math.round((100 * topic.progress) / topic.progress_total) : 0;
+    return (
+      <div className="collection">
+        <span className="muted small">Collecting from the public data… {share}%</span>
+        <span
+          className="progress"
+          role="progressbar"
+          aria-label={`Collecting ${topic.name}`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={share}
+        >
+          <span style={{ width: `${share}%` }} />
+        </span>
+      </div>
+    );
+  }
+  if (topic.status === "failed") {
+    return (
+      <p className="collection error small">
+        Collection failed: {topic.error || "unknown error"}
+        {onRetry && (
+          <>
+            {" "}
+            <button type="button" className="link-button" onClick={onRetry}>
+              Try again
+            </button>
+          </>
+        )}
+      </p>
+    );
+  }
+  return null;
+}
 
 function formatDate(value) {
   return value ? new Date(value).toLocaleDateString(undefined, { dateStyle: "medium" }) : "not yet";
@@ -20,18 +58,24 @@ function formatDate(value) {
 export default function Topics() {
   useTitle("Topics");
   const navigate = useNavigate();
-  const { setSelected, reload: reloadPicker } = useTopics();
-  const [version, setVersion] = useState(0);
-  const { data, error, loading, retry } = useApi(() => api.topics(), [version]);
+  // The topics come from the shared context, which follows running collections.
+  const { topics: data, loaded, setSelected, reload } = useTopics();
   const config = useApi(() => api.config(), []);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [actionError, setActionError] = useState("");
   const edits = Boolean(config.data?.topic_edits);
 
-  function changed() {
-    setVersion((v) => v + 1);
-    reloadPicker();
+  const changed = reload;
+
+  async function collectAgain(topic) {
+    setActionError("");
+    try {
+      await api.collectTopic(topic.id);
+      changed();
+    } catch (error) {
+      setActionError(error.message);
+    }
   }
 
   async function save(topic, values) {
@@ -59,7 +103,7 @@ export default function Topics() {
     setAdding(false);
     changed();
   }
-  const revision = data?.find((topic) => topic.source_revision)?.source_revision;
+  const revision = data.find((topic) => topic.source_revision)?.source_revision;
 
   function open(topic, path) {
     setSelected([String(topic.id)]);
@@ -93,9 +137,8 @@ export default function Topics() {
           </p>
         ))}
 
-      <ErrorMessage error={error} onRetry={retry} />
-      {loading && !data && <p className="muted">Loading…</p>}
-      {data && (
+      {!loaded && <p className="muted">Loading…</p>}
+      {loaded && (
         <div className="topics">
           {data.map((topic) =>
             editing === topic.id ? (
@@ -111,6 +154,7 @@ export default function Topics() {
             ) : (
               <article key={topic.id} className="panel topic">
                 <h2 className="panel-title">{topic.name}</h2>
+                <CollectionState topic={topic} onRetry={edits ? () => collectAgain(topic) : null} />
                 <p>{topic.description}</p>
                 <p className="topic-count">
                   <strong>{formatNumber(topic.patent_count)}</strong> patents

@@ -4,6 +4,9 @@ import { api } from "./api";
 
 const TopicContext = createContext(null);
 const STORAGE_KEY = "selected-topics";
+const POLL_MS = 5000;
+
+export const isCollecting = (topic) => topic.status === "queued" || topic.status === "collecting";
 
 // Ids of the selected topics, as strings; [] means all topics.
 function stored() {
@@ -36,6 +39,14 @@ export function TopicProvider({ children }) {
   useEffect(() => {
     reload();
   }, [reload]);
+
+  // While a topic is being collected, its counts and progress keep changing.
+  const busy = topics.some(isCollecting);
+  useEffect(() => {
+    if (!busy) return undefined;
+    const timer = window.setTimeout(reload, POLL_MS);
+    return () => window.clearTimeout(timer);
+  }, [busy, topics, reload]);
 
   // Topics deleted since they were selected drop out of the selection.
   const selected = useMemo(
