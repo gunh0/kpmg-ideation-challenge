@@ -37,11 +37,21 @@ def parse_keywords(value):
     return keywords
 
 
+def plural(word):
+    """The last word may be plural: battery -> batter(?:y|ies), box -> box(?:es)?,
+    drone -> drone(?:s)?."""
+    if len(word) > 2 and word.endswith("y") and word[-2] not in "aeiou":
+        return re.escape(word[:-1]) + "(?:y|ies)"
+    if word.endswith(("s", "x", "z", "ch", "sh")):
+        return re.escape(word) + "(?:es)?"
+    return re.escape(word) + "(?:s)?"
+
+
 def keyword_pattern(keyword):
-    """"cyber attack" -> cyber[\\s-]+attack(?:s|es)?: words may be joined by
-    spaces or hyphens, and the last one may be plural."""
-    words = [re.escape(word) for word in re.split(r"[ \-]", keyword)]
-    return r"[\s\-]+".join(words) + "(?:s|es)?"
+    """"cyber attack" -> cyber[\\s-]+attack(?:s)?: words may be joined by spaces
+    or hyphens, and the last one may be plural."""
+    words = re.split(r"[ \-]", keyword)
+    return r"[\s\-]+".join([re.escape(word) for word in words[:-1]] + [plural(words[-1])])
 
 
 def topic_pattern(keywords):

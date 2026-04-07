@@ -36,6 +36,12 @@ class TopicPatternTests(SimpleTestCase):
         self.assertTrue(self.matches(["uav"], "Charging UAVs"))
         self.assertFalse(self.matches(["drone"], "Hydrones in soil"))
 
+    def test_plurals_of_the_last_word(self):
+        self.assertTrue(self.matches(["delivery"], "Drone deliveries to balconies"))
+        self.assertTrue(self.matches(["parcel box"], "Parcel boxes with locks"))
+        self.assertTrue(self.matches(["key"], "Rotating keys"))
+        self.assertFalse(self.matches(["delivery"], "Deliver goods"))
+
     def test_phrases_accept_spaces_and_hyphens(self):
         self.assertTrue(self.matches(["cyber attack"], "Detecting cyber-attacks on grids"))
         self.assertTrue(self.matches(["self-driving"], "A self driving shuttle"))
