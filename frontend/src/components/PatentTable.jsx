@@ -12,7 +12,7 @@ const COLUMNS = [
   { key: "title", label: "Title", sortable: true },
   { key: "assignee", label: "Assignee" },
   { key: "publication_date", label: "Published", sortable: true },
-  { key: "cited_by", label: "Cited by", sortable: true },
+  { key: "cited_by", label: "Cited", sortable: true },
   { key: "grant_date", label: "Status", sortable: true },
 ];
 

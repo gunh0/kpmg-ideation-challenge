@@ -68,17 +68,6 @@ a {
     color: #e3b341;
   }
 
-/* Matches of the selected topics: the accent, not the status colours. */
-.badge-match {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.badge-match-all {
-  background: var(--accent);
-  color: #fff;
-}
-
   .alert {
     border-color: #5c2320;
     background: #2d1414;
@@ -242,6 +231,17 @@ a {
 .badge-pending {
   background: #fff4e5;
   color: #9a6700;
+}
+
+/* Matches of the selected topics: the accent, not the status colours. */
+.badge-match {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge-match-all {
+  background: var(--accent);
+  color: #fff;
 }
 
 .toolbar {
@@ -550,7 +550,7 @@ th[aria-sort="descending"] .sort-arrow {
   position: absolute;
   right: 0;
   z-index: 20;
-  min-width: 240px;
+  min-width: 260px;
   max-height: 60vh;
   margin: 6px 0 0;
   padding: 6px;
@@ -564,6 +564,7 @@ th[aria-sort="descending"] .sort-arrow {
 
 .picker-option {
   display: flex;
+  white-space: nowrap;
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
