@@ -26,7 +26,11 @@ async function request(path, options = {}) {
   if (response.status === 204) return null;
   const body = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new ApiError(errorMessage(body) || `Request failed (${response.status})`, response.status, body);
+    const error = new ApiError(errorMessage(body) || `Request failed (${response.status})`, response.status, body);
+    // The dev server's and nginx's proxies answer 500/502/504 without a JSON
+    // body when the backend is down.
+    error.unreachable = body === null && [500, 502, 503, 504].includes(response.status);
+    throw error;
   }
   return body;
 }

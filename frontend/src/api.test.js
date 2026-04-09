@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { errorMessage, toQuery } from "./api";
+import { api, errorMessage, toQuery } from "./api";
 
 describe("toQuery", () => {
   it("skips empty values", () => {
@@ -26,5 +26,25 @@ describe("errorMessage", () => {
   it("ignores bodies without messages", () => {
     expect(errorMessage(null)).toBe("");
     expect(errorMessage("oops")).toBe("");
+  });
+});
+
+describe("request errors", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("marks a proxy answering for a stopped backend as unreachable", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("", { status: 502 })));
+
+    await expect(api.topics()).rejects.toMatchObject({ status: 502, unreachable: true });
+  });
+
+  it("keeps the API's own errors", async () => {
+    const body = JSON.stringify({ keywords: ["Give at least one keyword."] });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { status: 400 })));
+
+    await expect(api.createTopic({})).rejects.toMatchObject({
+      message: "Give at least one keyword.",
+      unreachable: false,
+    });
   });
 });
