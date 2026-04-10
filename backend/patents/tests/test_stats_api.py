@@ -21,13 +21,13 @@ class StatsApiTests(APITestCase):
         return response.json()
 
     def test_totals(self):
-        body = self.stats(f"dataset={self.dataset.pk}")
+        body = self.stats(f"topics={self.dataset.pk}")
 
         self.assertEqual(body["total"], 3)
         self.assertEqual(body["granted"], 2)
 
     def test_by_year_counts_each_date_in_its_own_year(self):
-        by_year = {row["year"]: row for row in self.stats(f"dataset={self.dataset.pk}")["by_year"]}
+        by_year = {row["year"]: row for row in self.stats(f"topics={self.dataset.pk}")["by_year"]}
 
         self.assertEqual(list(by_year), [2017, 2018, 2019, 2020])
         self.assertEqual(by_year[2019], {"year": 2019, "filed": 1, "published": 1, "granted": 1})

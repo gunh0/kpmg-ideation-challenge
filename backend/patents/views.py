@@ -149,7 +149,7 @@ class PatentViewSet(viewsets.ReadOnlyModelViewSet):
         """patents-drones-cybersecurity-2026-03-14.csv: the topics and the day,
         so downloads of different selections do not overwrite each other."""
         parts = ["patents"]
-        ids = self.request.query_params.get("topics") or self.request.query_params.get("dataset") or ""
+        ids = self.request.query_params.get("topics") or ""
         ids = [int(item) for item in ids.split(",") if item.strip().isdigit()]
         for topic in Topic.objects.filter(pk__in=ids).order_by("name"):
             parts.append(slugify(topic.name) or f"topic-{topic.pk}")
@@ -196,7 +196,7 @@ class AssigneeView(APIView):
     )
     def get(self, request):
         queryset = Patent.objects.exclude(assignee="")
-        ids = request.query_params.get("topics") or request.query_params.get("dataset") or ""
+        ids = request.query_params.get("topics") or ""
         ids = [int(item) for item in ids.split(",") if item.strip().isdigit()]
         if ids:
             queryset = queryset.filter(pk__in=Patent.objects.filter(topics__in=ids).values("pk"))

@@ -7,8 +7,6 @@ from .views import AssigneeView, ConfigView, FigureView, PatentViewSet, StatsVie
 
 router = DefaultRouter()
 router.register("topics", TopicViewSet)
-# the name of 2.0, until the dashboard has moved to /api/topics/
-router.register("datasets", TopicViewSet, basename="dataset")
 router.register("patents", PatentViewSet)
 
 urlpatterns = router.urls + [

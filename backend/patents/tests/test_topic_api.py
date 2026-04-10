@@ -44,8 +44,8 @@ class TopicApiTests(APITestCase):
     def test_detail(self):
         self.assertEqual(self.client.get(f"/api/topics/{self.dataset.pk}/").json()["patent_count"], 3)
 
-    def test_the_old_datasets_address_still_lists_them(self):
-        self.assertEqual(self.client.get("/api/datasets/").json()[0]["slug"], "drones")
+    def test_the_old_datasets_address_is_gone(self):
+        self.assertEqual(self.client.get("/api/datasets/").status_code, 404)
 
 
 @mock.patch("patents.jobs.start_worker")

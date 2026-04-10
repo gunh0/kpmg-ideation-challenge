@@ -11,8 +11,6 @@ class PatentFilter(django_filters.FilterSet):
     # number it matches ("matched"); ?match=all keeps those matching all.
     topics = django_filters.BaseInFilter(method="filter_topics")
     match = django_filters.ChoiceFilter(choices=[("any", "any"), ("all", "all")], method="keep")
-    # ?dataset=<id>, the single-topic filter of 2.0
-    dataset = django_filters.NumberFilter(method="filter_dataset")
     assignee = django_filters.CharFilter(field_name="assignee", lookup_expr="iexact")
     inventor = django_filters.CharFilter(method="filter_inventor")
     granted = django_filters.BooleanFilter(field_name="grant_date", lookup_expr="isnull", exclude=True)
@@ -24,7 +22,7 @@ class PatentFilter(django_filters.FilterSet):
 
     class Meta:
         model = Patent
-        fields = ["topics", "match", "dataset", "assignee", "inventor", "granted", "year_from", "year_to", "country", "has_figure"]
+        fields = ["topics", "match", "assignee", "inventor", "granted", "year_from", "year_to", "country", "has_figure"]
 
     def keep(self, queryset, name, value):
         return queryset  # read by filter_topics
@@ -39,9 +37,6 @@ class PatentFilter(django_filters.FilterSet):
         if self.form.cleaned_data.get("match") == "all":
             queryset = queryset.filter(matched=len(ids))
         return queryset
-
-    def filter_dataset(self, queryset, name, value):
-        return queryset.filter(topics=value)
 
     def filter_has_figure(self, queryset, name, value):
         """Patents whose representative figure is known (true) or not (false)."""

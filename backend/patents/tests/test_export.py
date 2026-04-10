@@ -25,7 +25,7 @@ class ExportTests(APITestCase):
         self.assertEqual(response["Content-Disposition"], f'attachment; filename="patents-{today}.csv"')
 
     def test_file_is_named_after_the_dataset(self):
-        response = self.client.get(f"/api/patents/export/?dataset={self.dataset.pk}")
+        response = self.client.get(f"/api/patents/export/?topics={self.dataset.pk}")
 
         today = timezone.localdate().isoformat()
         self.assertEqual(response["Content-Disposition"], f'attachment; filename="patents-drone-delivery-{today}.csv"')
