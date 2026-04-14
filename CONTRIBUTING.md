@@ -30,6 +30,8 @@ CI runs the same commands for each app (`.github/workflows/`) and `make smoke`, 
 - Commit messages follow `type: summary` — `feat`, `fix`, `test`, `docs`, `build`, `ci`, `perf`, `refactor`, `chore`.
 - Patent data comes from a third party and is untrusted: render links through `safeUrl()`, never with `dangerouslySetInnerHTML`, and keep exported cells escaped (`patents/export.py`).
 - Tests never touch the network: the collector reads a small Parquet file written by `patents/tests/opendata_fixture.py`, and figure lookups are mocked. Try a real collection on one file with `python manage.py collect_patents --shards 0` against a scratch database (`DJANGO_DB_PATH=/tmp/try.db`).
-- A new topic goes into `patents/topics.py`; collect it and refresh the snapshot (`make -C backend collect seed`) in the same pull request.
+- Topics are data, added in the dashboard. Only a change of the **default** topics goes into `patents/topics.py`, with a refreshed snapshot (`make -C backend collect seed`) in the same pull request.
+- Anything typed into a topic reaches the collector through `keywords.parse_keywords` and `topic_pattern`, and DuckDB as a query parameter. Keep it that way: no string formatting of user input into SQL or expressions.
+- Collection jobs change topic state only through `jobs.py` (queue, claim, progress), so that the backend thread and the collector service never collect the same topic twice.
 - Colors of chart series come from `--series-*` in `frontend/src/index.css`, with separate light and dark steps.
 - Images may only come from Google's patent image host; widen the Content-Security-Policy in `frontend/security-headers.conf` if that changes.
