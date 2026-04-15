@@ -51,11 +51,12 @@ def scan_threads(memory=None):
 
 def connect():
     connection = duckdb.connect(config=duckdb_config())
-    # Remote reads over a long scan meet the odd timeout; retry them. Order
+    # Remote reads over a long scan meet the odd stalled connection: give up
+    # on it after two minutes (http_timeout is in seconds) and retry. Order
     # does not matter to the collector, and keeping it costs memory.
     connection.execute(
         f"SET threads = {scan_threads()}; SET memory_limit = '{int(memory_bytes() * 0.6)}B'; "
-        "SET preserve_insertion_order = false; SET http_retries = 8; SET http_timeout = 120000"
+        "SET preserve_insertion_order = false; SET http_retries = 8; SET http_timeout = 120"
     )
     return connection
 

@@ -104,6 +104,16 @@ class ShardArgumentTests(TestCase):
             parse_shards("a-b")
 
 
+class ConnectionTests(TestCase):
+    def test_stalled_reads_time_out_after_minutes(self):
+        from patents.collector import connect
+
+        connection = connect()
+        timeout = connection.execute("SELECT current_setting('http_timeout')").fetchone()[0]
+
+        self.assertEqual(int(timeout), 120)  # seconds
+
+
 class ScanThreadsTests(TestCase):
     def test_threads_follow_the_memory(self):
         from patents.collector import scan_threads
