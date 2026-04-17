@@ -33,12 +33,13 @@ describe("ordering", () => {
 });
 
 describe("niceMax", () => {
-  it("rounds up to 5, 10, 20, 50 ...", () => {
+  it("rounds up to 5, 10, 20, 25, 50 ...", () => {
     expect(niceMax(0)).toBe(5);
     expect(niceMax(3)).toBe(5);
     expect(niceMax(7)).toBe(10);
     expect(niceMax(11)).toBe(20);
-    expect(niceMax(21)).toBe(50);
+    expect(niceMax(21)).toBe(25);
+    expect(niceMax(26)).toBe(50);
     expect(niceMax(120)).toBe(200);
   });
 });

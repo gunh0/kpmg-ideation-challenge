@@ -21,7 +21,7 @@ describe("YearChart", () => {
     expect(screen.getByRole("button", { name: "Show chart" })).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("rounds the axis up to 1, 2 or 5 times a power of ten", () => {
-    expect([3, 7, 12, 180, 501].map(niceMax)).toEqual([5, 10, 20, 200, 1000]);
+  it("rounds the axis up to 1, 2, 2.5 or 5 times a power of ten", () => {
+    expect([3, 7, 12, 180, 501, 2037].map(niceMax)).toEqual([5, 10, 20, 200, 1000, 2500]);
   });
 });

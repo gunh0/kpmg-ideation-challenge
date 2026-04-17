@@ -12,11 +12,12 @@ const WIDTH = 1100;
 const HEIGHT = 280;
 const PAD = { top: 12, right: 16, bottom: 28, left: 36 };
 
-// Round the axis maximum up to 1, 2 or 5 times a power of ten.
+// Round the axis maximum up to 1, 2, 2.5 or 5 times a power of ten.
 export function niceMax(value) {
   if (value <= 5) return 5;
   const power = 10 ** Math.floor(Math.log10(value));
-  const step = [1, 2, 5, 10].find((m) => m * power >= value);
+  // 2.5 keeps a peak of 2,100 from being drawn against a 5,000 axis
+  const step = [1, 2, 2.5, 5, 10].find((m) => m * power >= value);
   return step * power;
 }
 
@@ -63,7 +64,7 @@ export default function YearChart({ data }) {
   const innerH = HEIGHT - PAD.top - PAD.bottom;
   const x = (i) => PAD.left + (data.length === 1 ? innerW / 2 : (innerW * i) / (data.length - 1));
   const y = (v) => PAD.top + innerH - (innerH * v) / max;
-  // niceMax() returns 5, 10, 20, 50, ... so fifths are whole numbers.
+  // niceMax() returns 5, 10, 20, 25, 50, ... so fifths are whole numbers.
   const ticks = [0, 1, 2, 3, 4, 5].map((i) => (max * i) / 5);
   const labelEvery = Math.ceil(data.length / 12);
   const row = hover === null ? null : data[hover];
