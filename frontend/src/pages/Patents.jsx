@@ -57,7 +57,8 @@ export default function Patents() {
   const [params, update] = useQueryParams(DEFAULTS);
   const { topicsParam: topics, topics: allTopics, selected, loaded } = useTopics();
   const ranking = selected.length > 1;
-  const ordering = params.ordering || (ranking ? "-matched" : "-publication_date");
+  // Among patents matching as many topics, the most cited come first.
+  const ordering = params.ordering || (ranking ? "-matched,-cited_by" : "-publication_date");
   const match = ranking ? params.match : "";
   const page = Number(params.page) || 1;
   const pageSize = PAGE_SIZES.includes(params.page_size) ? Number(params.page_size) : 25;

@@ -16,10 +16,12 @@ const COLUMNS = [
   { key: "grant_date", label: "Status", sortable: true },
 ];
 
-// "-publication_date" -> {field: "publication_date", descending: true}
+// "-publication_date" -> {field: "publication_date", descending: true}; of
+// "-matched,-cited_by" the first field counts.
 export function parseOrdering(ordering) {
-  const descending = ordering.startsWith("-");
-  return { field: descending ? ordering.slice(1) : ordering, descending };
+  const first = ordering.split(",")[0];
+  const descending = first.startsWith("-");
+  return { field: descending ? first.slice(1) : first, descending };
 }
 
 export function nextOrdering(ordering, field) {

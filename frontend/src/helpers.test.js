@@ -23,6 +23,7 @@ describe("ordering", () => {
   it("parses the direction", () => {
     expect(parseOrdering("-publication_date")).toEqual({ field: "publication_date", descending: true });
     expect(parseOrdering("title")).toEqual({ field: "title", descending: false });
+    expect(parseOrdering("-matched,-cited_by")).toEqual({ field: "matched", descending: true });
   });
 
   it("sorts a new column ascending, then toggles", () => {

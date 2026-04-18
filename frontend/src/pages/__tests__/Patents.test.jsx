@@ -100,7 +100,7 @@ describe("Patents", () => {
     renderAt("/patents");
 
     expect(await screen.findByText("2 of 2")).toBeInTheDocument();
-    expect(api.patents).toHaveBeenLastCalledWith(expect.objectContaining({ topics: "1,2", ordering: "-matched" }));
+    expect(api.patents).toHaveBeenLastCalledWith(expect.objectContaining({ topics: "1,2", ordering: "-matched,-cited_by" }));
 
     fireEvent.change(screen.getByRole("combobox", { name: "Topics to match" }), { target: { value: "all" } });
     await waitFor(() => expect(api.patents).toHaveBeenLastCalledWith(expect.objectContaining({ match: "all" })));
