@@ -1,5 +1,35 @@
 # Changelog
 
+## 3.0.0 — 2026-04-19
+
+Topics are defined in the dashboard and combined: select the topics that describe an idea, and the patents matching most of them come first.
+
+### Added
+
+- Add, edit and delete topics on the Topics page: a name and keywords, matched as whole words in titles and abstracts, plurals included. A new topic shows the stored patents it matches at once and is then collected from the public data, with its progress, failures and a retry on the page. `PATENTS_ALLOW_TOPIC_EDITS` and `PATENTS_MAX_TOPICS` bound it; `/api/config/` tells the dashboard.
+- Select several topics in the header; the patent list ranks patents by the number of selected topics they match, then by citations, or keeps only those matching all (`?topics=1,2&match=all`, ordering `matched`).
+- Dashboard: the topics' publications per year side by side, assignee countries (narrowing the dashboard to one country), the most cited patents.
+- Patents keep their abstract, the country of their first assignee and the number of applications citing them; search covers abstracts, the list filters by country and sorts by citations, the details show all of it.
+- A collection queue (`jobs.py`) that the web process and the `run_collector` service share; the Compose collector picks up dashboard topics within 30 seconds.
+- A hint to start the backend when the API cannot be reached.
+
+### Changed
+
+- Patents are stored once and linked to all topics they match (`Topic` replaces `Dataset`); `/api/topics/` replaces `/api/datasets/`, `?topics=` replaces `?dataset=`.
+- Topics are matched in titles and abstracts: the snapshot holds 32,862 patents (was 20,152), 422 of them in more than one topic.
+- The snapshot is one file with topics, keywords and links, loaded into an empty database only, so deleted topics stay deleted.
+- DuckDB's threads follow the available memory (abstract chunks take about 100 MB each).
+- Chart axes also round to 2.5 steps.
+
+### Fixed
+
+- A stalled HTTP read could hang a collection for a day: `http_timeout` is in seconds, not milliseconds.
+- Plurals ending in -ies and -es are matched.
+
+### Removed
+
+- `/api/datasets/` and the `dataset` parameter.
+
 ## 2.0.0 — 2026-03-07
 
 The dashboard fills itself: patents are collected from Google Patents Public Data instead of imported by hand.

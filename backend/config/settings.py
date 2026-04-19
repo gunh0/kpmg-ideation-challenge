@@ -165,7 +165,7 @@ LOGGING = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Patent Attorney Without Borders API",
-    "DESCRIPTION": "US patents of a few technology topics from Google Patents Public Data: topics, patents, figures, dashboard statistics.",
-    "VERSION": "2.0.0",
+    "DESCRIPTION": "US patents by technology topic from Google Patents Public Data: topics defined by keywords, patents ranked by the topics they match, figures, citations, dashboard statistics.",
+    "VERSION": "3.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }

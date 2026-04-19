@@ -9,7 +9,10 @@ A dashboard of US patents by technology topic — drones, autonomous driving and
 ## Features
 
 - **Topics you define**: add, edit or delete topics on the Topics page with a name and keywords (words or phrases, matched as whole words in titles and abstracts, plurals included). A new topic shows the stored patents it matches at once, then grows while it is collected from the public data, with its progress on the page.
-- **Several topics at once**: select them in the header, and the patent list ranks patents by how many of the topics they match ("3 of 3" first), or keeps only those matching all.
+- **Several topics at once**: select them in the header, and the patent list ranks patents by how many of the topics they match ("3 of 3" first, the most cited first among equals), or keeps only those matching all.
+
+  ![Patents matching both drones and cybersecurity](docs/ranking.png)
+
 - **Dashboard** for the selection: patents, grants and applications, the latest patents as cards with their figures, filings / publications / grants per year, the topics' publications per year side by side, assignee countries (a click narrows the dashboard to one country's assignees), the most cited patents, top assignees with their grant rate, top inventors. Charts can be shown as tables.
 - **Representative figures** from Google Patents in the dashboard, the patent list and the details; a figure or card opens the patent on Google Patents.
 - **Patent list** with full-text search (titles, abstracts, names), filters for assignee (with suggestions), inventor, assignee country, grant status and publication years, sortable columns including citations, 25–100 rows per page. Filters and the open patent live in the URL, so every view can be shared.
