@@ -1,11 +1,20 @@
 # Patent Attorney Without Borders
 #
-#   make up         build and start everything in Docker   -> http://localhost:8080
-#   make backend    API dev server (Python 3.13)           -> http://localhost:8000/api/
-#   make frontend   React dev server, proxies /api          -> http://localhost:3000
+#   make up         build and start everything in Docker    -> http://localhost:8080
+#   make down       stop it
+#   make dev-back   API dev server in backend/.venv          -> http://localhost:8000/api/
+#   make dev-front  React dev server, proxies /api           -> http://localhost:3000
+#   make test       backend and frontend tests
+#   make lint       Django checks, migrations, OpenAPI schema, ESLint
 #   make smoke      start the Docker stack and check it end to end (as CI does)
 
-.PHONY: up down logs smoke backend frontend install test lint
+.PHONY: up down smoke dev-back dev-front test lint
+
+# Python 3.13 if installed, else the default python3 (3.12+ works).
+PYTHON ?= $(shell command -v python3.13 || command -v python3)
+VENV := backend/.venv
+VENV_PYTHON := $(CURDIR)/$(VENV)/bin/python
+NODE_MODULES := frontend/node_modules/.package-lock.json
 
 up:
 	docker compose up -d --build
@@ -14,27 +23,31 @@ up:
 down:
 	docker compose down
 
-logs:
-	docker compose logs -f
-
 smoke:
 	docker compose up -d --build --wait --wait-timeout 180
 	scripts/smoke.sh
 
-backend:
-	$(MAKE) -C backend run
+# The first run creates backend/.venv, installs the requirements and loads the
+# bundled snapshot into backend/db.sqlite3; later runs start right away.
+dev-back: $(VENV)/.installed
+	$(MAKE) -C backend run PYTHON=$(VENV_PYTHON)
 
-frontend:
+dev-front: $(NODE_MODULES)
 	cd frontend && npm run dev
 
-install:
-	$(MAKE) -C backend install
-	cd frontend && npm ci
-
-test:
-	$(MAKE) -C backend test
+test: $(VENV)/.installed $(NODE_MODULES)
+	$(MAKE) -C backend test PYTHON=$(VENV_PYTHON)
 	cd frontend && npm test
 
-lint:
-	$(MAKE) -C backend check
+lint: $(VENV)/.installed $(NODE_MODULES)
+	$(MAKE) -C backend check PYTHON=$(VENV_PYTHON)
 	cd frontend && npm run lint
+
+$(VENV)/.installed: backend/requirements.txt
+	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
+	$(VENV)/bin/pip install --quiet --upgrade pip
+	$(VENV)/bin/pip install --quiet -r backend/requirements.txt
+	touch $@
+
+$(NODE_MODULES): frontend/package-lock.json
+	cd frontend && npm ci --no-audit --no-fund

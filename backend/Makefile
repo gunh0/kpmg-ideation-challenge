@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: install run migrate test check schema collect seed
+.PHONY: install run migrate test check collect seed
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt
@@ -15,15 +15,12 @@ migrate:
 test:
 	$(PYTHON) manage.py test --parallel auto --shuffle
 
-# Fails when a model change has no migration yet.
+# Fails when a model change has no migration yet or the OpenAPI schema
+# (served at /api/schema/) has warnings.
 check:
 	$(PYTHON) manage.py check
 	$(PYTHON) manage.py makemigrations --check --dry-run
 	$(PYTHON) manage.py spectacular --validate --fail-on-warn --file /dev/null
-
-# OpenAPI description of the API, also served at /api/schema/
-schema:
-	$(PYTHON) manage.py spectacular --validate --file openapi.yaml
 
 # Collect the topics from Google Patents Public Data (about 15 minutes).
 collect:

@@ -56,7 +56,7 @@ Collection reads only the columns it needs from 56 Parquet files, two at a time 
 | `GET` | `/api/stats/` | `total`, `granted`, `by_year` (filed / published / granted), `top_assignees` (with their `granted` count), `top_inventors` (`top` = 1–50) |
 | `GET` | `/api/assignees/` | assignee names and counts for suggestions (`dataset`, `search`) |
 | `GET` | `/api/health/` | `{"status": "ok"}` when the database answers |
-| `GET` | `/api/schema/` | OpenAPI 3 description of all of the above (`make schema` writes it to `openapi.yaml`) |
+| `GET` | `/api/schema/` | OpenAPI 3 description of all of the above |
 
 `/api/patents/`, `/api/patents/export/` and `/api/stats/` share the filters:
 

@@ -38,12 +38,11 @@ Collecting all topics reads the title column of 56 Parquet files (about 1 TB in 
 
 ## Development
 
-Requirements: Python 3.13, Node.js 22.
+Requirements: Python 3.12+ (3.13 in Docker and CI), Node.js 22+.
 
 ```bash
-make install        # backend requirements + frontend packages
-make backend        # Django API        http://localhost:8000/api/
-make frontend       # React dev server  http://localhost:3000  (proxies /api)
+make dev-back       # terminal 1: Django API  http://localhost:8000/api/  (creates backend/.venv, loads the snapshot)
+make dev-front      # terminal 2: React app   http://localhost:3000       (proxies /api)
 make test           # backend and frontend tests
 make lint           # Django checks, pending migrations, OpenAPI schema, ESLint
 make smoke          # build the Docker stack and check it end to end

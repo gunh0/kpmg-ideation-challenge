@@ -3,13 +3,11 @@
 ## Setup
 
 ```bash
-python3.13 -m venv backend/.venv && . backend/.venv/bin/activate
-make install
-make backend      # terminal 1
-make frontend     # terminal 2 -> http://localhost:3000
+make dev-back     # terminal 1 -> http://localhost:8000/api/
+make dev-front    # terminal 2 -> http://localhost:3000
 ```
 
-`make backend` loads the bundled snapshot into an empty database, so the dashboard has data from the start.
+The first `make dev-back` creates `backend/.venv`, installs the requirements and loads the bundled snapshot into an empty database, so the dashboard has data from the start. `make dev-front` installs the packages the first time.
 
 ## Before opening a pull request
 
