@@ -1,5 +1,9 @@
 # Patent Attorney Without Borders
 
+[![backend](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/backend.yml/badge.svg)](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/backend.yml)
+[![frontend](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/frontend.yml/badge.svg)](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/frontend.yml)
+[![docker](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/docker.yml/badge.svg)](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/docker.yml)
+
 A dashboard of US patents by technology topic — drones, autonomous driving and cybersecurity to start with, and any topic you describe by keywords — with the representative figure of each patent: who files, how much, from where, since when, and what the inventions look like. Select several topics that describe an idea and the patents matching most of them come first: a first look for prior art. `docker compose up` starts it with the data in place, and it collects new topics and refreshes itself when the public patent data changes.
 
 > Originally built for the **KPMG Ideation Challenge 2020** by team **Jackpop** — leader [gunh0](https://github.com/gunh0), crew Ji-hun Lim, Seung-jae Lee and Min-soo Kim. The idea: a "borderless patent attorney" that helps inventors and companies see who already holds patents around their idea before they file. See [History](#history) for how it got here.
@@ -29,6 +33,14 @@ open http://localhost:8080
 ```
 
 The first start loads the bundled snapshot of the three default topics, so the dashboard is complete right away. A `collector` service collects topics added or edited in the dashboard, and all topics again when the public data has a new revision (checked daily). Set `PATENTS_ALLOW_TOPIC_EDITS=0` for an instance others can reach: the API has no accounts.
+
+## Checking an idea
+
+1. On **Topics**, add a topic for each part of the idea, e.g. *Parcel lockers* (`parcel locker, delivery locker`) next to the default *Drones*. Keywords are words or phrases; plurals are found too.
+2. Select those topics in the header. The patent list shows first the patents matching all of them ("2 of 2"), most cited first; *All selected topics* hides the rest.
+3. Open a patent for its abstract, figure and dates, or the assignee for everything else it holds. The dashboard shows who is active in the field and from which countries.
+
+A new topic lists the stored patents it matches right away; the rest arrive while it is collected (see [Data](#data)).
 
 ## Data
 
@@ -75,7 +87,7 @@ browser ──► nginx (frontend container, :8080)
 
 ### Security notes
 
-- The API only reads; there are no user accounts. The Django admin keeps its own login.
+- There are no user accounts: whoever reaches the API can add, edit and delete topics. Set `PATENTS_ALLOW_TOPIC_EDITS=0` for an instance others can reach (the dashboard then hides editing) and keep the rest behind your own authentication. Writes take JSON only, so a form on another site cannot post them. The Django admin keeps its own login.
 - Patent data comes from a third party: links are only rendered when they are `http(s)`, figures only from Google's patent image host, and exported cells that a spreadsheet would run as a formula are escaped.
 - Set `DJANGO_SECRET_KEY` and, behind TLS, `DJANGO_HTTPS=1` for any deployment. All settings are listed in the [backend README](backend/README.md#configuration).
 - The containers run as unprivileged users on read-only file systems without Linux capabilities; nginx sends a Content-Security-Policy that only allows the app's own scripts and Google's patent images.
