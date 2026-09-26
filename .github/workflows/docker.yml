@@ -15,7 +15,7 @@ jobs:
   compose:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Build and start
         run: docker compose up -d --build --wait --wait-timeout 180
       - name: Smoke test
