@@ -1,8 +1,10 @@
 # Patent Attorney Without Borders
 
-[![backend](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/backend.yml/badge.svg)](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/backend.yml)
-[![frontend](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/frontend.yml/badge.svg)](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/frontend.yml)
-[![docker](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/docker.yml/badge.svg)](https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/docker.yml)
+<p align="center">
+  <a href="https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/backend.yml"><img src="https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/backend.yml/badge.svg" alt="backend"></a>
+  <a href="https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/frontend.yml"><img src="https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/frontend.yml/badge.svg" alt="frontend"></a>
+  <a href="https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/docker.yml"><img src="https://github.com/gunh0/kpmg-ideation-challenge/actions/workflows/docker.yml/badge.svg" alt="docker"></a>
+</p>
 
 A dashboard of US patents by technology topic — drones, autonomous driving and cybersecurity to start with, and any topic you describe by keywords — with the representative figure of each patent: who files, how much, from where, since when, and what the inventions look like. Select several topics that describe an idea and the patents matching most of them come first: a first look for prior art. `docker compose up` starts it with the data in place, and it collects new topics and refreshes itself when the public patent data changes.
 
