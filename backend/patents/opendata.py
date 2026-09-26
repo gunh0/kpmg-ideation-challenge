@@ -20,9 +20,9 @@ LICENSE = "CC BY 4.0, Google Patents Public Data by IFI CLAIMS Patent Services a
 
 COLUMNS = """
     publication_number, application_number, kind_code, family_id,
-    title_localized[1].text AS title,
+    title_localized[1].text AS title, abstract_localized[1].text AS abstract,
     priority_date, filing_date, publication_date, grant_date,
-    assignee, inventor
+    assignee, assignee_harmonized[1].country_code AS assignee_country, inventor
 """
 
 
@@ -69,22 +69,29 @@ def direct_url(url, timeout=30):
 
 
 def topic_query(source, topics, since):
-    """SQL that returns the US publications of `source` whose title matches a
-    topic, with the slug of the first matching topic in `topic`."""
-    cases = " ".join(f"WHEN regexp_matches(lower(title), '{topic.pattern}') THEN '{topic.slug}'" for topic in topics)
-    return f"""
-        SELECT * FROM (
-            SELECT CASE {cases} END AS topic, *
-            FROM (SELECT {COLUMNS} FROM read_parquet('{source}')
-                  WHERE country_code = 'US' AND publication_date >= {int(since)})
+    """SQL and parameters that return the US publications of `source` whose
+    title or abstract matches a topic, with the slugs of all matching topics
+    in `topics`. Patterns and slugs are passed as parameters."""
+    cases = ", ".join("CASE WHEN regexp_matches(text, ?) THEN ? END" for _ in topics)
+    parameters = [value for topic in topics for value in (topic.pattern, topic.slug)]
+    source = str(source).replace("'", "''")
+    sql = f"""
+        SELECT * EXCLUDE (text) FROM (
+            SELECT list_filter([{cases}], slug -> slug IS NOT NULL) AS topics, *
+            FROM (SELECT {COLUMNS}, lower(coalesce(title_localized[1].text, '') || ' '
+                         || coalesce(abstract_localized[1].text, '')) AS text
+                  FROM read_parquet('{source}')
+                  WHERE country_code = 'US' AND publication_date >= ?)
         )
-        WHERE topic IS NOT NULL
+        WHERE len(topics) > 0
     """
+    return sql, parameters + [int(since)]
 
 
 def read_topics(source, topics, since, connection=None):
     """Matching publications of one Parquet file (a path or a URL) as dicts."""
     connection = connection or duckdb.connect()
-    result = connection.execute(topic_query(source, topics, since))
+    sql, parameters = topic_query(source, topics, since)
+    result = connection.execute(sql, parameters)
     names = [column[0] for column in result.description]
     return [dict(zip(names, row)) for row in result.fetchall()]

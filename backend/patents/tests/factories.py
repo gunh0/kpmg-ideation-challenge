@@ -1,7 +1,7 @@
 """Test data: datasets with patents, created directly."""
 from datetime import date
 
-from patents.models import Dataset, Patent
+from patents.models import Topic, Patent
 
 # Fictional ZZ- numbers, so no test depends on a real patent.
 EXAMPLE_PATENTS = [
@@ -42,9 +42,14 @@ EXAMPLE_PATENTS = [
 
 
 def make_dataset(name, patents, **fields):
-    dataset = Dataset.objects.create(name=name, **fields)
-    Patent.objects.bulk_create(Patent(dataset=dataset, **patent) for patent in patents)
-    return dataset
+    """A topic with `patents` (dicts of Patent fields); patents that exist
+    already are linked, not created again."""
+    topic = Topic.objects.create(name=name, **fields)
+    for values in patents:
+        values = dict(values)
+        patent, _ = Patent.objects.get_or_create(patent_id=values.pop("patent_id"), defaults=values)
+        patent.topics.add(topic)
+    return topic
 
 
 def example_dataset(name="Drone delivery", **fields):

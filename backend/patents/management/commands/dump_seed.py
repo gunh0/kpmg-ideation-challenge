@@ -2,23 +2,16 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
-from patents.models import Dataset
-from patents.seed import SEED_DIR, dump, seed_path
-from patents.topics import TOPICS
+from patents.seed import SEED_FILE, dump
 
 
 class Command(BaseCommand):
-    help = "Write the collected topics to patents/seed/ as the snapshot new instances start from."
+    help = "Write all topics and patents to patents/seed/patents.json.gz, the snapshot new instances start from."
 
     def add_arguments(self, parser):
-        parser.add_argument("--dir", type=Path, default=SEED_DIR)
+        parser.add_argument("--file", type=Path, default=SEED_FILE)
 
-    def handle(self, *args, dir, **options):
-        dir.mkdir(parents=True, exist_ok=True)
-        for topic in TOPICS:
-            dataset = Dataset.objects.filter(slug=topic.slug).first()
-            if dataset is None:
-                self.stderr.write(f"{topic.slug}: not collected, skipped")
-                continue
-            count = dump(dataset, seed_path(topic, dir))
-            self.stdout.write(self.style.SUCCESS(f"{topic.slug}: {count} patents"))
+    def handle(self, *args, file, **options):
+        file.parent.mkdir(parents=True, exist_ok=True)
+        topics, patents = dump(file)
+        self.stdout.write(self.style.SUCCESS(f"{topics} topics, {patents} patents written to {file}"))

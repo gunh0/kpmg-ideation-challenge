@@ -6,6 +6,7 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-in-production}
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
       DJANGO_CSRF_TRUSTED_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      PATENTS_COLLECT_IN_BACKEND: "0"  # the collector service does it
     volumes:
       - backend-data:/data
     # Only the database volume and /tmp are writable; no Linux capabilities.
@@ -22,13 +23,12 @@ services:
       retries: 5
       start_period: 10s
 
-  # Checks the public data once a day (PATENTS_COLLECT_INTERVAL seconds) and
-  # collects the topics again when it has a new revision.
+  # Collects topics added or edited in the dashboard (it looks every 30
+  # seconds), and all topics again when the public data has a new revision
+  # (checked every PATENTS_COLLECT_INTERVAL seconds).
   collector:
     build: ./backend
-    command: >-
-      sh -c 'while true; do python manage.py collect_patents --if-changed;
-      sleep "$${PATENTS_COLLECT_INTERVAL:-86400}"; done'
+    command: ["python", "manage.py", "run_collector"]
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-in-production}
       PATENTS_COLLECT_INTERVAL: ${PATENTS_COLLECT_INTERVAL:-86400}

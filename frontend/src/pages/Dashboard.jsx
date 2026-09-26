@@ -1,15 +1,17 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import { api } from "../api";
 import LatestPatents from "../components/LatestPatents";
+import MostCited from "../components/MostCited";
 import Ranking from "../components/Ranking";
+import TopicTrends from "../components/TopicTrends";
 import YearChart from "../components/YearChart";
-import { useDatasets } from "../DatasetContext";
+import { useTopics } from "../TopicContext";
 import EmptyState from "../components/EmptyState";
 import ErrorMessage from "../components/ErrorMessage";
 import useApi from "../hooks/useApi";
 import useTitle from "../hooks/useTitle";
-import { formatNumber } from "../format";
+import { countryName, formatNumber } from "../format";
 
 function percent(part, whole) {
   return whole ? `${Math.round((100 * part) / whole)}%` : "—";
@@ -17,16 +19,19 @@ function percent(part, whole) {
 
 export default function Dashboard() {
   useTitle("Dashboard");
-  const { selected: dataset, datasets, loaded } = useDatasets();
-  const { data, error, loading, retry } = useApi(() => api.stats({ dataset }), [dataset]);
+  const { selected, topicsParam: topics, topics: allTopics, loaded } = useTopics();
+  // ?country=KR narrows the whole dashboard to one country's assignees.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const country = searchParams.get("country") || "";
+  const { data, error, loading, retry } = useApi(() => api.stats({ topics, country }), [topics, country]);
   const latest = useApi(
-    () => api.patents({ dataset, has_figure: true, ordering: "-publication_date", page_size: 8 }),
-    [dataset]
+    () => api.patents({ topics, country, has_figure: true, ordering: "-publication_date", page_size: 8 }),
+    [topics, country]
   );
-  const current = datasets.find((item) => String(item.id) === dataset);
-  const name = current?.name;
+  const cited = useApi(() => api.patents({ topics, country, ordering: "-cited_by", page_size: 8 }), [topics, country]);
+  const names = allTopics.filter((topic) => selected.includes(String(topic.id))).map((topic) => topic.name);
 
-  if (loaded && datasets.length === 0) {
+  if (loaded && allTopics.length === 0) {
     return (
       <section>
         <h1 className="page-title">Dashboard</h1>
@@ -39,8 +44,18 @@ export default function Dashboard() {
     <section>
       <h1 className="page-title">Dashboard</h1>
       <p className="page-lead">
-        {name ? `Topic “${name}”` : "All topics"}
+        {names.length ? names.map((name) => `“${name}”`).join(" + ") : "All topics"}
       </p>
+      {country && (
+        <p className="chips">
+          <span className="chip">
+            Assignees from {countryName(country)}
+            <button type="button" aria-label="Show all countries" onClick={() => setSearchParams({})}>
+              ×
+            </button>
+          </span>
+        </p>
+      )}
 
       <ErrorMessage error={error} onRetry={retry} />
       {loading && !data && <p className="muted">Loading…</p>}
@@ -81,6 +96,33 @@ export default function Dashboard() {
         <div className="panel">
           <h2 className="panel-title">Patents per year</h2>
           <YearChart data={data.by_year} />
+        </div>
+      )}
+      {data && data.by_topic.length > 1 && (
+        <div className="panel">
+          <h2 className="panel-title">Topics per year</h2>
+          <TopicTrends topics={data.by_topic} allTopics={allTopics} />
+        </div>
+      )}
+      {data && (
+        <div className="grid-2 grid-gap">
+          <div className="panel">
+            <h2 className="panel-title">Assignee countries</h2>
+            <Ranking
+              rows={data.top_countries.map((row) => ({ ...row, name: countryName(row.code) }))}
+              linkTo={(row) => `/?country=${row.code}`}
+              emptyText="No assignee countries in this selection."
+            />
+          </div>
+          <div className="panel">
+            <div className="panel-head">
+              <h2 className="panel-title">Most cited</h2>
+              <Link to="/patents?ordering=-cited_by" className="small">
+                All by citations →
+              </Link>
+            </div>
+            {cited.data && <MostCited patents={cited.data.results} />}
+          </div>
         </div>
       )}
       {data && (

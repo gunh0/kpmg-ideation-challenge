@@ -1,10 +1,12 @@
-"""The technology fields the dashboard follows.
+"""The technology fields a new instance follows.
 
-Each topic is a regular expression matched against the lower-cased English
-title of US publications. Titles are short and specific, so a title match
-keeps the lists on topic without the noise of abstract matches.
+A topic is a list of keywords (see keywords.py) matched as whole words in
+the titles and abstracts of US publications. These are the defaults the
+bundled snapshot is collected for; more can be added from the dashboard.
 """
 from dataclasses import dataclass
+
+from .keywords import topic_pattern
 
 
 @dataclass(frozen=True)
@@ -12,7 +14,11 @@ class Topic:
     slug: str
     name: str
     description: str
-    pattern: str
+    keywords: tuple
+
+    @property
+    def pattern(self):
+        return topic_pattern(self.keywords)
 
 
 TOPICS = (
@@ -20,19 +26,20 @@ TOPICS = (
         slug="drones",
         name="Drones",
         description="Unmanned aerial vehicles: flight control, delivery, inspection and counter-drone systems.",
-        pattern=r"\b(drones?|unmanned aerial|uavs?|multicopter|quadcopter)\b",
+        keywords=("drone", "uav", "unmanned aerial", "multicopter", "quadcopter"),
     ),
     Topic(
         slug="autonomous-driving",
         name="Autonomous driving",
         description="Self-driving vehicles: perception, planning, control and remote operation.",
-        pattern=r"\b(autonomous (driving|vehicles?)|self-driving|driverless)\b",
+        keywords=("autonomous driving", "autonomous vehicle", "self-driving", "driverless"),
     ),
     Topic(
         slug="cybersecurity",
         name="Cybersecurity",
         description="Detecting and stopping attacks: malware, intrusion detection, ransomware and phishing.",
-        pattern=r"\b(malware|intrusion detection|ransomware|phishing|cyber ?attacks?|cybersecurity)\b",
+        keywords=("malware", "intrusion detection", "ransomware", "phishing", "cyber attack", "cyberattack",
+                  "cybersecurity"),
     ),
 )
 

@@ -11,6 +11,11 @@
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
   --radius: 10px;
   color-scheme: light;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
@@ -45,6 +50,11 @@ a {
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #008300;
+    --series-7: #9085e9;
+    --series-8: #e66767;
     color-scheme: dark;
   }
 
@@ -221,6 +231,17 @@ a {
 .badge-pending {
   background: #fff4e5;
   color: #9a6700;
+}
+
+/* Matches of the selected topics: the accent, not the status colours. */
+.badge-match {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge-match-all {
+  background: var(--accent);
+  color: #fff;
 }
 
 .toolbar {
@@ -420,6 +441,30 @@ th[aria-sort="descending"] .sort-arrow {
   background: var(--hover);
 }
 
+.drawer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.abstract {
+  margin: 0 0 20px;
+}
+
+.abstract h3 {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.abstract p {
+  margin: 0;
+  line-height: 1.55;
+}
+
 .facts {
   display: grid;
   grid-template-columns: 110px 1fr;
@@ -486,14 +531,53 @@ th[aria-sort="descending"] .sort-arrow {
 }
 
 .picker {
-  max-width: 240px;
+  position: relative;
+}
+
+.picker-button {
+  max-width: 260px;
+  overflow: hidden;
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.08);
   color: #f1f5f9;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
-.picker option {
+.picker-menu {
+  position: absolute;
+  right: 0;
+  z-index: 20;
+  min-width: 260px;
+  max-height: 60vh;
+  margin: 6px 0 0;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
   color: var(--text);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+}
+
+.picker-option {
+  display: flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.picker-option:hover {
+  background: var(--hover);
+}
+
+.picker-option .small {
+  margin-left: auto;
 }
 
 .cards {
@@ -569,6 +653,60 @@ th[aria-sort="descending"] .sort-arrow {
   margin-top: auto !important;
 }
 
+.collection {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 10px;
+}
+
+.progress {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--track);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyword {
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.topic-form {
+  display: grid;
+  gap: 12px;
+  max-width: 640px;
+}
+
+.topic-form label {
+  display: grid;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.topic-form-actions {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+
 .section-title {
   margin: 8px 0 6px;
   font-size: 1.05rem;
@@ -637,6 +775,38 @@ th[aria-sort="descending"] .sort-arrow {
   font-size: 0.8rem;
 }
 
+.cited {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cited li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.cited li:last-child {
+  border-bottom: 0;
+}
+
+.cited .small {
+  grid-column: 1;
+}
+
+.cited-count {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .panel-more {
   margin: 10px 0 0;
   font-size: 0.9rem;
@@ -676,6 +846,11 @@ th[aria-sort="descending"] .sort-arrow {
 .chart .axis {
   fill: var(--muted);
   font-size: 11px;
+}
+
+.chart .end-label {
+  fill: var(--text);
+  font-size: 12px;
 }
 
 .chart .crosshair {
@@ -729,6 +904,10 @@ th[aria-sort="descending"] .sort-arrow {
 
 .grid-2 .panel {
   margin-bottom: 0;
+}
+
+.grid-gap {
+  margin-bottom: 20px;
 }
 
 .ranking {
@@ -851,8 +1030,8 @@ a.button {
     overflow-x: auto;
   }
 
-  .picker {
-    max-width: 50%;
+  .picker-button {
+    max-width: 50vw;
   }
 
   .topbar-inner,
@@ -909,7 +1088,8 @@ a.button {
     border: 0;
   }
 
-  .patent-table .cell-status {
+  .patent-table .cell-status,
+  .patent-table .cell-matches {
     order: 1;
   }
 
@@ -924,7 +1104,11 @@ a.button {
     order: 3;
   }
 
-  .patent-table .cell-dataset {
+  .patent-table .cell-cited {
+    display: none;
+  }
+
+  .patent-table .cell-topics {
     order: 4;
   }
 
@@ -950,7 +1134,7 @@ a.button {
   }
 
   .patent-table.with-figures .cell-title,
-  .patent-table.with-figures .cell-dataset {
+  .patent-table.with-figures .cell-topics {
     grid-column: 2 / -1;
   }
 
@@ -961,7 +1145,7 @@ a.button {
 
   .patent-table .cell-assignee,
   .patent-table .cell-date,
-  .patent-table .cell-dataset {
+  .patent-table .cell-topics {
     color: var(--muted);
     font-size: 0.85rem;
   }
@@ -1004,6 +1188,10 @@ a.button {
   font: inherit;
   font-size: 0.82rem;
   cursor: pointer;
+}
+
+.link-button.danger {
+  color: #cf222e;
 }
 
 .link-button:hover {
@@ -1075,6 +1263,11 @@ select:focus-visible,
     --series-1: #2a78d6;
     --series-2: #eb6834;
     --series-3: #1baf7a;
+    --series-4: #eda100;
+    --series-5: #e87ba4;
+    --series-6: #008300;
+    --series-7: #4a3aa7;
+    --series-8: #e34948;
     color-scheme: light;
   }
 

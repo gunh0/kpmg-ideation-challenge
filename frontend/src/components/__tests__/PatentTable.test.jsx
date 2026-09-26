@@ -9,6 +9,8 @@ import PatentTable from "../PatentTable";
 
 const patent = {
   id: 1,
+  topics: [1],
+  cited_by: 3,
   patent_id: "ZZ-0000001-B2",
   title: "Parcel release mechanism",
   assignee: "Example Robotics Inc.",
@@ -39,11 +41,11 @@ describe("PatentTable", () => {
     expect(within(rows[1]).getByText("—")).toBeInTheDocument();
   });
 
-  it("names the dataset of each patent when asked to", () => {
-    render(<PatentTable patents={[{ ...patent, dataset: 7 }]} datasetNames={{ 7: "Drones" }} />);
+  it("names the topics of each patent when asked to", () => {
+    render(<PatentTable patents={[{ ...patent, topics: [7, 8] }]} topicNames={{ 7: "Drones", 8: "Lockers" }} />);
 
-    expect(screen.getByRole("columnheader", { name: "Topic" })).toBeInTheDocument();
-    expect(screen.getByText("Drones")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Topics" })).toBeInTheDocument();
+    expect(screen.getByText("Drones, Lockers")).toBeInTheDocument();
   });
 
   it("sorts through the column headers", () => {
@@ -86,6 +88,15 @@ describe("PatentDetail", () => {
   });
 
   afterEach(() => vi.restoreAllMocks());
+
+  it("shows the abstract, the assignee's country and the citations", () => {
+    render(<PatentDetail patent={{ ...patent, abstract: "A drone lowers parcels.", assignee_country: "KR" }} onClose={() => {}} />);
+
+    expect(screen.getByRole("heading", { name: "Abstract" })).toBeInTheDocument();
+    expect(screen.getByText("A drone lowers parcels.")).toBeInTheDocument();
+    expect(screen.getByText(/South Korea/)).toBeInTheDocument();
+    expect(screen.getByText("3 applications")).toBeInTheDocument();
+  });
 
   it("shows the figure, linked to Google Patents", async () => {
     const figure = "https://patentimages.storage.googleapis.com/full/ZZ0000001B2.png";

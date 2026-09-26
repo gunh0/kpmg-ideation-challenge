@@ -2,6 +2,8 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import useFigures from "../hooks/useFigures";
+import { useTopics } from "../TopicContext";
+import { countryName, formatNumber } from "../format";
 import { safeUrl } from "../links";
 import { formatDate } from "./PatentTable";
 
@@ -14,6 +16,8 @@ const DATES = [
 
 export default function PatentDetail({ patent, onClose }) {
   const link = safeUrl(patent.result_link);
+  const { topics: allTopics = [] } = useTopics() || {};
+  const topicNames = allTopics.filter((topic) => patent.topics?.includes(topic.id)).map((topic) => topic.name);
   // The full drawing if known, else the thumbnail; looked up if never checked.
   const found = useFigures([patent])[patent.id];
   const figure = found ? safeUrl(found.figure) || safeUrl(found.thumbnail) : null;
@@ -69,9 +73,16 @@ export default function PatentDetail({ patent, onClose }) {
         <h2 id="patent-title" className="drawer-title">
           {patent.title}
         </h2>
-        <span className={`badge ${patent.is_granted ? "badge-granted" : "badge-pending"}`}>
-          {patent.is_granted ? "Granted" : "Application"}
-        </span>
+        <p className="drawer-badges">
+          <span className={`badge ${patent.is_granted ? "badge-granted" : "badge-pending"}`}>
+            {patent.is_granted ? "Granted" : "Application"}
+          </span>
+          {topicNames.map((name) => (
+            <span key={name} className="badge badge-match">
+              {name}
+            </span>
+          ))}
+        </p>
 
         <dl className="facts">
           <dt>Assignee</dt>
@@ -83,6 +94,7 @@ export default function PatentDetail({ patent, onClose }) {
             ) : (
               "—"
             )}
+            {patent.assignee_country && <span className="muted"> · {countryName(patent.assignee_country)}</span>}
           </dd>
           <dt>Inventors</dt>
           <dd>
@@ -103,7 +115,20 @@ export default function PatentDetail({ patent, onClose }) {
               <dd>{formatDate(patent[field])}</dd>
             </div>
           ))}
+          {patent.cited_by !== undefined && (
+            <div className="fact-row">
+              <dt>Cited by</dt>
+              <dd>{formatNumber(patent.cited_by)} applications</dd>
+            </div>
+          )}
         </dl>
+
+        {patent.abstract && (
+          <section className="abstract">
+            <h3>Abstract</h3>
+            <p>{patent.abstract}</p>
+          </section>
+        )}
 
         {figure && figure !== failed && (
           <figure className="figure">

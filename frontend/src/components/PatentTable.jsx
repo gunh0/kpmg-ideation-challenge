@@ -12,13 +12,16 @@ const COLUMNS = [
   { key: "title", label: "Title", sortable: true },
   { key: "assignee", label: "Assignee" },
   { key: "publication_date", label: "Published", sortable: true },
+  { key: "cited_by", label: "Cited", sortable: true },
   { key: "grant_date", label: "Status", sortable: true },
 ];
 
-// "-publication_date" -> {field: "publication_date", descending: true}
+// "-publication_date" -> {field: "publication_date", descending: true}; of
+// "-matched,-cited_by" the first field counts.
 export function parseOrdering(ordering) {
-  const descending = ordering.startsWith("-");
-  return { field: descending ? ordering.slice(1) : ordering, descending };
+  const first = ordering.split(",")[0];
+  const descending = first.startsWith("-");
+  return { field: descending ? first.slice(1) : first, descending };
 }
 
 export function nextOrdering(ordering, field) {
@@ -73,19 +76,24 @@ function Thumbnail({ patent, figure }) {
   );
 }
 
-// datasetNames: {id: name}, shown as an extra column when several topics are listed.
+// topicNames: {id: name}; given, a column names the topics of each patent.
+// matchOf: the number of selected topics; above 0, a column shows how many of
+// them each patent matches.
 // figures: {id: {thumbnail, figure}} from useFigures, shown as the first column.
-export default function PatentTable({ patents, ordering = "", onSort, onSelect, datasetNames, figures }) {
+const MATCHES = { key: "matched", label: "Matches", sortable: true };
+
+export default function PatentTable({ patents, ordering = "", onSort, onSelect, topicNames, figures, matchOf = 0 }) {
   return (
     <div className="table-wrap">
       <table className={`table patent-table${figures ? " with-figures" : ""}`}>
         <thead>
           <tr>
             {figures && <th className="cell-figure">Figure</th>}
+            {matchOf > 0 && <SortHeader column={MATCHES} ordering={ordering} onSort={onSort} />}
             {COLUMNS.map((column) => (
               <SortHeader key={column.key} column={column} ordering={ordering} onSort={onSort} />
             ))}
-            {datasetNames && <th>Topic</th>}
+            {topicNames && <th>Topics</th>}
           </tr>
         </thead>
         <tbody>
@@ -100,6 +108,13 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
               {figures && (
                 <td className="cell-figure">
                   <Thumbnail patent={patent} figure={figures[patent.id] ?? undefined} />
+                </td>
+              )}
+              {matchOf > 0 && (
+                <td className="nowrap cell-matches">
+                  <span className={`badge badge-match${patent.matched === matchOf ? " badge-match-all" : ""}`}>
+                    {patent.matched} of {matchOf}
+                  </span>
                 </td>
               )}
               <td className="mono nowrap cell-id">{patent.patent_id}</td>
@@ -119,12 +134,17 @@ export default function PatentTable({ patents, ordering = "", onSort, onSelect, 
                 )}
               </td>
               <td className="nowrap cell-date">{formatDate(patent.publication_date)}</td>
+              <td className="numeric cell-cited">{patent.cited_by ?? "—"}</td>
               <td className="cell-status">
                 <span className={`badge ${patent.is_granted ? "badge-granted" : "badge-pending"}`}>
                   {patent.is_granted ? "Granted" : "Application"}
                 </span>
               </td>
-              {datasetNames && <td className="muted small cell-dataset">{datasetNames[patent.dataset] || "—"}</td>}
+              {topicNames && (
+                <td className="muted small cell-topics">
+                  {patent.topics.map((id) => topicNames[id]).filter(Boolean).join(", ") || "—"}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

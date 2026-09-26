@@ -36,7 +36,7 @@ class PatentApiTests(APITestCase):
         self.assertNotIn("ZZ-0000003-B1", self.ids("has_figure=false"))
 
     def test_filter_by_dataset(self):
-        self.assertEqual(self.ids(f"dataset={self.other.pk}"), ["ZZ-9-A1"])
+        self.assertEqual(self.ids(f"topics={self.other.pk}"), ["ZZ-9-A1"])
 
     def test_search_matches_title_assignee_inventors_and_id(self):
         self.assertEqual(self.ids("search=antenna"), ["ZZ-9-A1"])
@@ -48,7 +48,7 @@ class PatentApiTests(APITestCase):
         self.assertEqual(self.ids("assignee=EXAMPLE ROBOTICS INC.&ordering=patent_id"), ["ZZ-0000001-B2", "ZZ-0000003-B1"])
 
     def test_filter_by_grant_status(self):
-        self.assertEqual(self.ids(f"dataset={self.dataset.pk}&granted=false"), ["ZZ-0000002-A1"])
+        self.assertEqual(self.ids(f"topics={self.dataset.pk}&granted=false"), ["ZZ-0000002-A1"])
         self.assertEqual(len(self.ids("granted=true")), 2)
 
     def test_filter_by_publication_year_range(self):
@@ -72,7 +72,7 @@ class PatentApiTests(APITestCase):
     def test_search_finds_numbers_written_without_dashes(self):
         self.assertEqual(self.ids("search=ZZ0000001B2"), ["ZZ-0000001-B2"])
         self.assertEqual(self.ids("search=zz0000003b1"), ["ZZ-0000003-B1"])
-        self.assertEqual(self.ids(f"search=ZZ0000001B2&dataset={self.other.pk}"), [])
+        self.assertEqual(self.ids(f"search=ZZ0000001B2&topics={self.other.pk}"), [])
 
     def test_stats_use_the_same_search(self):
         self.assertEqual(self.client.get("/api/stats/?search=ZZ0000002A1").json()["total"], 1)

@@ -1,15 +1,33 @@
 from django.db import models
 
+from .keywords import topic_pattern
 
-class Dataset(models.Model):
-    """One collected topic (patents.topics), known by its slug."""
+
+class Topic(models.Model):
+    """A technology field: the patents whose title or abstract match its keywords."""
+
+    READY, QUEUED, COLLECTING, FAILED = "ready", "queued", "collecting", "failed"
+    STATUSES = [(READY, "ready"), (QUEUED, "queued"), (COLLECTING, "collecting"), (FAILED, "failed")]
 
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=100, unique=True, null=True, blank=True)
     description = models.TextField(blank=True)
-    pattern = models.CharField(max_length=500, blank=True)
+    # Comma-separated, as normalised by keywords.parse_keywords; the pattern
+    # is derived from them.
+    keywords = models.TextField(blank=True)
+    pattern = models.CharField(max_length=2000, blank=True)
     source_revision = models.CharField(max_length=64, blank=True)
     collected_at = models.DateTimeField(null=True, blank=True)
+    # Collection from the public data: files read of the total, and why the
+    # last one failed.
+    status = models.CharField(max_length=20, choices=STATUSES, default=READY)
+    progress = models.PositiveIntegerField(default=0)
+    progress_total = models.PositiveIntegerField(default=0)
+    error = models.TextField(blank=True)
+    status_changed_at = models.DateTimeField(null=True, blank=True)
+    # The worker collecting the topic (jobs.claim), so that two processes never
+    # collect the same topic and an edit can take it back from a running job.
+    job = models.CharField(max_length=32, blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -17,16 +35,29 @@ class Dataset(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def keyword_list(self):
+        return [keyword for keyword in self.keywords.split(",") if keyword]
+
+    def set_keywords(self, keywords):
+        """Store validated keywords (keywords.parse_keywords) and their pattern."""
+        self.keywords = ",".join(keywords)
+        self.pattern = topic_pattern(keywords)
+
 
 class Patent(models.Model):
     """A patent application, known by its grant number once it is granted."""
 
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name="patents")
+    # A patent is stored once and belongs to every topic it matches.
+    topics = models.ManyToManyField(Topic, related_name="patents")
     patent_id = models.CharField(max_length=64)
     application_number = models.CharField(max_length=64, blank=True)
     family_id = models.CharField(max_length=32, blank=True)
     title = models.TextField()
+    abstract = models.TextField(blank=True)
     assignee = models.CharField(max_length=500, blank=True)
+    # ISO country of the first assignee, as harmonised by Google (US, CN, KR, ...)
+    assignee_country = models.CharField(max_length=2, blank=True)
     inventors = models.TextField(blank=True)
     priority_date = models.DateField(null=True, blank=True)
     filing_date = models.DateField(null=True, blank=True)
@@ -35,13 +66,18 @@ class Patent(models.Model):
     result_link = models.URLField(max_length=500, blank=True)
     figure_link = models.URLField(max_length=500, blank=True)
     thumbnail_link = models.URLField(max_length=500, blank=True)
+    # All publications of the application (its A1 and B2 ...), comma-separated;
+    # citations name publications, so counting them needs every number.
+    publication_numbers = models.TextField(blank=True)
+    # How many publications cite this patent (any of its publication numbers).
+    cited_by = models.PositiveIntegerField(default=0)
     # When the figure was looked up on Google Patents; set even if none was found.
     figure_checked_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-publication_date", "patent_id"]
         constraints = [
-            models.UniqueConstraint(fields=["dataset", "patent_id"], name="unique_patent_per_dataset"),
+            models.UniqueConstraint(fields=["patent_id"], name="unique_patent_id"),
         ]
         indexes = [
             # default ordering and the year filters

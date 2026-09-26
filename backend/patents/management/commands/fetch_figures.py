@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from patents.figures import fill_figures
-from patents.models import Dataset
+from patents.models import Topic
 
 BATCH = 24
 
@@ -15,7 +15,7 @@ class Command(BaseCommand):
                             help="give up on a topic after looking up this many patents (default 240)")
 
     def handle(self, *args, latest, max_lookups, **options):
-        for dataset in Dataset.objects.exclude(slug=None):
+        for dataset in Topic.objects.exclude(slug=None):
             # The newest publications often have no image yet, so walk back
             # from the latest until enough figures are found.
             patents = dataset.patents.order_by("-publication_date", "patent_id")

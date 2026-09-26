@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from "react-router";
 
-import DatasetPicker from "./DatasetPicker";
+import TopicPicker from "./TopicPicker";
 
 const links = [
   { to: "/", label: "Dashboard", end: true },
@@ -27,7 +27,7 @@ export default function Layout() {
               </NavLink>
             ))}
           </nav>
-          <DatasetPicker />
+          <TopicPicker />
         </div>
       </header>
       <main id="main" className="content" tabIndex={-1}>

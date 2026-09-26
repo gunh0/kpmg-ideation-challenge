@@ -6,10 +6,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 import duckdb
 
-from . import opendata
-from .models import Dataset
+from . import citations, opendata
+from .models import Patent, Topic
 from .records import merge
-from .store import store_topic
+from .store import store_topics
 from .topics import SINCE, TOPICS
 
 logger = logging.getLogger(__name__)
@@ -27,25 +27,65 @@ def duckdb_config():
     return config
 
 
-def read_shard(url, topics, since):
+def memory_bytes():
+    """Memory available to this process: the container's limit if there is
+    one, else the machine's."""
+    try:
+        with open("/sys/fs/cgroup/memory.max") as file:
+            limit = file.read().strip()
+        if limit.isdigit():
+            return int(limit)
+    except OSError:
+        pass
+    return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
+
+
+def scan_threads(memory=None):
+    """DuckDB reads a file's row groups with one thread each, and a remote
+    scan waits on the network rather than the CPU, so many threads pay off.
+    Each holds a decompressed column chunk, though — about 100 MB for the
+    abstracts — so their number follows the memory: 8 per 2 GB, 8 to 64."""
+    memory = memory if memory is not None else memory_bytes()
+    return max(8, min(64, int(memory / 2**30 * 4)))
+
+
+def connect():
     connection = duckdb.connect(config=duckdb_config())
-    # DuckDB fetches row groups with one thread each, and a remote scan waits
-    # on the network, not the CPU: with as many threads as a file has row
-    # groups (about 50) one file takes seconds instead of minutes on 2 cores.
-    # Remote reads over a long scan meet the odd timeout; retry them.
-    connection.execute("SET threads = 64; SET http_retries = 8; SET http_timeout = 120000")
+    # Remote reads over a long scan meet the odd stalled connection: give up
+    # on it after two minutes (http_timeout is in seconds) and retry. Order
+    # does not matter to the collector, and keeping it costs memory.
+    connection.execute(
+        f"SET threads = {scan_threads()}; SET memory_limit = '{int(memory_bytes() * 0.6)}B'; "
+        "SET preserve_insertion_order = false; SET http_retries = 8; SET http_timeout = 120"
+    )
+    return connection
+
+
+def read_shard(url, topics, since):
+    connection = connect()
     try:
         return opendata.read_topics(opendata.direct_url(url), topics, since, connection)
     finally:
         connection.close()
 
 
-def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
+def read_citations(url, numbers):
+    connection = connect()
+    try:
+        return citations.citing_pairs(opendata.direct_url(url), numbers, connection)
+    finally:
+        connection.close()
+
+
+def collect(topics=TOPICS, shards=None, workers=1, since=SINCE, revision=None, progress=None):
     """Scan the Parquet files for `topics` and replace each topic's patents.
 
-    `shards` limits the scan to some files (indexes), for trying things out;
-    the stored topics then only hold what those files contain.
+    `topics` are topics.Topic defaults or stored Topic rows. `shards` limits
+    the scan to some files (indexes), for trying things out; the stored topics
+    then only hold what those files contain. `progress(done, total)` is called
+    after each file of the two passes.
     """
+    progress = progress or (lambda done, total: None)
     revision = revision or opendata.source_revision()
     urls = opendata.shard_urls(revision)
     if shards is not None:
@@ -57,12 +97,18 @@ def collect(topics=TOPICS, shards=None, workers=2, since=SINCE, revision=None):
         for done, batch in enumerate(pool.map(lambda url: read_shard(url, topics, since), urls), start=1):
             rows.extend(batch)
             logger.info("file %d/%d: %d matches", done, len(urls), len(batch))
+            progress(done, 2 * len(urls))
+    stored = store_topics(topics, merge(rows), revision)
 
-    merged = merge(rows)
-    return [store_topic(topic, merged.get(topic.slug, []), revision) for topic in topics]
+    # A second pass: who cites the patents of these topics.
+    patents = Patent.objects.filter(topics__in=stored).distinct()
+    numbers = citations.ours(patents)
+    pairs = []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for done, batch in enumerate(pool.map(lambda url: read_citations(url, numbers), urls), start=1):
+            pairs.extend(batch)
+            logger.info("citations %d/%d: %d", done, len(urls), len(batch))
+            progress(len(urls) + done, 2 * len(urls))
+    citations.store_citations(citations.count_citations(pairs, numbers), patents)
+    return stored
 
-
-def up_to_date(topics, revision):
-    """True when every topic was collected from `revision` already."""
-    stored = dict(Dataset.objects.filter(slug__in=[t.slug for t in topics]).values_list("slug", "source_revision"))
-    return all(stored.get(topic.slug) == revision for topic in topics)

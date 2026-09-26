@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
 import Layout from "./components/Layout";
-import { DatasetProvider } from "./DatasetContext";
+import { TopicProvider } from "./TopicContext";
 
 // Each page is its own chunk; the first visit only loads the page it opens.
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -18,7 +18,7 @@ function page(element) {
 export default function App() {
   return (
     <BrowserRouter>
-      <DatasetProvider>
+      <TopicProvider>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={page(<Dashboard />)} />
@@ -30,7 +30,7 @@ export default function App() {
             <Route path="*" element={page(<NotFound />)} />
           </Route>
         </Routes>
-      </DatasetProvider>
+      </TopicProvider>
     </BrowserRouter>
   );
 }

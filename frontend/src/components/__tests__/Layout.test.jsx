@@ -3,19 +3,19 @@ import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "../../api";
-import { DatasetProvider } from "../../DatasetContext";
+import { TopicProvider } from "../../TopicContext";
 import Layout from "../Layout";
 
 afterEach(() => vi.restoreAllMocks());
 
 describe("Layout", () => {
   it("credits the patent data on every page", () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([]);
+    vi.spyOn(api, "topics").mockResolvedValue([]);
     render(
       <MemoryRouter>
-        <DatasetProvider>
+        <TopicProvider>
           <Layout />
-        </DatasetProvider>
+        </TopicProvider>
       </MemoryRouter>
     );
 

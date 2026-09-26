@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "../../api";
-import { DatasetProvider } from "../../DatasetContext";
+import { TopicProvider } from "../../TopicContext";
 import Dashboard from "../Dashboard";
 
 const stats = {
@@ -15,14 +15,16 @@ const stats = {
   ],
   top_assignees: [{ name: "Example Robotics Inc.", count: 2, granted: 2 }],
   top_inventors: [{ name: "John Roe", count: 2 }],
+  top_countries: [],
+  by_topic: [],
 };
 
 function renderDashboard() {
   return render(
     <MemoryRouter>
-      <DatasetProvider>
+      <TopicProvider>
         <Dashboard />
-      </DatasetProvider>
+      </TopicProvider>
     </MemoryRouter>
   );
 }
@@ -38,7 +40,7 @@ afterEach(() => {
 describe("Dashboard", () => {
   it("summarises the selection and links rankings to their pages", async () => {
     vi.spyOn(api, "patents").mockResolvedValue({ count: 0, results: [] });
-    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockResolvedValue(stats);
 
     renderDashboard();
@@ -54,7 +56,7 @@ describe("Dashboard", () => {
   });
 
   it("shows the latest patents with their figures, linked to Google Patents", async () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockResolvedValue(stats);
     vi.spyOn(api, "patents").mockResolvedValue({
       count: 1,
@@ -79,8 +81,23 @@ describe("Dashboard", () => {
     expect(api.patents).toHaveBeenCalledWith(expect.objectContaining({ has_figure: true, page_size: 8 }));
   });
 
+  it("ranks the assignee countries and narrows the dashboard to one", async () => {
+    vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "patents").mockResolvedValue({ count: 0, results: [] });
+    vi.spyOn(api, "stats").mockResolvedValue({ ...stats, top_countries: [{ code: "KR", count: 2, granted: 1 }] });
+
+    renderDashboard();
+
+    const korea = await screen.findByRole("link", { name: "South Korea" });
+    expect(korea).toHaveAttribute("href", "/?country=KR");
+    fireEvent.click(korea);
+
+    expect(await screen.findByText("Assignees from South Korea")).toBeInTheDocument();
+    await waitFor(() => expect(api.stats).toHaveBeenLastCalledWith({ topics: "", country: "KR" }));
+  });
+
   it("explains where the data comes from when there is none", async () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([]);
+    vi.spyOn(api, "topics").mockResolvedValue([]);
     vi.spyOn(api, "stats").mockResolvedValue({ ...stats, total: 0 });
 
     renderDashboard();
@@ -90,7 +107,7 @@ describe("Dashboard", () => {
   });
 
   it("offers a retry when the API fails", async () => {
-    vi.spyOn(api, "datasets").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
+    vi.spyOn(api, "topics").mockResolvedValue([{ id: 1, name: "Drones", patent_count: 3 }]);
     vi.spyOn(api, "stats").mockRejectedValue(new TypeError("Failed to fetch"));
 
     renderDashboard();

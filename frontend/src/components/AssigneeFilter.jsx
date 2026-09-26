@@ -6,7 +6,7 @@ import useDebounce from "../hooks/useDebounce";
 // Free-text input with suggestions from /api/assignees/. The filter matches the
 // whole name, so the value is only applied once it is one of the suggestions
 // or the user presses Enter.
-export default function AssigneeFilter({ value, dataset, onChange }) {
+export default function AssigneeFilter({ value, topics, onChange }) {
   const [text, setText] = useState(value);
   const [shown, setShown] = useState(value);
   const [suggestions, setSuggestions] = useState([]);
@@ -21,13 +21,13 @@ export default function AssigneeFilter({ value, dataset, onChange }) {
   useEffect(() => {
     let current = true;
     api
-      .assignees({ search: query, dataset })
+      .assignees({ search: query, topics })
       .then((rows) => current && setSuggestions(rows))
       .catch(() => current && setSuggestions([]));
     return () => {
       current = false;
     };
-  }, [query, dataset]);
+  }, [query, topics]);
 
   function update(next) {
     setText(next);
